@@ -1,0 +1,103 @@
+When events are created for user interaction with the UI, these events are passed to the uppermost widget in the 
+UI. So, if you have a button on a window, and click the button, the button will receive the event first.
+
+If the first widget cannot handle the event, or chooses not to, the event will bubble up to the parent widget, 
+which will be given a turn. This bubbling continues all the way up nested widgets, until the event is handled 
+or it reaches the main window.
+
+In your own event handlers you can choose to mark an event as handled calling .accept() --
+
+python:
+    class CustomButton(QPushButton)
+        def mousePressEvent(self, e):
+            e.accept()
+
+Alternatively, you can mark it as unhandled by calling .ignore() on the event object. In this case the event 
+will continue to bubble up the hierarchy.
+
+python:
+    class CustomButton(QPushButton)
+        def event(self, e):
+            e.ignore()
+
+If you want your widget to appear transparent to events, you can safely ignore events which you've actually responded
+to in some way. Similarly, you can choose to accept events you are not responding to in order to silence them.
+
+
+
+----------------------------
+layout: her children'ı dikey olarak sıralamak için
+
+
+Widget  	    :       What it does
+QCheckbox 	    :       A checkbox
+QComboBox 	    :       A dropdown list box
+QDateEdit 	    :       For editing dates and datetimes
+QDateTimeEdit 	:       For editing dates and datetimes
+QDial 	        :       Rotatable dial
+QDoubleSpinbox 	:       A number spinner for floats
+QFontComboBox 	:       A list of fonts
+QLCDNumber 	    :       A quite ugly LCD display
+QLabel 	        :       Just a single line text, not interactable
+QLineEdit 	    :       Enter a line of text
+QProgressBar 	:       A progress bar
+QPushButton 	:       A button
+QRadioButton 	:       A toggle set, with only one active item
+QSlider 	    :       A slider
+QSpinBox 	    :       An integer spinner
+QTimeEdit 	    :       For editing times
+
+*--------------*
+ALIGNMENT FLAGS
+
+.setAlignment(Qt.AlignHCenter | Qt.AlignVCenter)
+
+PyQt5 flag 	        Behavior
+Qt.AlignLeft 	    Aligns with the left edge.
+Qt.AlignRight 	    Aligns with the right edge.
+Qt.AlignHCenter 	Centers horizontally in the available space.
+Qt.AlignJustify 	Justifies the text in the available space.
+
+PyQt5 flag 	        Behavior
+Qt.AlignTop 	    Aligns with the top.
+Qt.AlignBottom  	Aligns with the bottom.
+Qt.AlignVCenter 	Centers vertically in the available space.
+
+Qt.AlignCenter 	    Centers horizontally and vertically
+
+Weirdly, you can also use QLabel to display an image using .setPixmap(). This accepts an pixmap, which you can create 
+by passing an image filename to QPixmap. In the example files provided with this book you can find a file otje.jpg 
+which you can display in your window as follows:
+widget.setPixmap(QPixmap('otje.jpg'))
+
+edit: kaldırmışlar bu özelliği sanırım
+
+
+QCheckbox:::
+
+Qt.Unchecked 	Item is unchecked                   0
+Qt.PartiallyChecked   Item is partially checked     1
+Qt.Checked 	Item is checked                         2
+
+
+Margins:
+self.input.setTextMargins(100,200,200,20)
+
+
+ICONS:
+pyinstaller'ı çalıştırırken --icon argümanı verebilirsin veya spec dosyasında belirtebilirsin
+app = QApplication(sys.argv)
+# app.setWindowIcon(QtGui.QIcon('hand.ico'))
+
+
+
+https://www.pythonguis.com/tutorials/packaging-pyqt5-pyside2-applications-windows-pyinstaller/ 
+bu linkte baya uygulama exe ikonu, uygulamanın asıl ikonu ve windows taskbar ikonu nasıl değiştirilir falan anlatılıyor buna bak
+
+
+
+Uygulamanın asıl loop'u nerede kardeşim göremiyorum loopuuuuuuuuuuuuuuu
+qthread subclass'lenmemeli diyor napim ben bunu
+
+
+Instead, you should always use signal-slot connections on QObject-based workers moved into a QThread
