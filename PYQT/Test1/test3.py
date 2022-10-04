@@ -11,6 +11,9 @@ import json
 import sys,time
 
 
+
+global driver #this is a messy way to do this but whatever
+
 # Subclass QMainWindow to customize your application's main window
 class MainWindow(QMainWindow):
     def __init__(self):
@@ -61,6 +64,13 @@ class MainWindow(QMainWindow):
     def setText(self,inp):
         self.label.text = inp
 
+    # uygulama kapatıldığında çağrılacak fonksiyonu değiştirme
+    def closeEvent(self, event):
+        self.tdriver.close() #tarayıcıyı kapatmak
+        self.obj.running = False
+        event.accept() #buna ignore dersek daha üst node'a gidip bunu kabul edebilir misin diye soruyor 
+        # bu yüzden ignore dersen uygulamayı kapatamıyorsunxx accept uygulamayı kapatabilmeni sağlıyor
+
     # Bu uygulamanın içine sağ tık yaptığında 3 tane seçenek çıkmasını sağlıyor
     def contextMenuEvent(self, e):
         context = QMenu(self)
@@ -105,18 +115,24 @@ class SomeObject(QObject):
 
     website_url = "http://www.koeri.boun.edu.tr/scripts/lst2.asp"
 
-    global driver
+    
     driver = webdriver.Chrome(PATH)
 
     driver.get(website_url)
 
+    running = True
+
     def long_running(self):
         count = 0
-        while True:
-            time.sleep(2)
-            driver.refresh()
+        while self.running:
+            time.sleep(5)
+            try:
+                driver.refresh()
+            except:
+                self.running = False
+                break
 
-            element = driver.find_element(By.CSS_SELECTOR, "pre") #neden bilmiyorum ama sadece <pre> ismine sahip olan bu şeyi bile buluyo
+            element = driver.find_element(By.CSS_SELECTOR, "pre") #<pre> ismine sahip olan şeyi buluyo
 
             formatted_text = element.text
             lines = formatted_text.splitlines(True) #False \n olmasın, True \n olsun anlamında
@@ -132,12 +148,16 @@ class SomeObject(QObject):
         print("whyy")
         self.twin.uh_oh()
 
+
 objThread = QThread()
 obj = SomeObject()
 obj.moveToThread(objThread)
 obj.finished.connect(objThread.quit)
 objThread.started.connect(obj.long_running)
 # objThread.finished.connect(app.exit) # bence bu çalışmamalı ama emin değiim  #edit: evet çalışmamalı bu
+
+window.tdriver = obj.driver
+window.obj = obj
 
 objThread.start()
 
