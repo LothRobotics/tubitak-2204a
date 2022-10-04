@@ -3,6 +3,10 @@ from PyQt5.QtWidgets import QApplication, QWidget, QMainWindow,QPushButton,QLabe
 from PyQt5 import QtGui
 # The main modules for Qt are QtWidgets, QtGui and QtCore.
 
+from selenium import webdriver
+from selenium.webdriver.common.keys import Keys
+from selenium.webdriver.common.by import By
+import json
 
 import sys,time
 
@@ -97,11 +101,29 @@ class SomeObject(QObject):
     finished = pyqtSignal() # if I understood correctly we create our own QOebject like a widget and we control what thing is emitted
     twin = window #for some reason this works and if I try to use def __init__ with super()__init__() it just doesnt work so yeah...
 
+    PATH = "chromedriver.exe"
+
+    website_url = "http://www.koeri.boun.edu.tr/scripts/lst2.asp"
+
+    global driver
+    driver = webdriver.Chrome(PATH)
+
+    driver.get(website_url)
+
     def long_running(self):
         count = 0
-        while True: # loop yey!
-            time.sleep(1)
-            print("B is",count)
+        while True:
+            time.sleep(2)
+            driver.refresh()
+
+            element = driver.find_element(By.CSS_SELECTOR, "pre") #neden bilmiyorum ama sadece <pre> ismine sahip olan bu şeyi bile buluyo
+
+            formatted_text = element.text
+            lines = formatted_text.splitlines(True) #False \n olmasın, True \n olsun anlamında
+            
+
+            print(lines[20])
+            
             count += 1
         self.send_something_to_gui()
         print("broke someobject's thread")

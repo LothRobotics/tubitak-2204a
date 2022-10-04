@@ -1,7 +1,7 @@
 from selenium import webdriver
 from selenium.webdriver.common.keys import Keys
 from selenium.webdriver.common.by import By
-import json
+import json,time
 
 # bu kod gidip siteden deprem bilgisini alıp sonra da bunu debuglines.txt'ye kaydediyo
 
@@ -16,7 +16,10 @@ driver.get(website_url)
 element = driver.find_element(By.CSS_SELECTOR, "pre") #neden bilmiyorum ama sadece <pre> ismine sahip olan bu şeyi bile buluyo
 
 formatted_text = element.text
+time.sleep(2)
+driver.refresh()
 
+"""
 with open("debug.txt","w") as file:
     file.write(formatted_text)
 
@@ -24,7 +27,7 @@ lines = formatted_text.splitlines(True) #False \n olmasın, True \n olsun anlam�
 
 with open("debuglines.txt","w") as file:
     json.dump(lines,file)
-    
+"""
 
 
 """
@@ -36,7 +39,7 @@ for char in formatted_text:
 """
 
 #element.screenshot("debug.png") # ss alma
-driver.close()
+#driver.close()
 print("end")
 #result = driver.find_element(By.id) #by.id dedii şey ben id ile arıcam demek
 
