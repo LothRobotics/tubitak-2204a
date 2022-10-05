@@ -1,5 +1,6 @@
-from PyQt5.QtCore import Qt,QThread,QObject,pyqtSignal
+from PyQt5.QtCore import Qt,QThread,QObject,pyqtSignal,QRect
 from PyQt5.QtWidgets import QApplication, QWidget, QMainWindow,QPushButton,QLabel, QLineEdit, QVBoxLayout,QMenu,QAction,QCheckBox
+from PyQt5.QtGui import QFont
 import sys,time
 
 # Subclass QMainWindow to customize your application's main window
@@ -22,24 +23,62 @@ class MainWindow(QMainWindow):
         # Set the central widget of the Window.
         self.setCentralWidget(self.button)
         """
-        self.label = QLabel()
-
-        self.input = QLineEdit()
-        self.input.textChanged.connect(self.label.setText)
-
-
-        self.input.setAlignment(Qt.AlignHCenter)
-        self.label.setAlignment(Qt.AlignHCenter)
-        
-
-        self.checkbox = QCheckBox()
-        self.checkbox.setCheckState(Qt.PartiallyChecked)
-        self.checkbox.stateChanged.connect(self.show_state)
-
         layout = QVBoxLayout()
+        
+        self.label1 = QLabel("Tübitak Projesi")
+        self.label1.setFont(QFont("Arial",24))
+        self.label1.setAlignment(Qt.AlignHCenter)
+        layout.addWidget(self.label1)
+
+
+        self.label2 = QLabel("Deprem Uygulaması \n Lorem Ipsum")
+        self.label2.setFont(QFont("Arial",16))
+        self.label2.setAlignment(Qt.AlignHCenter)
+        layout.addWidget(self.label2)
+
+
+        """
+        for _ in range(6):
+            lbl = QLabel("Deprem Uygulaması \n Lorem Ipsum")
+            lbl.setFont(QFont("Arial",16))
+            lbl.setAlignment(Qt.AlignHCenter)
+            layout.addWidget(lbl)
+        """
+
+        print(layout.setContentsMargins(0,0,0,-1010))
+        #self.input.textChanged.connect(self.label.setText)
+        
+        self.input = QLineEdit()
+        self.input.setFixedWidth(200)
+        #self.input.textChanged.connect(self.label.setText)
+        self.input.setAlignment(Qt.AlignmentFlag.AlignLeft)
+        self.input.setContentsMargins(20,0,0,0)
         layout.addWidget(self.input)
-        layout.addWidget(self.label)
-        layout.addWidget(self.checkbox)
+
+        self.input2 = QLineEdit()
+        self.input2.setFixedWidth(200)
+        #self.input.textChanged.connect(self.label.setText)
+        self.input2.setAlignment(Qt.AlignmentFlag.AlignLeft)
+        self.input2.setContentsMargins(20,0,0,0)
+        layout.addWidget(self.input2)
+        #self.input.setWindowIcon
+
+        self.enterbutton = QPushButton()
+        layout.addWidget(self.enterbutton)
+
+        #self.checkbox = QCheckBox()
+        #self.checkbox.setCheckState(Qt.PartiallyChecked)
+        #self.checkbox.stateChanged.connect(self.show_state)
+        #layout.addWidget(self.checkbox)
+        
+        self.label3 = QLabel("Lorem Ipsum Dolor Amet \n Lorem Ipsum Dolor Amet")
+        self.label3.setFont(QFont("Arial",16))
+        self.label3.setAlignment(Qt.AlignmentFlag.AlignBottom)
+        layout.addWidget(self.label3)
+        
+        layout.setSpacing(-1)
+        layout.setStretch(0,0)
+        layout.setAlignment(Qt.AlignmentFlag.AlignHCenter)
 
         container = QWidget()
         container.setLayout(layout)
@@ -51,7 +90,7 @@ class MainWindow(QMainWindow):
         print(e)
     
     def setText(self,inp):
-        self.label.text = inp
+        self.label1.text = inp
 
     # uygulama kapatıldığında çağrılacak fonksiyonu değiştirme
     def closeEvent(self, event):

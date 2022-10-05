@@ -99,5 +99,20 @@ bu linkte baya uygulama exe ikonu, uygulamanın asıl ikonu ve windows taskbar i
 Uygulamanın asıl loop'u nerede kardeşim göremiyorum loopuuuuuuuuuuuuuuu
 qthread subclass'lenmemeli diyor napim ben bunu
 
-
 Instead, you should always use signal-slot connections on QObject-based workers moved into a QThread
+-----------------
+Found a better way to handle code_thread:
+QRunnable and QThreadPool. The former is the container for the work you want to perform, while the latter 
+is the method by which you pass that work to alternate threads.
+
+
+To define a custom QRunnable you can subclass the base QRunnable class, then place the code you wish you 
+execute within the run() method. The following is an implementation of our long running time.sleep 
+job as a QRunnable.
+
+# https://www.pythonguis.com/tutorials/multithreading-pyqt-applications-qthreadpool/
+
+moving label pos:
+self.label_2.move(100, 120)
+
+
