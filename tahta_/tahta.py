@@ -1,24 +1,12 @@
 from PyQt5.QtCore import Qt,QThread,QObject,pyqtSignal
 from PyQt5.QtWidgets import QApplication, QWidget, QMainWindow,QPushButton,QLabel, QLineEdit, QVBoxLayout,QMenu,QAction,QCheckBox
-from PyQt5 import QtGui
-# The main modules for Qt are QtWidgets, QtGui and QtCore.
-
-from selenium import webdriver
-from selenium.webdriver.common.keys import Keys
-from selenium.webdriver.common.by import By
-from selenium.webdriver.chrome.service import Service
-from webdriver_manager.chrome import ChromeDriverManager
-
 import sys,time
-
-
-
-global driver #this is a messy way to do this but whatever
 
 # Subclass QMainWindow to customize your application's main window
 class MainWindow(QMainWindow):
-    def __init__(self):
+    def __init__(self,parent):
         super().__init__() #ALWAYS USE THIS
+        self.parent = parent
 
         self.setWindowTitle("My App")
         self.setMinimumSize(700,400) # minimum ekran boyutları
@@ -67,8 +55,9 @@ class MainWindow(QMainWindow):
 
     # uygulama kapatıldığında çağrılacak fonksiyonu değiştirme
     def closeEvent(self, event):
-        self.tdriver.close() #tarayıcıyı kapatmak
-        self.obj.running = False
+        self.parent.code_thread.running = False
+        self.parent.code_thread.finished.emit()
+        print("ended code_thread")
         event.accept() #buna ignore dersek daha üst node'a gidip bunu kabul edebilir misin diye soruyor 
         # bu yüzden ignore dersen uygulamayı kapatamıyorsunxx accept uygulamayı kapatabilmeni sağlıyor
 
@@ -92,54 +81,37 @@ class MainWindow(QMainWindow):
         print("but is",checked)
     """
 
-
-# You need one (and only one) QApplication instance per application.
-# Pass in sys.argv to allow command line arguments for your app.
-# If you know you won't use command line arguments QApplication([]) works too.
-app = QApplication(sys.argv)
-# app.setWindowIcon(QtGui.QIcon('hand.ico'))
-# icon için özel .ico dosyası lazım
-
-
-# Create a Qt widget, which will be our window.
-window = MainWindow() #QMainWindow()   #QWidget()
-window.show()  # IMPORTANT!!!!! Windows are hidden by default.
-# bunu acil durum olduğunda arkaplandan hemen ekranın önüne getirmek için kullanabiliriz
-
 # Subclassing QObject and using moveToThread
 # http://blog.qt.digia.com/blog/2007/07/05/qthreads-no-longer-abstract
 class SomeObject(QObject):
     finished = pyqtSignal() # if I understood correctly we create our own QOebject like a widget and we control what thing is emitted
-    twin = window #for some reason this works and if I try to use def __init__ with super()__init__() it just doesnt work so yeah...
-
+    
     PATH = "chromedriver.exe"
 
     website_url = "http://www.koeri.boun.edu.tr/scripts/lst2.asp"
 
-    driver = webdriver.Chrome(service=Service(ChromeDriverManager().install()))
-    driver.get(website_url)
+    # driver = webdriver.Chrome(service=Service(ChromeDriverManager().install()))
+    # driver.get(website_url)
 
     running = True
 
     def long_running(self):
-        count = 0
         while self.running:
-            time.sleep(5)
-            try:
-                driver.refresh()
-            except:
-                self.running = False
-                break
+            time.sleep(1)
+            print("running")
+            #try:
+            #    driver.refresh()
+            #except:
+            #    self.running = False
+            #    break
 
-            element = driver.find_element(By.CSS_SELECTOR, "pre") #<pre> ismine sahip olan şeyi buluyo
+            #element = driver.find_element(By.CSS_SELECTOR, "pre") #<pre> ismine sahip olan şeyi buluyo
 
-            formatted_text = element.text
-            lines = formatted_text.splitlines(True) #False \n olmasın, True \n olsun anlamında
+            #formatted_text = element.text
+            #lines = formatted_text.splitlines(True) #False \n olmasın, True \n olsun anlamında
             
 
-            print(lines[20])
-            
-            count += 1
+            #print(lines[20])
         self.send_something_to_gui()
         print("broke someobject's thread")
         self.finished.emit()
@@ -148,20 +120,29 @@ class SomeObject(QObject):
         self.twin.uh_oh()
 
 
-objThread = QThread()
-obj = SomeObject()
-obj.moveToThread(objThread)
-obj.finished.connect(objThread.quit)
-objThread.started.connect(obj.long_running)
-# objThread.finished.connect(app.exit) # bence bu çalışmamalı ama emin değiim  #edit: evet çalışmamalı bu
+class APP:
+    def __init__(self) -> None:
+        self.windowmanager = MainWindow(self)
+        self.windowmanager.show() # bunu acil durum olduğunda arkaplandan hemen ekranın önüne getirmek için kullanabiliriz
+        self.code_thread = SomeObject()
+        self.obj_thread = QThread()
+        self.code_thread.moveToThread(self.obj_thread)
+        self.code_thread.finished.connect(self.obj_thread.quit)
+        self.obj_thread.started.connect(self.code_thread.long_running)
+        # objThread.finished.connect(app.exit) # bence bu çalışmamalı ama emin değiim  #edit: evet çalışmamalı bu
 
-window.tdriver = obj.driver
-window.obj = obj
+# You need one (and only one) QApplication instance per application.
+# Pass in sys.argv to allow command line arguments for your app.
+# If you know you won't use command line arguments QApplication([]) works too.
+useful = QApplication(sys.argv)
+# app.setWindowIcon(QtGui.QIcon('hand.ico'))
+# icon için özel .ico dosyası lazım
 
-objThread.start()
+app = APP()
+app.obj_thread.start()
 
 # Start the event loop.
-app.exec()
+useful.exec()
 
 # Your application won't reach here until you exit and the event
 # loop has stopped.
