@@ -115,4 +115,6 @@ job as a QRunnable.
 moving label pos:
 self.label_2.move(100, 120)
 
+Label'larda \n'den sonra boşluk koyarsan yatay olarak sabitlenmemiş olabilir
+
 

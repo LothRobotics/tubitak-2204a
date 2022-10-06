@@ -170,19 +170,21 @@ class APP:
         self.obj_thread.started.connect(self.code_thread.long_running)
         # objThread.finished.connect(app.exit) # bence bu çalışmamalı ama emin değiim  #edit: evet çalışmamalı bu
 
-# You need one (and only one) QApplication instance per application.
-# Pass in sys.argv to allow command line arguments for your app.
-# If you know you won't use command line arguments QApplication([]) works too.
-useful = QApplication(sys.argv)
-# app.setWindowIcon(QtGui.QIcon('hand.ico'))
-# icon için özel .ico dosyası lazım
 
-app = APP()
-app.obj_thread.start()
+if __name__ == '__main__':
+    # You need one (and only one) QApplication instance per application.
+    # Pass in sys.argv to allow command line arguments for your app.
+    # If you know you won't use command line arguments QApplication([]) works too.
+    qapp = QApplication(sys.argv)
+    # app.setWindowIcon(QtGui.QIcon('hand.ico'))
+    # icon için özel .ico dosyası lazım
 
-# Start the event loop.
-useful.exec()
+    app = APP()
+    app.obj_thread.start()
 
-# Your application won't reach here until you exit and the event
-# loop has stopped.
-print("ended application")
+    # Start the event loop.
+    qapp.exec()
+
+    # Your application won't reach here until you exit and the event
+    # loop has stopped.
+    print("ended application")
