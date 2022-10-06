@@ -1,10 +1,6 @@
 import firebase_admin
 
-from firebase_admin import firestore
-from firebase_admin import credentials
-
-
-
+from firebase_admin import firestore, credentials
 
 class DatabaseHandler():
     def __init__(self, credentials_path: str = '') -> None:
@@ -14,26 +10,35 @@ class DatabaseHandler():
 
         self.db = firestore.client()
 
+    def __repr__(self): return str(self.db) 
 
-    def __repr__(self): return str(self.db)
+    def __str__(self): return str(self.db) 
 
-    def __str__(self): return str(self.db)
-
-    def get(self, collection_name: str = '', where_clause: str = '') -> list:
-        customers = self.db.collection(collection_name) 
+    def get(self, collection_name: str = '', where_clause: str = '', auto_format: bool = True) -> list | dict:
+        gathered_collection = self.db.collection(collection_name) 
 
         if where_clause != '':
-            key, operator, value = (where_clause.split(' '))
-            query: list = customers.where(key, operator, value).get()
+            key, operator, value, *_ = (where_clause.split(' ')) # *(where_clause.split(''))
+            query: list = gathered_collection.where(key, operator, value).get()
 
-            return ( 
-                query
-                if len(query) != 1 
-                else query[0].to_dict()  
-            )   
+            if auto_format:
+                query = self.format_values(query)
 
-        return customers.stream() 
+            return query
 
+        return gathered_collection.get() 
+
+    def format_values(self, value_list: list) -> list:
+        formatted_values: list = [*
+            map( 
+                lambda x: x.to_dict(),
+                value_list
+            )]
+        
+        if len(formatted_values) == 1:
+            formatted_values = formatted_values[0].to_dict()
+        
+        return formatted_values
     
     def write(self):
         pass
@@ -43,4 +48,5 @@ class DatabaseHandler():
 
 
 instance = DatabaseHandler('db_credentials.json')
-print(instance.get('test', 'Name == Furkan'))
+gotten_values = instance.get('test', 'Name == Furkan a', False)
+print(gotten_values)
