@@ -13,6 +13,9 @@ class Worker(QRunnable):
     Worker thread
     '''
     running = True
+    def __init__(self,app):
+        super().__init__()
+        self.app = app
 
     @pyqtSlot()
     def run(self):
@@ -25,6 +28,11 @@ class Worker(QRunnable):
         while self.running:
             print("running")
             time.sleep(1)
+    
+    def loginButtonPress(self):
+        print("login")
+        self.app.windowmanager.setCentralWidget(self.app.windowmanager.inapp_container)
+        
 
 
 
@@ -40,29 +48,19 @@ class MainWindow(QMainWindow):
         self.app = app
         self.counter = 0
 
-        layout = QVBoxLayout()
+        login_layout = QVBoxLayout()
         
         self.label1 = QLabel("Tübitak Projesi")
         self.label1.setFont(QFont("Arial",24))
         self.label1.setAlignment(Qt.AlignHCenter)
-        layout.addWidget(self.label1)
-
+        login_layout.addWidget(self.label1)
 
         self.label2 = QLabel("Deprem Uygulaması \n Lorem Ipsum")
         self.label2.setFont(QFont("Arial",16))
         self.label2.setAlignment(Qt.AlignHCenter)
-        layout.addWidget(self.label2)
+        login_layout.addWidget(self.label2)
 
-
-        """
-        for _ in range(6):
-            lbl = QLabel("Deprem Uygulaması \n Lorem Ipsum")
-            lbl.setFont(QFont("Arial",16))
-            lbl.setAlignment(Qt.AlignHCenter)
-            layout.addWidget(lbl)
-        """
-
-        print(layout.setContentsMargins(0,0,0,-1010))
+        print(login_layout.setContentsMargins(0,0,0,-1010))
         #self.input.textChanged.connect(self.label.setText)
         
         self.input = QLineEdit()
@@ -70,43 +68,62 @@ class MainWindow(QMainWindow):
         #self.input.textChanged.connect(self.label.setText)
         self.input.setAlignment(Qt.AlignmentFlag.AlignLeft)
         self.input.setContentsMargins(20,0,0,0)
-        layout.addWidget(self.input)
+        login_layout.addWidget(self.input)
 
         self.input2 = QLineEdit()
         self.input2.setFixedWidth(200)
         #self.input.textChanged.connect(self.label.setText)
         self.input2.setAlignment(Qt.AlignmentFlag.AlignLeft)
         self.input2.setContentsMargins(20,0,0,0)
-        layout.addWidget(self.input2)
+        login_layout.addWidget(self.input2)
         #self.input.setWindowIcon
 
         self.enterbutton = QPushButton()
         self.enterbutton.setMinimumSize(20,10)
         self.enterbutton.setMaximumSize(240,40)
 
-        layout.addWidget(self.enterbutton)
+        login_layout.addWidget(self.enterbutton)
 
-        
-
-        #self.checkbox = QCheckBox()
-        #self.checkbox.setCheckState(Qt.PartiallyChecked)
-        #self.checkbox.stateChanged.connect(self.show_state)
-        #layout.addWidget(self.checkbox)
-        
         self.label3 = QLabel("Lorem Ipsum Dolor Amet \nLorem Ipsum Dolor Amet")
         self.label3.setFont(QFont("Arial",16))
         self.label3.setAlignment(Qt.AlignmentFlag.AlignBottom)
-        layout.addWidget(self.label3)
+        login_layout.addWidget(self.label3)
         
-        layout.setSpacing(-1)
-        layout.setStretch(0,0)
-        layout.setAlignment(Qt.AlignmentFlag.AlignHCenter)
+        login_layout.setSpacing(-1)
+        login_layout.setStretch(0,0)
+        login_layout.setAlignment(Qt.AlignmentFlag.AlignHCenter)
 
-        container = QWidget()
-        container.setLayout(layout)
+        self.login_container = QWidget()
+        self.login_container.setLayout(login_layout)
+        self.enterbutton.clicked.connect(self.app.worker.loginButtonPress)
+
+
+        inapp_layout = QVBoxLayout()
+
+        self.label3 = QLabel("  Uygulama arayüzü")
+        self.label3.setFont(QFont("Arial",16))
+        self.label3.setAlignment(Qt.AlignHCenter)
+        inapp_layout.addWidget(self.label3)
+
+        self.label4 = QLabel("bla bla bla")
+        self.label4.setFont(QFont("Arial",16))
+        self.label4.setAlignment(Qt.AlignHCenter)
+        inapp_layout.addWidget(self.label4)
+
+        self.label5 = QLabel("Lorem Ipsum Dolor Amet \nLorem Ipsum Dolor Amet")
+        self.label5.setFont(QFont("Arial",16))
+        self.label5.setAlignment(Qt.AlignmentFlag.AlignBottom)
+        inapp_layout.addWidget(self.label5)
+        
+        inapp_layout.setSpacing(-1)
+        inapp_layout.setStretch(0,0)
+        inapp_layout.setAlignment(Qt.AlignmentFlag.AlignHCenter)
+
+        self.inapp_container = QWidget()
+        self.inapp_container.setLayout(inapp_layout)
 
         # Set the central widget of the Window.
-        self.setCentralWidget(container)
+        self.setCentralWidget(self.login_container)
 
         self.show()
 
@@ -136,12 +153,13 @@ class MainWindow(QMainWindow):
 
 class APP:
     def __init__(self) -> None:
+        self.worker = Worker(self)
         self.windowmanager = MainWindow(self)
         self.windowmanager.show() # bunu acil durum olduğunda arkaplandan hemen ekranın önüne getirmek için kullanabiliriz
 
         self.threadpool = QThreadPool()
         print("Multithreading with maximum %d threads" % self.threadpool.maxThreadCount())
-        self.worker = Worker()
+        #
         self.threadpool.start(self.worker)
 
     def closeApp(self):
