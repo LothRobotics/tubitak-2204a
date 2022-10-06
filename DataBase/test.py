@@ -1,6 +1,7 @@
 import firebase_admin
 
-from firebase_admin import firestore, credentials
+from firebase_admin import credentials, firestore
+
 
 class DatabaseHandler():
     def __init__(self, credentials_path: str = '') -> None:
@@ -17,16 +18,15 @@ class DatabaseHandler():
     def get(self, collection_name: str = '', where_clause: str = '', auto_format: bool = True) -> list | dict:
         gathered_collection = self.db.collection(collection_name) 
 
+        query = gathered_collection.get()
+
         if where_clause != '':
             key, operator, value, *_ = (where_clause.split(' ')) # *(where_clause.split(''))
             query: list = gathered_collection.where(key, operator, value).get()
-
-            if auto_format:
-                query = self.format_values(query)
-
-            return query
-
-        return gathered_collection.get() 
+        
+        if auto_format:
+           query = self.format_values(query)
+        return query 
 
     def format_values(self, value_list: list) -> list:
         formatted_values: list = [*
@@ -41,12 +41,10 @@ class DatabaseHandler():
         return formatted_values
     
     def write(self):
-        pass
         
-
-    
-
+        
+        pass
 
 instance = DatabaseHandler('db_credentials.json')
-gotten_values = instance.get('test', 'Name == Furkan a', False)
+gotten_values = instance.get(collection_name='test', auto_format=True)
 print(gotten_values)
