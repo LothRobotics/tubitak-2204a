@@ -116,5 +116,19 @@ moving label pos:
 self.label_2.move(100, 120)
 
 Label'larda \n'den sonra boşluk koyarsan yatay olarak sabitlenmemiş olabilir
+------------------------------------------------------------------------------------
+
+HOWTO MAKE BACKGROUND: 
+you can technically use qpainter and qpicture and draw over it then add thatto a label and then add that to the layout 
+but then it wont work since its a vertical layout so im gonna use css stylesheet
+
+
+
+
+
+
+
+
+
 
 

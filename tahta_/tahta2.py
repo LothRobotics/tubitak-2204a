@@ -1,6 +1,6 @@
 from PyQt5.QtCore import *
 from PyQt5.QtWidgets import *
-from PyQt5.QtGui import QFont
+from PyQt5.QtGui import *
 # The main modules for Qt are QtWidgets, QtGui and QtCore.
 
 import sys,time
@@ -48,7 +48,49 @@ class MainWindow(QMainWindow):
         self.app = app
         self.counter = 0
 
+        #self.paintEvent
+
         login_layout = QVBoxLayout()
+
+        self.backgroundimg = QPicture()
+        painter = QPainter(self.backgroundimg)
+        #painter.setRenderHint(QtGui.)
+        painter.setRenderHint(painter.RenderHint.Antialiasing)
+        painter.setPen(QPen(Qt.black, 12, Qt.SolidLine, Qt.RoundCap))
+        
+        
+        
+        #self.backgroundimg.fill(QColor(255,255,255,255))
+        painter.drawLine(100,100,200,200)
+        painter.drawEllipse(0,0,100,100)
+
+
+        self.backgroundwidget = QLabel()
+        #self.backgroundwidget.setPixmap(self.backgroundimg)
+        self.backgroundwidget.setPicture(self.backgroundimg)
+
+        self.backgroundwidget.show()
+
+        login_layout.addWidget(self.backgroundwidget)
+
+
+        """
+        self.backgroundimg = QImage(3, 3, QImage.Format_RGB32)
+        value = qRgba(189, 149, 39,255)  # 0xffbd9527
+        self.backgroundimg.setPixel(1, 1, value)
+
+        value = qRgba(122, 163, 39,0)  # 0xff7aa327
+        self.backgroundimg.setPixel(0, 1, value)
+        self.backgroundimg.setPixel(1, 0, value)
+
+        value = qRgba(237, 187, 51,255)  # 0xffedba31
+        self.backgroundimg.setPixel(2, 1, value)
+        self.backgroundwidget = QLabel()
+        self.backgroundwidget.setPicture()
+        login_layout.addWidget(self.backgroundwidget)"""
+        
+
+        
         
         self.label1 = QLabel("Tübitak Projesi")
         self.label1.setFont(QFont("Arial",24))
@@ -125,6 +167,9 @@ class MainWindow(QMainWindow):
         # Set the central widget of the Window.
         self.setCentralWidget(self.login_container)
 
+        #self.setCentralWidget(self.backgroundwidget)
+        #self.backgroundwidget.Widget
+
         self.show()
 
         #self.timer = QTimer()
@@ -173,6 +218,16 @@ if __name__ == '__main__':
     # Pass in sys.argv to allow command line arguments for your app.
     # If you know you won't use command line arguments QApplication([]) works too.
     qapp = QApplication(sys.argv)
+
+    string = "C:\Users\Lab26\Documents\GitHub/tubitak-2204a"
+
+    stylesheet = """ MainWindow
+    {
+        background:url({});
+        background-color:red;
+    }
+    """.format(string)
+    qapp.setStyleSheet(stylesheet)
     # app.setWindowIcon(QtGui.QIcon('hand.ico'))
     # icon için özel .ico dosyası lazım
 
