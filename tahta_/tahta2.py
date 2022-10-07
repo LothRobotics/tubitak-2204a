@@ -1,12 +1,10 @@
 from PyQt5.QtCore import *
 from PyQt5.QtWidgets import *
 from PyQt5.QtGui import *
+from PyQt5.QtCore import Qt
 # The main modules for Qt are QtWidgets, QtGui and QtCore.
 
 import sys,time
-
-
-
 
 class Worker(QRunnable):
     '''
@@ -36,12 +34,31 @@ class Worker(QRunnable):
 
 
 
-
 class MainWindow(QMainWindow):
-
-
     def __init__(self, app, *args, **kwargs):
         super(MainWindow, self).__init__(*args, **kwargs)
+
+        self.setAttribute(Qt.WidgetAttribute.WA_StyledBackground)
+
+        filename = "test.png"
+
+        a = "\n"
+        a = a.strip("n")
+
+        import os
+        dirname = os.path.dirname(__file__)
+        print(dirname)
+        filename = os.path.join(dirname, 'test.png')
+        filename = "url(" +filename + ")"
+        filename = filename.replace(a,"/")
+
+        print(filename)
+
+        # stylesheet = "MainWindow{background-color: red;background-image:"+filename+";}"
+        stylesheet = "MainWindow{background-color: red;}"
+        print("generated {}".format(repr(stylesheet)))
+        self.setStyleSheet(stylesheet)
+
 
         self.setMinimumSize(600,450)
 
@@ -61,36 +78,17 @@ class MainWindow(QMainWindow):
         
         
         #self.backgroundimg.fill(QColor(255,255,255,255))
-        painter.drawLine(100,100,200,200)
-        painter.drawEllipse(0,0,100,100)
+        #painter.drawLine(100,100,200,200)
+        painter.drawEllipse(50,50,100,100)
 
 
         self.backgroundwidget = QLabel()
-        #self.backgroundwidget.setPixmap(self.backgroundimg)
         self.backgroundwidget.setPicture(self.backgroundimg)
 
         self.backgroundwidget.show()
 
         login_layout.addWidget(self.backgroundwidget)
 
-
-        """
-        self.backgroundimg = QImage(3, 3, QImage.Format_RGB32)
-        value = qRgba(189, 149, 39,255)  # 0xffbd9527
-        self.backgroundimg.setPixel(1, 1, value)
-
-        value = qRgba(122, 163, 39,0)  # 0xff7aa327
-        self.backgroundimg.setPixel(0, 1, value)
-        self.backgroundimg.setPixel(1, 0, value)
-
-        value = qRgba(237, 187, 51,255)  # 0xffedba31
-        self.backgroundimg.setPixel(2, 1, value)
-        self.backgroundwidget = QLabel()
-        self.backgroundwidget.setPicture()
-        login_layout.addWidget(self.backgroundwidget)"""
-        
-
-        
         
         self.label1 = QLabel("Tübitak Projesi")
         self.label1.setFont(QFont("Arial",24))
@@ -110,6 +108,7 @@ class MainWindow(QMainWindow):
         #self.input.textChanged.connect(self.label.setText)
         self.input.setAlignment(Qt.AlignmentFlag.AlignLeft)
         self.input.setContentsMargins(20,0,0,0)
+        self.input.setStyleSheet(r"color: blue; background-color: yellow;background-image:url(c:\Users\Acer\IHSAN\PROJECTS\tubitak-2204a\tahta_\test.png);")
         login_layout.addWidget(self.input)
 
         self.input2 = QLineEdit()
@@ -219,19 +218,14 @@ if __name__ == '__main__':
     # If you know you won't use command line arguments QApplication([]) works too.
     qapp = QApplication(sys.argv)
 
-    string = "C:/Users/Lab26/Documents/GitHub/tubitak-2204a/test.png"
-
-    stylesheet = """ MainWindow
-    {
-        background-color:red;
-    }
-    """
-    qapp.setStyleSheet(stylesheet)
+    # Qt.WidgetAttribute.WA_StyledBackground
+    
     # app.setWindowIcon(QtGui.QIcon('hand.ico'))
     # icon için özel .ico dosyası lazım
 
     app = APP()
-    #app.obj_thread.start() TODO: ADD THIS 31
+
+    
 
     # Start the event loop.
     qapp.exec()

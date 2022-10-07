@@ -6,8 +6,7 @@ from PyQt5.QtGui import QFont,QPainter,QPen,QImage,qRgba,QPixmap,QColor,QPicture
 import sys,time
 qapp = QApplication(sys.argv)
 
-
-
+"""
 pi = QPicture()
 painter = QPainter(pi)
 
@@ -20,9 +19,19 @@ painter.end()
 l = QLabel()
 l.setPicture(pi);
 l.show();
+"""
+
+
+window = QMainWindow()
+
+import os 
+print(os.listdir())
+window.setStyleSheet("QMainWindow{background-image:url(tahta_/test.png); background-color:red;}")
 
 
 
 
+
+window.show()
 qapp.exec()
 
