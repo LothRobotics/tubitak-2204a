@@ -28,10 +28,46 @@ class Worker(QRunnable):
             time.sleep(1)
     
     def loginButtonPress(self):
-        print("login")
+        print("LOGIN")
+        self.app.classname = self.app.windowmanager.input.text()
+        self.app.windowmanager.infowidget.label1.setText("SINIF: {}".format(self.app.classname))
+        self.app.windowmanager.infowidget.label2.setText("OKUL: {}".format("ÖRNEK"))
+
+        print("USERNAME:",self.app.classname, "SCHOOL:","ÖRNEK")
+
+
         self.app.windowmanager.setCentralWidget(self.app.windowmanager.inapp_container)
         
 
+class InfoWidget(QWidget):
+    def __init__(self,windowmanager,*args,**kwargs) -> None:
+        super(InfoWidget, self).__init__(*args, **kwargs)
+        self.windowmanager = windowmanager
+        
+        self.layout = QVBoxLayout()
+
+        self.layout.setContentsMargins(0,0,0,0)
+        self.layout.setStretch(0,0)
+
+
+        self.label1 = QLabel("Sınıf ismi")
+        self.label1.setFont(QFont("Arial",16))
+        self.label1.setAlignment(Qt.AlignmentFlag.AlignTop)
+        self.layout.addWidget(self.label1)
+        self.label1.setMaximumHeight(20)
+
+        self.label2 = QLabel("AAA")
+        self.label2.setFont(QFont("Arial",16))
+        self.label2.setAlignment(Qt.AlignmentFlag.AlignTop)
+        self.layout.addWidget(self.label2)
+
+
+
+        self.setLayout(self.layout)
+
+
+
+    
 
 
 class MainWindow(QMainWindow):
@@ -40,56 +76,34 @@ class MainWindow(QMainWindow):
 
         self.setAttribute(Qt.WidgetAttribute.WA_StyledBackground)
 
-        filename = "test.png"
-
-        a = "\n"
-        a = a.strip("n")
-
-        import os
-        dirname = os.path.dirname(__file__)
-        print(dirname)
-        filename = os.path.join(dirname, 'test.png')
-        filename = "url(" +filename + ")"
-        filename = filename.replace(a,"/")
-
-        print(filename)
-
         # stylesheet = "MainWindow{background-color: red;background-image:"+filename+";}"
-        stylesheet = "MainWindow{background-color: red;}"
-        print("generated {}".format(repr(stylesheet)))
+        stylesheet = """MainWindow{
+            background-color: red; 
+            background-image: url(background.png); 
+            background-position: center;
+            }"""
         self.setStyleSheet(stylesheet)
 
-
         self.setMinimumSize(600,450)
-
         self.app = app
         self.counter = 0
 
-        #self.paintEvent
-
         login_layout = QVBoxLayout()
 
+        """ BACKGROUND STUFF
         self.backgroundimg = QPicture()
         painter = QPainter(self.backgroundimg)
-        #painter.setRenderHint(QtGui.)
         painter.setRenderHint(painter.RenderHint.Antialiasing)
         painter.setPen(QPen(Qt.black, 12, Qt.SolidLine, Qt.RoundCap))
-        
-        
-        
-        #self.backgroundimg.fill(QColor(255,255,255,255))
+
         #painter.drawLine(100,100,200,200)
         painter.drawEllipse(50,50,100,100)
-
-
         self.backgroundwidget = QLabel()
         self.backgroundwidget.setPicture(self.backgroundimg)
-
         self.backgroundwidget.show()
-
         login_layout.addWidget(self.backgroundwidget)
+        """
 
-        
         self.label1 = QLabel("Tübitak Projesi")
         self.label1.setFont(QFont("Arial",24))
         self.label1.setAlignment(Qt.AlignHCenter)
@@ -100,28 +114,39 @@ class MainWindow(QMainWindow):
         self.label2.setAlignment(Qt.AlignHCenter)
         login_layout.addWidget(self.label2)
 
-        print(login_layout.setContentsMargins(0,0,0,-1010))
+        login_layout.setContentsMargins(0,0,0,-1010)
         #self.input.textChanged.connect(self.label.setText)
         
+        buttonstylesheet = r"color: black; background-color: white; border: 2px solid black; border-radius:2px;"
+        buttonfont = QFont("Arial",24)
+        buttonfont2 = QFont("Arial",16)
+
         self.input = QLineEdit()
         self.input.setFixedWidth(200)
+        self.input.setMinimumHeight(25)
         #self.input.textChanged.connect(self.label.setText)
         self.input.setAlignment(Qt.AlignmentFlag.AlignLeft)
         self.input.setContentsMargins(20,0,0,0)
-        self.input.setStyleSheet(r"color: blue; background-color: yellow;background-image:url(c:\Users\Acer\IHSAN\PROJECTS\tubitak-2204a\tahta_\test.png);")
+        self.input.setFont(buttonfont2)
+        self.input.setStyleSheet(buttonstylesheet)
         login_layout.addWidget(self.input)
 
         self.input2 = QLineEdit()
         self.input2.setFixedWidth(200)
+        self.input2.setMinimumHeight(25)
+        self.input2.setFont(buttonfont2)
         #self.input.textChanged.connect(self.label.setText)
         self.input2.setAlignment(Qt.AlignmentFlag.AlignLeft)
         self.input2.setContentsMargins(20,0,0,0)
+        self.input2.setStyleSheet(buttonstylesheet)
         login_layout.addWidget(self.input2)
         #self.input.setWindowIcon
 
         self.enterbutton = QPushButton()
-        self.enterbutton.setMinimumSize(20,10)
-        self.enterbutton.setMaximumSize(240,40)
+        self.enterbutton.setText("Giriş Yap")
+        self.enterbutton.setFont(buttonfont)
+        self.enterbutton.setMaximumSize(240,50)
+        self.enterbutton.setStyleSheet(buttonstylesheet)
 
         login_layout.addWidget(self.enterbutton)
 
@@ -141,20 +166,18 @@ class MainWindow(QMainWindow):
 
         inapp_layout = QVBoxLayout()
 
-        self.label3 = QLabel("  Uygulama arayüzü")
-        self.label3.setFont(QFont("Arial",16))
+        self.label3 = QLabel("Tübitak Projesi")
+        self.label3.setFont(QFont("Arial",24))
         self.label3.setAlignment(Qt.AlignHCenter)
         inapp_layout.addWidget(self.label3)
 
-        self.label4 = QLabel("bla bla bla")
-        self.label4.setFont(QFont("Arial",16))
-        self.label4.setAlignment(Qt.AlignHCenter)
-        inapp_layout.addWidget(self.label4)
+        self.infowidget = InfoWidget(self)
+        inapp_layout.addWidget(self.infowidget)
 
-        self.label5 = QLabel("Lorem Ipsum Dolor Amet \nLorem Ipsum Dolor Amet")
-        self.label5.setFont(QFont("Arial",16))
-        self.label5.setAlignment(Qt.AlignmentFlag.AlignBottom)
-        inapp_layout.addWidget(self.label5)
+        self.label6 = QLabel("Lorem Ipsum Dolor Amet \nLorem Ipsum Dolor Amet")
+        self.label6.setFont(QFont("Arial",16))
+        self.label6.setAlignment(Qt.AlignmentFlag.AlignBottom)
+        inapp_layout.addWidget(self.label6)
         
         inapp_layout.setSpacing(-1)
         inapp_layout.setStretch(0,0)
@@ -201,9 +224,10 @@ class APP:
         self.windowmanager = MainWindow(self)
         self.windowmanager.show() # bunu acil durum olduğunda arkaplandan hemen ekranın önüne getirmek için kullanabiliriz
 
+        self.classname = None
+
         self.threadpool = QThreadPool()
         print("Multithreading with maximum %d threads" % self.threadpool.maxThreadCount())
-        #
         self.threadpool.start(self.worker)
 
     def closeApp(self):
