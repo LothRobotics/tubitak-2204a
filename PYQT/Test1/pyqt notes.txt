@@ -127,13 +127,11 @@ when run from vscode the codes root is not the 'tahta_' dir, its actually the Tu
 
 also background-size: cover; property just doesnt work for some reason
 
-
-
 appereantly you can add stretch(spacers) then change how much stretch there is
  
 
-
-
+search for this: add app to system tray arrow python 
+the little arrow on taskbar is called system tray 
 
 
 
