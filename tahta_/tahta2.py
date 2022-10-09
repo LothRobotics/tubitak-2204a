@@ -6,6 +6,8 @@ from PyQt5.QtCore import Qt
 
 import sys,time
 
+RUN_PATH = "HKEY_CURRENT_USER\\Software\\Microsoft\\Windows\\CurrentVersion\\Run"
+
 class Worker(QRunnable):
     '''
     Worker thread
@@ -18,13 +20,11 @@ class Worker(QRunnable):
     @pyqtSlot()
     def run(self):
         '''
-        Your code goes in this function
+        The code goes in this function
         '''
         print("Thread start")
-        #time.sleep(5)
-        #print("Thread complete")
         while self.running:
-            print("running")
+            print(".")
             time.sleep(1)
     
     def loginButtonPress(self):
@@ -34,9 +34,7 @@ class Worker(QRunnable):
         self.app.windowmanager.infowidget.label2.setText("OKUL: {}".format("ÖRNEK"))
 
         print("USERNAME:",self.app.classname, "SCHOOL:","ÖRNEK")
-
-
-        self.app.windowmanager.setCentralWidget(self.app.windowmanager.inapp_container)
+        self.app.windowmanager.setCentralWidget(self.app.windowmanager.inapp_container) 
         
 
 class InfoWidget(QWidget):
@@ -45,10 +43,8 @@ class InfoWidget(QWidget):
         self.windowmanager = windowmanager
         
         self.layout = QVBoxLayout()
-
         self.layout.setContentsMargins(0,0,0,0)
         self.layout.setStretch(0,0)
-
 
         self.label1 = QLabel("Sınıf ismi")
         self.label1.setFont(QFont("Arial",16))
@@ -61,22 +57,18 @@ class InfoWidget(QWidget):
         self.label2.setAlignment(Qt.AlignmentFlag.AlignTop)
         self.layout.addWidget(self.label2)
 
-
-
         self.setLayout(self.layout)
-
-
-
-    
 
 
 class MainWindow(QMainWindow):
     def __init__(self, app, *args, **kwargs):
         super(MainWindow, self).__init__(*args, **kwargs)
 
-        self.setAttribute(Qt.WidgetAttribute.WA_StyledBackground)
+        self.settings = QSettings(RUN_PATH, QSettings.NativeFormat) 
+        # self.settings.contains("MainWidget")  # checks if it will start on startup
+        self.settings.setValue("MainWidget",sys.argv[0]); #set the app for startup
 
-        # stylesheet = "MainWindow{background-color: red;background-image:"+filename+";}"
+        self.setAttribute(Qt.WidgetAttribute.WA_StyledBackground)
         stylesheet = """MainWindow{
             background-color: red; 
             background-image: url(background.png); 
@@ -163,7 +155,6 @@ class MainWindow(QMainWindow):
         self.login_container.setLayout(login_layout)
         self.enterbutton.clicked.connect(self.app.worker.loginButtonPress)
 
-
         inapp_layout = QVBoxLayout()
 
         self.label3 = QLabel("Tübitak Projesi")
@@ -189,34 +180,14 @@ class MainWindow(QMainWindow):
         # Set the central widget of the Window.
         self.setCentralWidget(self.login_container)
 
-        #self.setCentralWidget(self.backgroundwidget)
-        #self.backgroundwidget.Widget
-
         self.show()
 
-        #self.timer = QTimer()
-        #self.timer.setInterval(1000)
-        #self.timer.timeout.connect(self.recurring_timer)
-        #self.timer.start()
-
-
     def bpress(self):
-        # these 2 lines are for creating a new thread
-        #worker = Worker()
-        #self.threadpool.start(worker)
-        
-        #time.sleep(5)
         pass
 
     def closeEvent(self, event):
         self.app.closeApp()
         event.accept()
-
-
-    #def recurring_timer(self):
-    #    self.counter +=1
-    #    self.l.setText("Counter: %d" % self.counter)
-
 
 class APP:
     def __init__(self) -> None:
@@ -242,14 +213,10 @@ if __name__ == '__main__':
     # If you know you won't use command line arguments QApplication([]) works too.
     qapp = QApplication(sys.argv)
 
-    # Qt.WidgetAttribute.WA_StyledBackground
-    
-    # app.setWindowIcon(QtGui.QIcon('hand.ico'))
+    qapp.setWindowIcon(QIcon('icon.ico'))
     # icon için özel .ico dosyası lazım
 
     app = APP()
-
-    
 
     # Start the event loop.
     qapp.exec()
