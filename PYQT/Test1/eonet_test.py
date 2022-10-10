@@ -14,6 +14,11 @@ output = 'json'
 
 # get a response using https
 def httpget():
+    """get data from http
+
+    Returns:
+        json: geojson data
+    """
     response = requests.get(
     f'{url}?format={output}',verify=False
     ).json()
@@ -21,7 +26,11 @@ def httpget():
     return response
 
 def readfile():
-    """Returns a json object read from debug.json"""
+    """reads debug.json
+
+    Returns:
+        json: geojson data
+    """
     f = open('debug.json')
     data = json.load(f)
     f.close()
@@ -30,12 +39,18 @@ def readfile():
 response = readfile() # httpget()
 
 def debugwrite(response:dict):
+    """write the data to debug.json
+
+    Args:
+        json (dict): geojson data from httpget()
+    """
     jsonString = json.dumps(response,indent=4)
     jsonFile = open("debug.json", "w")
     jsonFile.write(jsonString)
     jsonFile.close()
 
-debugwrite(response)
 
+a = httpget()
+debugwrite(a)
 # pprint.pprint(response)
 print(31)

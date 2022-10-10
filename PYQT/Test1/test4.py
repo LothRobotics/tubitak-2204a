@@ -78,8 +78,7 @@ class MainWindow(QMainWindow):
         self.l.setText("Counter: %d" % self.counter)
 
 
-
-
-app = QApplication([])
-window = MainWindow()
-app.exec_()
+if __name__ == '__main__':
+    app = QApplication([])
+    window = MainWindow()
+    app.exec_()

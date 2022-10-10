@@ -115,4 +115,25 @@ job as a QRunnable.
 moving label pos:
 self.label_2.move(100, 120)
 
+Label'larda \n'den sonra boşluk koyarsan yatay olarak sabitlenmemiş olabilir
+------------------------------------------------------------------------------------
+
+HOWTO MAKE BACKGROUND: 
+you can technically use qpainter and qpicture and draw over it then add thatto a label and then add that to the layout 
+but then it wont work since its a vertical layout so im gonna use css stylesheet
+
+NOTE FOR BACKGROUND IMAGE CODE:::
+when run from vscode the codes root is not the 'tahta_' dir, its actually the Tubitak-2204a dir so you need to move resources to there or smth
+
+also background-size: cover; property just doesnt work for some reason
+
+appereantly you can add stretch(spacers) then change how much stretch there is
+ 
+
+search for this: add app to system tray arrow python 
+the little arrow on taskbar is called system tray 
+
+
+
+
 

@@ -30,20 +30,10 @@ class MainWindow(QMainWindow):
         self.label1.setAlignment(Qt.AlignHCenter)
         layout.addWidget(self.label1)
 
-
         self.label2 = QLabel("Deprem Uygulaması \n Lorem Ipsum")
         self.label2.setFont(QFont("Arial",16))
         self.label2.setAlignment(Qt.AlignHCenter)
         layout.addWidget(self.label2)
-
-
-        """
-        for _ in range(6):
-            lbl = QLabel("Deprem Uygulaması \n Lorem Ipsum")
-            lbl.setFont(QFont("Arial",16))
-            lbl.setAlignment(Qt.AlignHCenter)
-            layout.addWidget(lbl)
-        """
 
         print(layout.setContentsMargins(0,0,0,-1010))
         #self.input.textChanged.connect(self.label.setText)
@@ -65,11 +55,6 @@ class MainWindow(QMainWindow):
 
         self.enterbutton = QPushButton()
         layout.addWidget(self.enterbutton)
-
-        #self.checkbox = QCheckBox()
-        #self.checkbox.setCheckState(Qt.PartiallyChecked)
-        #self.checkbox.stateChanged.connect(self.show_state)
-        #layout.addWidget(self.checkbox)
         
         self.label3 = QLabel("Lorem Ipsum Dolor Amet \n Lorem Ipsum Dolor Amet")
         self.label3.setFont(QFont("Arial",16))
@@ -80,11 +65,11 @@ class MainWindow(QMainWindow):
         layout.setStretch(0,0)
         layout.setAlignment(Qt.AlignmentFlag.AlignHCenter)
 
-        container = QWidget()
-        container.setLayout(layout)
+        login_container = QWidget()
+        login_container.setLayout(layout)
 
         # Set the central widget of the Window.
-        self.setCentralWidget(container)
+        self.setCentralWidget(login_container)
 
     def show_state(self,e):
         print(e)
@@ -170,19 +155,21 @@ class APP:
         self.obj_thread.started.connect(self.code_thread.long_running)
         # objThread.finished.connect(app.exit) # bence bu çalışmamalı ama emin değiim  #edit: evet çalışmamalı bu
 
-# You need one (and only one) QApplication instance per application.
-# Pass in sys.argv to allow command line arguments for your app.
-# If you know you won't use command line arguments QApplication([]) works too.
-useful = QApplication(sys.argv)
-# app.setWindowIcon(QtGui.QIcon('hand.ico'))
-# icon için özel .ico dosyası lazım
 
-app = APP()
-app.obj_thread.start()
+if __name__ == '__main__':
+    # You need one (and only one) QApplication instance per application.
+    # Pass in sys.argv to allow command line arguments for your app.
+    # If you know you won't use command line arguments QApplication([]) works too.
+    qapp = QApplication(sys.argv)
+    # app.setWindowIcon(QtGui.QIcon('hand.ico'))
+    # icon için özel .ico dosyası lazım
 
-# Start the event loop.
-useful.exec()
+    app = APP()
+    app.obj_thread.start()
 
-# Your application won't reach here until you exit and the event
-# loop has stopped.
-print("ended application")
+    # Start the event loop.
+    qapp.exec()
+
+    # Your application won't reach here until you exit and the event
+    # loop has stopped.
+    print("ended application")
