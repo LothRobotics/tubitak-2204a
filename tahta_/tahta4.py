@@ -18,6 +18,9 @@ class Worker(QRunnable):
         super().__init__()
         self.app = app
 
+    def get_windowmanager(self):
+        self.windowmanager = self.app.windowmanager
+
     @pyqtSlot()
     def run(self):
         '''
@@ -30,9 +33,10 @@ class Worker(QRunnable):
     
     def loginButtonPress(self):
         print("LOGIN")
-        self.app.classname = self.app.windowmanager.input.text()
-        self.app.windowmanager.infowidget.label1.setText("SINIF: {}".format(self.app.classname))
-        self.app.windowmanager.infowidget.label2.setText("OKUL: {}".format("ÖRNEK"))
+
+        self.app.classname = self.windowmanager.lineEdit.text()
+        self.windowmanager.infowidget.label1.setText("SINIF: {}".format(self.app.classname))
+        self.windowmanager.infowidget.label2.setText("OKUL: {}".format("ÖRNEK"))
 
         print("USERNAME:",self.app.classname, "SCHOOL:","ÖRNEK")
         self.app.windowmanager.setCentralWidget(self.app.windowmanager.inapp_container) 
@@ -62,8 +66,13 @@ class InfoWidget(QWidget):
 class MainWindow(QMainWindow):
     def __init__(self, app, *args, **kwargs):
         super(MainWindow, self).__init__(*args, **kwargs)
+        self.app = app
         #self.setObjectName("MainWindow")
         self.setFixedSize(776, 448)
+
+        self.settings = QSettings(RUN_PATH, QSettings.NativeFormat) 
+        # self.settings.contains("MainWidget")  # checks if it will start on startup
+        self.settings.setValue("MainWidget",sys.argv[0]); #set the app for startup
 
         self.centralwidget = QWidget(self) #TTTT
         self.centralwidget.setStyleSheet(
@@ -126,7 +135,7 @@ class MainWindow(QMainWindow):
             "}"
         )
         self.centralwidget.setObjectName("centralwidget")
-        
+
         self.login_container = QFrame(self.centralwidget)
         self.login_container.setGeometry(QRect(0, 0, 776, 448))
         self.login_container.setFrameShape(QFrame.StyledPanel)
@@ -137,8 +146,9 @@ class MainWindow(QMainWindow):
         self.inapp_container.setGeometry(QRect(0, 0, 776, 448))
         self.inapp_container.setFrameShape(QFrame.StyledPanel)
         self.inapp_container.setFrameShadow(QFrame.Raised)
-        self.inapp_container.setObjectName("frame") #### PUT THE INAPP LAYOUT STUFF IN THIS CONTAINER
-
+        self.inapp_container.setObjectName("frame2") #### PUT THE INAPP LAYOUT STUFF IN THIS CONTAINER
+        self.infowidget = InfoWidget(self)
+        self.infowidget.setParent(self.inapp_container)
 
         self.apptitle = QLabel(self.login_container)
         self.apptitle.setGeometry(QRect(0, 0, 776, 60))
@@ -172,6 +182,9 @@ class MainWindow(QMainWindow):
         self.retranslateUi()
         #QMetaObject.connectSlotsByName(MainWindow)
 
+    def connect_login(self):
+        self.pushButton.clicked.connect(self.app.worker.loginButtonPress)
+
     def retranslateUi(self):
         _translate = QCoreApplication.translate
         self.setWindowTitle(_translate("MainWindow", "MainWindow"))
@@ -199,6 +212,8 @@ class APP:
         self.worker = Worker(self)
         self.windowmanager = MainWindow(self)
         self.windowmanager.show() # bunu acil durum olduğunda arkaplandan hemen ekranın önüne getirmek için kullanabiliriz
+        self.worker.get_windowmanager()
+        self.windowmanager.connect_login()
 
         self.classname = None
 

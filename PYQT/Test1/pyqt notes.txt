@@ -133,7 +133,9 @@ appereantly you can add stretch(spacers) then change how much stretch there is
 search for this: add app to system tray arrow python 
 the little arrow on taskbar is called system tray 
 
-
+self.settings = QSettings(RUN_PATH, QSettings.NativeFormat) 
+# self.settings.contains("MainWidget")  # checks if it will start on startup
+self.settings.setValue("MainWidget",sys.argv[0]); #set the app for startup
 
 
 
