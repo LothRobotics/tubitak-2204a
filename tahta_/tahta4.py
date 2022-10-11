@@ -17,6 +17,7 @@ class Worker(QRunnable):
     def __init__(self,app):
         super().__init__()
         self.app = app
+        self.timer = 0 #timer in seconds
 
     def get_windowmanager(self):
         self.windowmanager = self.app.windowmanager
@@ -28,16 +29,28 @@ class Worker(QRunnable):
         '''
         print("Thread start")
         while self.running:
+            st = time.time()
             print(".")
             time.sleep(1)
-    
+            self.timer += time.time() - st
+            if self.timer > 60 * 10:
+                print("10 Minute check")
+                self.check_db_connection()
+                self.get_announcement() #maybe not put this in here?
+                self.timer = 0
+
+    def get_announcement(self):
+        pass
+
+    def check_db_connection(self):
+        pass
+
     def loginButtonPress(self):
         _translate = QCoreApplication.translate
         print("LOGIN")
 
         self.app.classname = self.windowmanager.lineEdit.text()
-        #self.windowmanager.infowidget.label1.setText("SINIF: {}".format(self.app.classname))
-        #self.windowmanager.infowidget.label2.setText("OKUL: {}".format("ÖRNEK"))
+        #self.app.schoolname = self.windowmanager.lineEdit_2.text() # lineedit2 is supposed to be for password not schoolname
         self.windowmanager.classlabel.setText(_translate("MainWindow", f"SINIF: {self.app.classname}"))
         self.windowmanager.schoollabel.setText(_translate("MainWindow", f"OKUL: {self.app.schoolname}"))
         self.windowmanager.announcelabel.setText(_translate("MainWindow", f"DUYURU: {self.app.lastannouncement}"))
