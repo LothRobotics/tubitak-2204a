@@ -32,36 +32,41 @@ class Worker(QRunnable):
             time.sleep(1)
     
     def loginButtonPress(self):
+        _translate = QCoreApplication.translate
         print("LOGIN")
 
         self.app.classname = self.windowmanager.lineEdit.text()
-        self.windowmanager.infowidget.label1.setText("SINIF: {}".format(self.app.classname))
-        self.windowmanager.infowidget.label2.setText("OKUL: {}".format("ÖRNEK"))
+        #self.windowmanager.infowidget.label1.setText("SINIF: {}".format(self.app.classname))
+        #self.windowmanager.infowidget.label2.setText("OKUL: {}".format("ÖRNEK"))
+        self.windowmanager.classlabel.setText(_translate("MainWindow", f"SINIF: {self.app.classname}"))
+        self.windowmanager.schoollabel.setText(_translate("MainWindow", f"OKUL: {self.app.schoolname}"))
+        self.windowmanager.announcelabel.setText(_translate("MainWindow", f"DUYURU: {self.app.lastannouncement}"))
+        self.windowmanager.dbcontrollabel.setText(_translate("MainWindow", f"DB: {self.app.isconnected2db}"))
 
         print("USERNAME:",self.app.classname, "SCHOOL:","ÖRNEK")
         self.app.windowmanager.setCentralWidget(self.app.windowmanager.inapp_container) 
 
-class InfoWidget(QWidget):
-    def __init__(self,windowmanager,*args,**kwargs) -> None:
-        super(InfoWidget, self).__init__(*args, **kwargs)
-        self.windowmanager = windowmanager
+# class InfoWidget(QWidget):
+#     def __init__(self,windowmanager,*args,**kwargs) -> None:
+#         super(InfoWidget, self).__init__(*args, **kwargs)
+#         self.windowmanager = windowmanager
         
-        self.layout = QVBoxLayout()
-        self.layout.setContentsMargins(0,0,0,0)
-        self.layout.setStretch(0,0)
+#         self.layout = QVBoxLayout()
+#         self.layout.setContentsMargins(0,0,0,0)
+#         self.layout.setStretch(0,0)
 
-        self.label1 = QLabel("Sınıf ismi")
-        self.label1.setFont(QFont("Arial",16))
-        self.label1.setAlignment(Qt.AlignmentFlag.AlignTop)
-        self.layout.addWidget(self.label1)
-        self.label1.setMaximumHeight(20)
+#         self.label1 = QLabel("Sınıf ismi")
+#         self.label1.setFont(QFont("Arial",16))
+#         self.label1.setAlignment(Qt.AlignmentFlag.AlignTop)
+#         self.layout.addWidget(self.label1)
+#         self.label1.setMaximumHeight(20)
 
-        self.label2 = QLabel("AAA")
-        self.label2.setFont(QFont("Arial",16))
-        self.label2.setAlignment(Qt.AlignmentFlag.AlignTop)
-        self.layout.addWidget(self.label2)
+#         self.label2 = QLabel("AAA")
+#         self.label2.setFont(QFont("Arial",16))
+#         self.label2.setAlignment(Qt.AlignmentFlag.AlignTop)
+#         self.layout.addWidget(self.label2)
 
-        self.setLayout(self.layout)
+#         self.setLayout(self.layout)
 
 class MainWindow(QMainWindow):
     def __init__(self, app, *args, **kwargs):
@@ -146,14 +151,119 @@ class MainWindow(QMainWindow):
         self.inapp_container.setGeometry(QRect(0, 0, 776, 448))
         self.inapp_container.setFrameShape(QFrame.StyledPanel)
         self.inapp_container.setFrameShadow(QFrame.Raised)
-        self.inapp_container.setObjectName("frame2") #### PUT THE INAPP LAYOUT STUFF IN THIS CONTAINER
-        self.infowidget = InfoWidget(self)
-        self.infowidget.setParent(self.inapp_container)
+        self.inapp_container.setObjectName("frame2")
+        self.inapp_container.setStyleSheet(
+            "* {\n"
+            "    font-family: 'Roboto', sans-serif;\n"
+            "}\n"
+            "\n"
+            "#frame2 {\n"
+            "    background-color: #e7f5ff;\n"
+            "    font-size: 16px;\n"
+            "}\n"
+            "\n"
+            "#apptitle {\n"
+            "    font-size: 44px;\n"
+            "}\n"
+            "#classlabel {\n"
+            "    font-size: 26px;\n"
+            "}\n"
+            "#schoollabel {\n"
+            "    font-size: 26px;\n"
+            "}\n"
+            "#announcelabel {\n"
+            "    font-size: 26px;\n"
+            "}\n"
+            "#dbcontrollabel {\n"
+            "    font-size: 26px;\n"
+            "}\n"
+            "\n" 
+            "#indicator {\n"
+            "    background-color: #333;\n"
+            "}\n"
+            "\n"
+            "#description {\n"
+            "    color: #555;\n"
+            "    font-size: 20px\n"
+            "}\n"
+            "\n"
+            "QLineEdit {\n"
+            "    background-color: #333333;\n"
+            "    border-radius: 6px;\n"
+            "    color: #AAA;\n"
+            "    font-size: 16px;\n"
+            "    font-weight: 400;\n"
+            "    font-family: 'Roboto', sans-serif;\n"
+            "    padding-left: 5px;\n"
+            "}\n"
+            "\n"
+            "QLineEdit:hover {\n"
+            "    background-color: #444;\n"
+            "}\n"
+            "\n"
+            "QLineEdit:focus {\n"
+            "    border: 2px solid #4dabf7;\n"
+            "}\n"
+            "\n"
+            "QPushButton {\n"
+            "    background-color: #1c7ed6;\n"
+            "    color: #EDF2FF;\n"
+            "    border: none;\n"
+            "    border-radius: 9px;\n"
+            "    font-size: 16px;\n"
+            "}\n"
+            "\n"
+            "QPushButton:hover, QPushButton:focus {\n"
+            "    background-color: #228be6;\n"
+            "}\n"
+            "\n"
+            "#alttext2 {\n"
+            "    color: #777;\n"
+            "    font-size: 14px;\n"
+            "    font-weight: 400;\n"
+            "}"
+        )
+        #self.infowidget = InfoWidget(self)
+        #self.infowidget.setParent(self.inapp_container)
 
         self.apptitle = QLabel(self.login_container)
         self.apptitle.setGeometry(QRect(0, 0, 776, 60))
         self.apptitle.setAlignment(Qt.AlignHCenter | Qt.AlignTop)
         self.apptitle.setObjectName("apptitle")
+
+
+        self.apptitle2 = QLabel(self.inapp_container)
+        self.apptitle2.setGeometry(QRect(0, 0, 776, 60))
+        self.apptitle2.setAlignment(Qt.AlignHCenter | Qt.AlignTop)
+        self.apptitle2.setObjectName("apptitle")
+        
+        self.classlabel = QLabel(self.inapp_container)
+        self.classlabel.setGeometry(QRect(150, 93, 500, 50))
+        self.classlabel.setAlignment(Qt.AlignmentFlag.AlignLeft | Qt.AlignTop)
+        self.classlabel.setObjectName("classlabel")
+        
+        self.schoollabel = QLabel(self.inapp_container)
+        self.schoollabel.setGeometry(QRect(150, 150, 500, 50))
+        self.schoollabel.setAlignment(Qt.AlignmentFlag.AlignLeft | Qt.AlignTop)
+        self.schoollabel.setObjectName("schoollabel")
+
+        self.announcelabel = QLabel(self.inapp_container)
+        self.announcelabel.setGeometry(QRect(150, 200, 500, 50))
+        self.announcelabel.setAlignment(Qt.AlignmentFlag.AlignLeft | Qt.AlignTop)
+        self.announcelabel.setObjectName("announcelabel")
+        
+        self.dbcontrollabel = QLabel(self.inapp_container)
+        self.dbcontrollabel.setGeometry(QRect(150, 250, 500, 50))
+        self.dbcontrollabel.setAlignment(Qt.AlignmentFlag.AlignLeft | Qt.AlignTop)
+        self.dbcontrollabel.setObjectName("dbcontrollabel")
+
+        self.indicator2 = QFrame(self.inapp_container)
+        self.indicator2.setGeometry(QRect(88, 60, 600, 2))
+        self.indicator2.setFrameShape(QFrame.HLine)
+        self.indicator2.setFrameShadow(QFrame.Sunken)
+        self.indicator2.setObjectName("indicator")
+
+
         self.indicator = QFrame(self.login_container)
         self.indicator.setGeometry(QRect(88, 60, 600, 2))
         self.indicator.setFrameShape(QFrame.HLine)
@@ -177,6 +287,12 @@ class MainWindow(QMainWindow):
         self.alttext.setGeometry(QRect(0, 400, 776, 41))
         self.alttext.setAlignment(Qt.AlignCenter)
         self.alttext.setObjectName("alttext")
+
+        self.alttext2 = QLabel(self.inapp_container)
+        self.alttext2.setGeometry(QRect(0, 400, 776, 41))
+        self.alttext2.setAlignment(Qt.AlignCenter)
+        self.alttext2.setObjectName("alttext2")
+
         self.setCentralWidget(self.centralwidget)
 
         self.retranslateUi()
@@ -189,6 +305,7 @@ class MainWindow(QMainWindow):
         _translate = QCoreApplication.translate
         self.setWindowTitle(_translate("MainWindow", "MainWindow"))
         self.apptitle.setText(_translate("MainWindow", "Tübitak Projesi"))
+        self.apptitle2.setText(_translate("MainWindow", "Tübitak Projesi"))
         self.description.setText(
             _translate(
                 "MainWindow",
@@ -199,6 +316,13 @@ class MainWindow(QMainWindow):
         self.lineEdit_2.setPlaceholderText(_translate("MainWindow", "Şifre"))
         self.pushButton.setText(_translate("MainWindow", "Sınıfı Kaydet"))
         self.alttext.setText(
+            _translate(
+                "MainWindow",
+                "Girdiğiniz bilgilerin doğruluğundan ve uygunluğundan “Tübitak Projesi” ve geliştiricileri sorumlu değildir. \n"
+                "Copyrighted by Tübitak Projesi.",
+            )
+        )
+        self.alttext2.setText(
             _translate(
                 "MainWindow",
                 "Girdiğiniz bilgilerin doğruluğundan ve uygunluğundan “Tübitak Projesi” ve geliştiricileri sorumlu değildir. \n"
@@ -216,6 +340,9 @@ class APP:
         self.windowmanager.connect_login()
 
         self.classname = None
+        self.schoolname = "ÖRNEK_OKUL"
+        self.lastannouncement = "DENEME_DUYURU"
+        self.isconnected2db = "CONNECTED_2_DB"
 
         self.threadpool = QThreadPool()
         print("Multithreading with maximum %d threads" % self.threadpool.maxThreadCount())
@@ -246,8 +373,3 @@ if __name__ == '__main__':
     # loop has stopped.
     app.closeApp()
     print("ended application")
-
-
-
-
-
