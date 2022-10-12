@@ -34,7 +34,7 @@ class Worker(QRunnable):
             time.sleep(1)
             self.timer += time.time() - st
 
-            if self.app.inapp:
+            if self.app.inapp: #TODO: Add authentication and school login
                 #print("IN APP")
                 if db_conn.is_connected == "Bağlantı stabil":
                     self.windowmanager.dbcontrollabel.setText('Veritabanı Durumu: <font color="#2b8a3e">Bağlantı Stabil</font>') 
