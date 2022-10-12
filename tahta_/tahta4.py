@@ -43,7 +43,7 @@ class Worker(QRunnable):
 
             # self.get_announcement() #maybe not put this in here? 
 
-            if self.timer > 4:
+            if self.timer > 60*10:
                 db_conn.is_connected = "BULUNAMADI"
                 print("10 Minute check")
                 self.check_db_connection()
@@ -307,9 +307,11 @@ class MainWindow(QMainWindow):
         self.lineEdit = QLineEdit(self.login_container)
         self.lineEdit.setGeometry(QRect(285, 175, 200, 40))
         self.lineEdit.setObjectName("lineEdit")
+        self.lineEdit.setMaxLength(20)
         self.lineEdit_2 = QLineEdit(self.login_container)
         self.lineEdit_2.setGeometry(QRect(285, 230, 200, 40))
         self.lineEdit_2.setObjectName("lineEdit_2")
+        self.lineEdit_2.setMaxLength(20)
         self.pushButton = QPushButton(self.login_container)
         self.pushButton.setGeometry(QRect(310, 290, 150, 40))
         self.pushButton.setObjectName("pushButton")
