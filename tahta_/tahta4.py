@@ -3,11 +3,11 @@ from PyQt5.QtWidgets import *
 from PyQt5.QtGui import *
 from PyQt5.QtCore import Qt
 
-
 import sys,time
 
-RUN_PATH = "HKEY_CURRENT_USER\\Software\\Microsoft\\Windows\\CurrentVersion\\Run"
+from database_handler import db_conn
 
+RUN_PATH = "HKEY_CURRENT_USER\\Software\\Microsoft\\Windows\\CurrentVersion\\Run"
 
 class Worker(QRunnable):
     '''
@@ -33,10 +33,20 @@ class Worker(QRunnable):
             print(".")
             time.sleep(1)
             self.timer += time.time() - st
-            if self.timer > 60 * 10:
+
+            if self.app.inapp:
+                #print("IN APP")
+                if db_conn.is_connected == "Bağlantı stabil":
+                    self.windowmanager.dbcontrollabel.setText('Veritabanı Durumu: <font color="#2b8a3e">Bağlantı Stabil</font>') 
+                else:
+                    self.windowmanager.dbcontrollabel.setText('Veritabanı Durumu: <font color="#c92a2a">Bağlantı Bulunamadı</font>') 
+
+            # self.get_announcement() #maybe not put this in here? 
+
+            if self.timer > 4:
+                db_conn.is_connected = "BULUNAMADI"
                 print("10 Minute check")
                 self.check_db_connection()
-                self.get_announcement() #maybe not put this in here?
                 self.timer = 0
 
     def get_announcement(self):
@@ -49,15 +59,21 @@ class Worker(QRunnable):
         _translate = QCoreApplication.translate
         print("LOGIN")
 
+        self.app.inapp = True
+
         self.app.classname = self.windowmanager.lineEdit.text()
         #self.app.schoolname = self.windowmanager.lineEdit_2.text() # lineedit2 is supposed to be for password not schoolname
         self.windowmanager.classlabel.setText(_translate("MainWindow", f"SINIF: {self.app.classname}"))
         self.windowmanager.schoollabel.setText(_translate("MainWindow", f"OKUL: {self.app.schoolname}"))
         self.windowmanager.announcelabel.setText(_translate("MainWindow", f"DUYURU: {self.app.lastannouncement}"))
-        self.windowmanager.dbcontrollabel.setText(_translate("MainWindow", f"DB: {self.app.isconnected2db}"))
+
+        if db_conn.is_connected == "Bağlantı stabil":
+            self.windowmanager.dbcontrollabel.setText('Veritabanı Durumu: <font color="#2b8a3e">Bağlantı Stabil</font>') 
+        else:
+            self.windowmanager.dbcontrollabel.setText('Veritabanı Durumu: <font color="#c92a2a">Bağlantı Bulunamadı</font>') 
 
         print("USERNAME:",self.app.classname, "SCHOOL:","ÖRNEK")
-        self.app.windowmanager.setCentralWidget(self.app.windowmanager.inapp_container) 
+        self.app.windowmanager.setCentralWidget(self.app.windowmanager.inapp_container)
 
 # class InfoWidget(QWidget):
 #     def __init__(self,windowmanager,*args,**kwargs) -> None:
@@ -269,6 +285,7 @@ class MainWindow(QMainWindow):
         self.dbcontrollabel.setGeometry(QRect(150, 250, 500, 50))
         self.dbcontrollabel.setAlignment(Qt.AlignmentFlag.AlignLeft | Qt.AlignTop)
         self.dbcontrollabel.setObjectName("dbcontrollabel")
+        
 
         self.indicator2 = QFrame(self.inapp_container)
         self.indicator2.setGeometry(QRect(88, 60, 600, 2))
@@ -356,6 +373,7 @@ class APP:
         self.schoolname = "ÖRNEK_OKUL"
         self.lastannouncement = "DENEME_DUYURU"
         self.isconnected2db = "CONNECTED_2_DB"
+        self.inapp = False
 
         self.threadpool = QThreadPool()
         print("Multithreading with maximum %d threads" % self.threadpool.maxThreadCount())
@@ -363,6 +381,7 @@ class APP:
 
     def closeApp(self):
         """called when app is closed"""
+        self.inapp = False #this is important since if you dont it might give an error since it deleted the QLabel even tho its trying to access it
         self.worker.running = False
         print("autodelete for worker is:",self.worker.autoDelete())
 
