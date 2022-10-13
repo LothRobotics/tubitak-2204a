@@ -2,6 +2,7 @@
 # https://www.geeksforgeeks.org/dijkstras-shortest-path-algorithm-greedy-algo-7/
 # undirected graph = x can go to y and y can go to x
 # directed graph = the way that each node can travel to is defined, x can go to y but maybe y cant go to x 
+# https://www.youtube.com/watch?v=pVfj6mxhdMw
 
 # Python program for Dijkstra's single
 # source shortest path algorithm. The program is
@@ -38,7 +39,7 @@ class Graph():
             if dist[u] < min and sptSet[u] == False:
                 min = dist[u]
                 min_index = u
- 
+        
         return min_index
  
     # Function that implements Dijkstra's single source
@@ -101,11 +102,12 @@ def a(vertex_count:int):
             line.append(random.randint(0,vertex_count-1))
         g.graph.append(line)
 
-    g.dijkstra(random.randint(0,vertex_count))
+    g.dijkstra(random.randint(0,vertex_count-1))
 
-st = time.time()
-a(300)
-print(f"it took {time.time()-st}")
+for _ in range(100): #TODO: fix the function so it doesnt prduce broken results
+    st = time.time()
+    a(5)
+    print(f"it took {time.time()-st}")
 # This code is contributed by Divyanshu Mehta and Updated by Pranav Singh Sambyal
 
 # a dictionary containing an end, start and also other nodes, we ideally would want to be able to change 
