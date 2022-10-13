@@ -2,23 +2,28 @@ import firebase_admin
 
 from firebase_admin import credentials, firestore
 
-
 class DatabaseHandler():
     def __init__(self, credentials_path: str) -> None:
-        self.credentials_path = credentials_path
-        self.login = credentials.Certificate(self.credentials_path)
-        firebase_admin.initialize_app(self.login)
+        try:
+            self.credentials_path = credentials_path
+            self.login = credentials.Certificate(self.credentials_path)
+            firebase_admin.initialize_app(self.login)
 
-        self.db = firestore.client()
-        self.is_connected = "Bağlantı stabil" 
+            self.db = firestore.client()
+            self.connection = "Bağlantı stabil" 
+        except:
+            self.connection = "Bağlantı bulunamadı" 
 
     def __repr__(self): return str(self.db) 
 
     def __str__(self): return str(self.db) 
 
+    def is_connected(self) -> str:
+        return self.connection
+
     def terminate_connection(self):
         self.db = None 
-        self.is_connected = "Bağlantı bulunamadı"
+        self.connection = "Bağlantı bulunamadı"
 
     def get(self, collection_name: str = '', where_clause: str = '', auto_format: bool = True) -> list | dict:
         gathered_collection = self.db.collection(collection_name) 
@@ -46,7 +51,12 @@ class DatabaseHandler():
         return formatted_values
     
     def create(self, collection_name: str, document_name: str, document_values: dict ) -> bool:
-        gathered_collection = self.db.collection(collection_name)
+        gathered_collection = self.db.collection(
+            
+
+
+
+        )
 
 
         assert document_values, 'Document values not defined correctly'
@@ -100,4 +110,6 @@ class DatabaseHandler():
             )
         ]
 
+
 db_conn = DatabaseHandler('db_credentials.json')
+print(db_conn.is_connected())
