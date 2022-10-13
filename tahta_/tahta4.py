@@ -387,8 +387,6 @@ class APP:
         self.worker.running = False
         print("autodelete for worker is:",self.worker.autoDelete())
 
-
-
 if __name__ == '__main__':
     # You need one (and only one) QApplication instance per application.
     # Pass in sys.argv to allow command line arguments for your app.
