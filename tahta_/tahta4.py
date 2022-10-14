@@ -68,7 +68,7 @@ class Worker(QRunnable):
         self.app.password =  self.windowmanager.lineEdit_2.text()
 
         if len(self.app.classname) < 1 or len(self.app.password) < 1:
-            print("ERROR LENGTH OF CLASSNAME OR PASSWORD TOO SHORT") 
+            print("ERROR LENGTH OF CLASSNAME OR PASSWORD TOO SHORT")
         
         hashed_password = hashlib.md5(self.app.password.encode()).hexdigest()
         
@@ -272,7 +272,6 @@ class MainWindow(QMainWindow):
         self.apptitle.setAlignment(Qt.AlignHCenter | Qt.AlignTop)
         self.apptitle.setObjectName("apptitle")
 
-
         self.apptitle2 = QLabel(self.inapp_container)
         self.apptitle2.setGeometry(QRect(0, 0, 776, 60))
         self.apptitle2.setAlignment(Qt.AlignHCenter | Qt.AlignTop)
@@ -331,6 +330,12 @@ class MainWindow(QMainWindow):
         self.alttext.setGeometry(QRect(0, 400, 776, 41))
         self.alttext.setAlignment(Qt.AlignCenter)
         self.alttext.setObjectName("alttext")
+
+        self.errorlabel = QLabel(self.login_container)
+        self.errorlabel.setGeometry(QRect(310, 290, 150, 40))
+        self.errorlabel.setObjectName("Errorlabel")
+        self.errorlabel.setText("TEST")
+        self.errorlabel.hide()
 
         self.alttext2 = QLabel(self.inapp_container)
         self.alttext2.setGeometry(QRect(0, 400, 776, 41))
