@@ -1,0 +1,106 @@
+{% load static %}
+
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>
+      Tübitak Projesi - {% block title %} Anasayfa {% endblock title %}
+    </title>
+
+    <style>
+      .alert {
+        position: absolute;
+        background: #d0ebff;
+        padding: 1rem 2rem;
+        min-width: 300px;
+        /* transform: translateX(1rem) translateY(1rem); */
+        margin-left: 1rem;
+        margin-top: 1rem;
+        width: 10rem;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+
+        border-radius: 0.4rem;
+        overflow: hidden;
+        opacity: 0;
+        pointer-events: none;
+        color: #345abc;
+
+        z-index: 500;
+        left: 0;
+        top: 0;
+      }
+      .alert.showAlert {
+        opacity: 1;
+        pointer-events: auto;
+      }
+      .alert.show {
+        animation: show_slide 5s ease forwards;
+      }
+      @keyframes show_slide {
+        0% {
+          transform: translateX(-100%);
+        }
+        25% {
+          transform: translateX(0%);
+        }
+        75% {
+          opacity: 1;
+        }
+
+        100% {
+          opacity: 0;
+          visibility: hidden;
+          display: none;
+        }
+      }
+      .alert ion-icon {
+        font-size: 3rem;
+        /* content: 'check_circle' */
+      }
+      .alert .msg {
+        font-size: 1.6rem;
+        color: #345abc;
+      }
+    </style>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap"
+      rel="stylesheet"
+    />
+
+    <script
+      type="module"
+      src="https://unpkg.com/ionicons@5.5.2/dist/ionicons/ionicons.esm.js"
+    ></script>
+    <script
+      nomodule
+      src="https://unpkg.com/ionicons@5.5.2/dist/ionicons/ionicons.js"
+    ></script>
+
+    <link rel="stylesheet" href="/static/styles/base.css" />
+    <link rel="stylesheet" href="/static/styles/utils.css" />
+
+    {% block head %} {% endblock head %}
+  </head>
+  <body>
+    {% block content %} {% endblock content %} {% if messages %}
+    <ul class="messages">
+      {% for message in messages %}
+      <!-- <li{% if message.tags %} class="{{ message.tags }}"{% endif %}> -->
+      <div class="alert showAlert show {{ message.tags }}">
+        <ion-icon name="{{ message.extra_tags }}"></ion-icon>
+        <span class="msg">{{ message }}!</span>
+      </div>
+
+      {% endfor %}
+    </ul>
+    {% endif %}
+  </body>
+</html>
