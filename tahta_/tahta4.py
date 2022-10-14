@@ -5,7 +5,10 @@ from PyQt5.QtCore import Qt
 
 import sys,time
 
-from database_handler import db_conn
+import hashlib
+from database_handler import DatabaseHandler
+
+db = DatabaseHandler("db_credentials.json")
 
 RUN_PATH = "HKEY_CURRENT_USER\\Software\\Microsoft\\Windows\\CurrentVersion\\Run"
 
@@ -35,8 +38,8 @@ class Worker(QRunnable):
             self.timer += time.time() - st
 
             if self.app.inapp: #TODO: Add authentication and school login
-                #print("IN APP")
-                if db_conn.is_connected == "Bağlantı stabil":
+                #print(db.connection)
+                if db.connection == "Bağlantı stabil":
                     self.windowmanager.dbcontrollabel.setText('Veritabanı Durumu: <font color="#2b8a3e">Bağlantı Stabil</font>') 
                 else:
                     self.windowmanager.dbcontrollabel.setText('Veritabanı Durumu: <font color="#c92a2a">Bağlantı Bulunamadı</font>') 
@@ -44,9 +47,9 @@ class Worker(QRunnable):
             # self.get_announcement() #maybe not put this in here? 
 
             if self.timer > 60*10:
-                db_conn.is_connected = "BULUNAMADI"
                 print("10 Minute check")
-                self.check_db_connection()
+                #db.connection = "BULUNAMADI" # TEMP
+                #self.check_db_connection()
                 self.timer = 0
 
     def get_announcement(self):
@@ -62,12 +65,21 @@ class Worker(QRunnable):
         self.app.inapp = True
 
         self.app.classname = self.windowmanager.lineEdit.text()
+        self.app.password =  self.windowmanager.lineEdit_2.text()
+
+        if len(self.app.classname) < 1 or len(self.app.password) < 1:
+            print("ERROR LENGTH OF CLASSNAME OR PASSWORD TOO SHORT") 
+        
+        hashed_password = hashlib.md5(self.app.password.encode()).hexdigest()
+        
+        
+        print(f"works?, password:{self.app.password} hashed password: {hashed_password}")
         #self.app.schoolname = self.windowmanager.lineEdit_2.text() # lineedit2 is supposed to be for password not schoolname
         self.windowmanager.classlabel.setText(_translate("MainWindow", f"SINIF: {self.app.classname}"))
         self.windowmanager.schoollabel.setText(_translate("MainWindow", f"OKUL: {self.app.schoolname}"))
         self.windowmanager.announcelabel.setText(_translate("MainWindow", f"DUYURU: {self.app.lastannouncement}"))
 
-        if db_conn.is_connected == "Bağlantı stabil":
+        if db.connection == "Bağlantı stabil":
             self.windowmanager.dbcontrollabel.setText('Veritabanı Durumu: <font color="#2b8a3e">Bağlantı Stabil</font>') 
         else:
             self.windowmanager.dbcontrollabel.setText('Veritabanı Durumu: <font color="#c92a2a">Bağlantı Bulunamadı</font>') 

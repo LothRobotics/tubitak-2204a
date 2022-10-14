@@ -3,6 +3,8 @@ __pycache__/
 *.py[cod]
 *$py.class
 
+db_credentials.json
+
 # C extensions
 *.so
 

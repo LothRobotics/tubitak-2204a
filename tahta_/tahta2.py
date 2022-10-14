@@ -36,7 +36,6 @@ class Worker(QRunnable):
         print("USERNAME:",self.app.classname, "SCHOOL:","ÖRNEK")
         self.app.windowmanager.setCentralWidget(self.app.windowmanager.inapp_container) 
         
-
 class InfoWidget(QWidget):
     def __init__(self,windowmanager,*args,**kwargs) -> None:
         super(InfoWidget, self).__init__(*args, **kwargs)

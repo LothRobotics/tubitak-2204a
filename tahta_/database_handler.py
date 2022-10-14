@@ -31,7 +31,7 @@ class DatabaseHandler():
         self.elapsed_time = timer() - self.start_time
     
         return self.elapsed_time
-    def is_connected(self) -> str:
+    def connection(self) -> str:
         return self.connection
 
     def get(self, collection_name: str = '', where_clause: str = '', auto_format: bool = True) -> list | dict:
@@ -120,5 +120,5 @@ class DatabaseHandler():
             )
         ]
 
-db_conn = DatabaseHandler('db_credentials.json')
-print(db_conn.update_date())
+if __name__ == '__main__':
+    db = DatabaseHandler('db_credentials.json')
