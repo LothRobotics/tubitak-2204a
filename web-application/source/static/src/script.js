@@ -1,7 +1,7 @@
 const passwordShowBtns = document.querySelectorAll(".form__password-show-btn"),
 passwordShowIcons = document.querySelectorAll(".form__password-show-icon"),
-passwordInputs = document.querySelectorAll(".form__password");
-
+passwordInputs = document.querySelectorAll(".form__password"),
+passwordBoxes = document.querySelectorAll('.form__password-box')
 
 passwordShowBtns.forEach((passwordShowBtn, index) => {
   passwordShowBtn. addEventListener("click", (_e) => {
@@ -21,8 +21,6 @@ passwordShowBtns.forEach((passwordShowBtn, index) => {
   });
 })
 
-
-
 function formatPhoneNumber(value) {
   if (!value) return value;
   const phoneNumber = value.replace(/[^\d]/g, '');
@@ -38,7 +36,8 @@ function formatPhoneNumber(value) {
 }
 
 function phoneNumberFormatter() {
-  const inputField = document.querySelector('.form__phonenumber');
-  const formattedInputValue = formatPhoneNumber(inputField.value);
+  let inputField = document.querySelector('.form__phonenumber');
+  let formattedInputValue = formatPhoneNumber(inputField.value);
+
   inputField.value = formattedInputValue;
 }
