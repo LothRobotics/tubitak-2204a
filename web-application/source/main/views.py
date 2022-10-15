@@ -6,7 +6,8 @@ from django.contrib import messages
 from django.core.validators import validate_email
 from django.core.exceptions import ValidationError
 
-from database_handler import db_conn
+from database_handler import DatabaseHandler
+db_conn = DatabaseHandler('../../db_credentials.json')
 
 import requests
 import bs4

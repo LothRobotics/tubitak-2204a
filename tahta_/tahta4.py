@@ -3,11 +3,12 @@ from PyQt5.QtWidgets import *
 from PyQt5.QtGui import *
 from PyQt5.QtCore import Qt
 
+import json
 import sys,time,os
 
 import hashlib
 
-sys.path.insert(1, '.') #also look for 1 folder back
+sys.path.insert(1, '.') #also look for 1 folder back #NOTE: Comment this when releasing the app
 from database_handler import DatabaseHandler
 
 db = DatabaseHandler("db_credentials.json")
@@ -104,28 +105,6 @@ class Worker(QRunnable):
                 
                 self.app.inapp = True
                 self.app.windowmanager.setCentralWidget(self.app.windowmanager.inapp_container)
-
-# class InfoWidget(QWidget):
-#     def __init__(self,windowmanager,*args,**kwargs) -> None:
-#         super(InfoWidget, self).__init__(*args, **kwargs)
-#         self.windowmanager = windowmanager
-        
-#         self.layout = QVBoxLayout()
-#         self.layout.setContentsMargins(0,0,0,0)
-#         self.layout.setStretch(0,0)
-
-#         self.label1 = QLabel("Sınıf ismi")
-#         self.label1.setFont(QFont("Arial",16))
-#         self.label1.setAlignment(Qt.AlignmentFlag.AlignTop)
-#         self.layout.addWidget(self.label1)
-#         self.label1.setMaximumHeight(20)
-
-#         self.label2 = QLabel("AAA")
-#         self.label2.setFont(QFont("Arial",16))
-#         self.label2.setAlignment(Qt.AlignmentFlag.AlignTop)
-#         self.layout.addWidget(self.label2)
-
-#         self.setLayout(self.layout)
 
 class MainWindow(QMainWindow):
     def __init__(self, app, *args, **kwargs):
@@ -423,7 +402,10 @@ class APP:
         self.worker.get_windowmanager()
         self.windowmanager.connect_login()
 
-        #self.worker.logged.connect(self.windowmanager.loginsuccesfull())
+        with open("data.json","r") as file:
+            self.data = json.load(file)
+        self.version = self.data["version"]
+        print(f"APP VERSION: {self.version}")
 
         self.classname = None
         self.schoolname = "ÖRNEK_OKUL"

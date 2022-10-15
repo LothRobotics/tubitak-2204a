@@ -102,5 +102,3 @@ class DatabaseHandler():
                 docs
             )
         ]
-        
-db_conn = DatabaseHandler('../../db_credentials.json')
