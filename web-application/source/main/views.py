@@ -3,7 +3,18 @@ import hashlib
 from django.shortcuts import render, redirect
 from django.contrib import messages
 
-from database_handler import db_conn 
+import sys
+
+sys.path.insert(1, '.') #also look for 1 folder back
+sys.path.insert(1, '..') 
+sys.path.insert(1, '...')
+sys.path.insert(1, '....')
+sys.path.insert(1, '.....')
+#print("SYS PATHS ARE HERE",sys.path[:3])
+
+from database_handler import DatabaseHandler
+
+db_conn = DatabaseHandler("db_credentials.json")
 
 NOTIFICATION_TAGS = {
     'success': 'checkmark-circle-outline',

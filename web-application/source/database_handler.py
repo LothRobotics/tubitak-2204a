@@ -25,7 +25,7 @@ class DatabaseHandler():
 
         query = gathered_collection.get()
 
-        if len(where_clauses) >= 1:
+        if len(where_clauses) >= 1 != '':
             for where_clause in where_clauses:
                 key, operator, value, *_ = (where_clause.split(' ')) # *(where_clause.split(''))
                 query: list = gathered_collection.where(key, operator, value)
@@ -103,5 +103,3 @@ class DatabaseHandler():
                 docs
             )
         ]
-
-db_conn = DatabaseHandler('db_credentials.json')
