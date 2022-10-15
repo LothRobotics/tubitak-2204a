@@ -34,7 +34,7 @@
 
 .register .form__inputs {
   display: grid;
-  grid-template-areas: "username fullname" "email phonenumber" "password repassword";
+  grid-template-areas: "username fullname" "email phonenumber" "password repassword" "schoolname schoolname";
 }
 
 .form__username-box {
@@ -61,6 +61,15 @@
   grid-area: repassword;
 }
 
+.form__schoolurl-box {
+  grid-area: schoolname;
+  justify-content: center !important;
+}
+
+.form__schoolurl {
+  width: 30rem !important;
+}
+
 .form__input-box {
   display: flex;
   justify-content: space-between;
@@ -84,6 +93,14 @@
   border-radius: 5px;
   padding-left: 1rem;
   transition: border 0.25s ease;
+}
+
+.form__input-invalid {
+  border: 3px solid #c92a2a !important;
+}
+
+.form__input-valid {
+  border: 3px solid #2b8a3e !important; 
 }
 
 .form__input:focus:invalid {
@@ -130,6 +147,11 @@
   border: none;
   outline: none;
   color: #e8f0f7;
+  border: 3px solid transparent;
+}
+
+.form__cta-btn:focus {
+  border: 3px solid #859cd7;
 }
 
 .form__cta-btn:hover {
@@ -140,11 +162,16 @@
 .form__semi-btn:visited {
   text-decoration: none;
   color: #222;
+  border: 3px solid transparent;
 }
 
 .form__semi-btn:hover,
 .form__semi-btn:active {
   color: #555;
+}
+
+.form__semi-btn:focus {
+  border: 3px solid #555;
 }
 
 .form__forgot-password-btn:link,
