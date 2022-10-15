@@ -82,6 +82,31 @@
         </div>
       </div>
 
+      <div class="form__password-box form__input-box">
+        <label for="password" class="form__password-label form__label"
+          >Kullanıcı Parolası:</label
+        >
+        <div class="form__password-inner-box">
+          <input
+            type="password"
+            name="password"
+            class="form__password form__input"
+            id="password"
+            placeholder="******"
+            maxlength="15"
+            minlength="1"
+            required
+          />
+
+          <a href="#" class="form__password-show-btn">
+            <ion-icon
+              name="eye-off-outline"
+              class="form__password-show-icon"
+            ></ion-icon>
+          </a>
+        </div>
+      </div>
+
       <div class="form__email-box form__input-box">
         <label for="email" class="form__email-label form__label"
           >Elektronik Posta:</label
@@ -100,57 +125,48 @@
         </div>
       </div>
 
-      <div class="form__schoolname-box form__input-box">
-        <label for="schoolname" class="form__schoolname-label form__label"
-          >Okul Adı:</label
+
+      <div class="form__phonenumber-box form__input-box">
+        <label for="phonenumber" class="form__phonenumber-label form__label"
+          >Telefon Numarası:</label
         >
-        <div class="form__schoolname-inner-box">
+        <div class="form__phonenumber-inner-box">
           <input
-            type="text"
-            name="schoolname"
-            class="form__schoolname form__input"
-            id="schoolname"
-            placeholder="Beşiktaş Anadolu Lisesi"
-            maxlength="50"
-            minlength="1"
+            onkeyup="phoneNumberFormatter()"
+            type="tel"
+            name="phonenumber"
+            class="form__phonenumber form__input"
+            id="phonenumber"
+            placeholder="+90 (xxx) xxx xx xx"
+            maxlength="14"
+            minlength="14"
             required
           />
         </div>
       </div>
 
-      <div class="form__schooltype-box form__input-box">
-        <label for="schooltype" class="form__schooltype-label form__label"
-          >Okul Tipi:</label
+      <div class="form__repassword-box form__input-box">
+        <label for="password" class="form__repassword-label form__label"
+          >Kullanıcı Parolası (Yeniden):</label
         >
-        <div class="form__schooltype-inner-box">
+        <div class="form__password-inner-box">
           <input
-            type="text"
-            name="schooltype"
-            class="form__schooltype form__input"
-            id="schooltype"
-            placeholder="Anadolu Lisesi"
-            maxlength="30"
+            type="password"
+            name="repassword"
+            class="form__password form__repassword form__input"
+            id="repassword"
+            placeholder="******"
+            maxlength="15"
             minlength="1"
             required
           />
-        </div>
-      </div>
 
-      <div class="form__schooladdress-box form__input-box">
-        <label for="schooladdress" class="form__schooladdress-label form__label"
-          >Okul Adresi:</label
-        >
-        <div class="form__schooladdress-inner-box">
-          <input
-            type="text"
-            name="schooladdress"
-            class="form__schooladdress form__input"
-            id="schooladdress"
-            placeholder="Yıldız bilmem ne"
-            maxlength="30"
-            minlength="1"
-            required
-          />
+          <a href="#" class="form__password-show-btn">
+            <ion-icon
+              name="eye-off-outline"
+              class="form__password-show-icon"
+            ></ion-icon>
+          </a>
         </div>
       </div>
     </div>

@@ -34,7 +34,7 @@
 
 .register .form__inputs {
   display: grid;
-  grid-template-areas: "username schoolname" "fullname schooltype" "email schooladdress";
+  grid-template-areas: "username fullname" "email phonenumber" "password repassword";
 }
 
 .form__username-box {
@@ -49,16 +49,16 @@
   grid-area: email;
 }
 
-.form__schoolname-box {
-  grid-area: schoolname;
+.form__phonenumber-box {
+  grid-area: phonenumber;
 }
 
-.form__schooltype-box {
-  grid-area: schooltype;
+.form__password-box {
+  grid-area: password;
 }
 
-.form__schooladdress-box {
-  grid-area: schooladdress;
+.form__repassword-box {
+  grid-area: repassword;
 }
 
 .form__input-box {
