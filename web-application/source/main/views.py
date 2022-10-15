@@ -3,7 +3,7 @@ import hashlib
 from django.shortcuts import render, redirect
 from django.contrib import messages
 
-from database_handler import db_conn 
+from database_handler import db_conn
 
 NOTIFICATION_TAGS = {
     'success': 'checkmark-circle-outline',

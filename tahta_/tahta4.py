@@ -7,13 +7,7 @@ import sys,time,os
 
 import hashlib
 
-print(__file__)
-dir_name = os.path.dirname(__file__)
-print(os.path.join( os.path.dirname ( __file__), os.path.pardir))
-print(dir_name)
-#os.chdir()
-#print(os.pardir)
-
+sys.path.insert(1, '.') #also look for 1 folder back
 from database_handler import DatabaseHandler
 
 db = DatabaseHandler("db_credentials.json")
@@ -168,7 +162,7 @@ class MainWindow(QMainWindow):
             "    font-size: 20px\n"
             "}\n"
             "#Errorlabel {\n"
-            "    color: #555;\n"
+            "    color: #e01f1f;\n"
             "    font-size: 20px\n"
             "}\n"
             "\n"
@@ -383,7 +377,7 @@ class MainWindow(QMainWindow):
 
         result = self.errorlabel.fontMetrics().boundingRect(self.errorlabel.text()).width() 
         
-        self.errorlabel.setGeometry(QRect( 330-int(result/3.8) , 280, 350, 40)) #FIXME: i dont have a better idea to do this 
+        self.errorlabel.setGeometry(QRect( 388-int(result/2) , 280, 350, 40)) #FIXME: i dont have a better idea to do this
         self.pushButton.setGeometry(QRect(310, 320, 150, 40))
         self.errorlabel.show()
         # This is not the best way to center a text but its good enough atm
