@@ -3,9 +3,17 @@ from PyQt5.QtWidgets import *
 from PyQt5.QtGui import *
 from PyQt5.QtCore import Qt
 
-import sys,time
+import sys,time,os
 
 import hashlib
+
+print(__file__)
+dir_name = os.path.dirname(__file__)
+print(os.path.join( os.path.dirname ( __file__), os.path.pardir))
+print(dir_name)
+#os.chdir()
+#print(os.pardir)
+
 from database_handler import DatabaseHandler
 
 db = DatabaseHandler("db_credentials.json")
@@ -16,6 +24,8 @@ class Worker(QRunnable):
     '''
     Worker thread
     '''
+    logged = pyqtSignal()
+
     running = True
     def __init__(self,app):
         super().__init__()
@@ -39,10 +49,13 @@ class Worker(QRunnable):
 
             if self.app.inapp: #TODO: Add authentication and school login
                 #print(db.connection)
-                if db.connection == "Bağlantı stabil":
-                    self.windowmanager.dbcontrollabel.setText('Veritabanı Durumu: <font color="#2b8a3e">Bağlantı Stabil</font>') 
-                else:
-                    self.windowmanager.dbcontrollabel.setText('Veritabanı Durumu: <font color="#c92a2a">Bağlantı Bulunamadı</font>') 
+                try:
+                    if db.connection == "Bağlantı stabil":
+                        self.windowmanager.dbcontrollabel.setText('Veritabanı Durumu: <font color="#2b8a3e">Bağlantı Stabil</font>') 
+                    else:
+                        self.windowmanager.dbcontrollabel.setText('Veritabanı Durumu: <font color="#c92a2a">Bağlantı Bulunamadı</font>') 
+                except:
+                    print("cant get db.connection")
 
             # self.get_announcement() #maybe not put this in here? 
 
@@ -62,30 +75,41 @@ class Worker(QRunnable):
         _translate = QCoreApplication.translate
         print("LOGIN")
 
-        self.app.inapp = True
-
-        self.app.classname = self.windowmanager.lineEdit.text()
-        self.app.password =  self.windowmanager.lineEdit_2.text()
-
-        if len(self.app.classname) < 1 or len(self.app.password) < 1:
+        if len(self.windowmanager.lineEdit.text()) < 1 or len(self.windowmanager.lineEdit_2.text()) < 1: 
             print("ERROR LENGTH OF CLASSNAME OR PASSWORD TOO SHORT")
-        
-        hashed_password = hashlib.md5(self.app.password.encode()).hexdigest()
-        
-        
-        print(f"works?, password:{self.app.password} hashed password: {hashed_password}")
-        #self.app.schoolname = self.windowmanager.lineEdit_2.text() # lineedit2 is supposed to be for password not schoolname
-        self.windowmanager.classlabel.setText(_translate("MainWindow", f"SINIF: {self.app.classname}"))
-        self.windowmanager.schoollabel.setText(_translate("MainWindow", f"OKUL: {self.app.schoolname}"))
-        self.windowmanager.announcelabel.setText(_translate("MainWindow", f"DUYURU: {self.app.lastannouncement}"))
-
-        if db.connection == "Bağlantı stabil":
-            self.windowmanager.dbcontrollabel.setText('Veritabanı Durumu: <font color="#2b8a3e">Bağlantı Stabil</font>') 
+            self.windowmanager.loginerror("Şifre veya Sınıf ismi çok kısa") 
         else:
-            self.windowmanager.dbcontrollabel.setText('Veritabanı Durumu: <font color="#c92a2a">Bağlantı Bulunamadı</font>') 
+            self.app.classname = self.windowmanager.lineEdit.text()
+            self.app.password = self.windowmanager.lineEdit_2.text()
+            hashed_password = hashlib.md5(self.app.password.encode()).hexdigest()
+            
+            print(f"password:{self.app.password} hashed password: {hashed_password}")
+            
+            result = db.get("accounts", [f"password == {hashed_password}"] )
+            if len(result) < 1:
+                self.windowmanager.loginerror("Yanlış Şifre")
+                print("WRONG PASSWORD")
+            elif len(result) > 1:
+                print("MORE THAN 1 ACCOUNT WITH THE SAME PASSWORD")
+                self.windowmanager.loginerror("Aynı şifreye sahip birden fazla hesap var") #FIXME: birden fazla aynı şifre olasılığı 
+            else:
+                print("CLASSNAME:",self.app.classname, "SCHOOL:","TESTOKULU")    
 
-        print("USERNAME:",self.app.classname, "SCHOOL:","ÖRNEK")
-        self.app.windowmanager.setCentralWidget(self.app.windowmanager.inapp_container)
+                self.windowmanager.classlabel.setText(_translate("MainWindow", f"SINIF: {self.app.classname}"))
+                self.windowmanager.schoollabel.setText(_translate("MainWindow", f"OKUL: {self.app.schoolname}"))
+                self.windowmanager.announcelabel.setText(_translate("MainWindow", f"DUYURU: {self.app.lastannouncement}"))
+
+                try:
+                    if db.connection == "Bağlantı stabil":
+                        self.windowmanager.dbcontrollabel.setText('Veritabanı Durumu: <font color="#2b8a3e">Bağlantı Stabil</font>') 
+                    else:
+                        self.windowmanager.dbcontrollabel.setText('Veritabanı Durumu: <font color="#c92a2a">Bağlantı Bulunamadı</font>') 
+                except:
+                    print("cant get db.connection but in loginbuttonpress func")
+                    pass
+                
+                self.app.inapp = True
+                self.app.windowmanager.setCentralWidget(self.app.windowmanager.inapp_container)
 
 # class InfoWidget(QWidget):
 #     def __init__(self,windowmanager,*args,**kwargs) -> None:
@@ -140,6 +164,10 @@ class MainWindow(QMainWindow):
             "}\n"
             "\n"
             "#description {\n"
+            "    color: #555;\n"
+            "    font-size: 20px\n"
+            "}\n"
+            "#Errorlabel {\n"
             "    color: #555;\n"
             "    font-size: 20px\n"
             "}\n"
@@ -332,7 +360,7 @@ class MainWindow(QMainWindow):
         self.alttext.setObjectName("alttext")
 
         self.errorlabel = QLabel(self.login_container)
-        self.errorlabel.setGeometry(QRect(310, 290, 150, 40))
+        self.errorlabel.setGeometry(QRect(0, 290, 350, 40))
         self.errorlabel.setObjectName("Errorlabel")
         self.errorlabel.setText("TEST")
         self.errorlabel.hide()
@@ -349,6 +377,19 @@ class MainWindow(QMainWindow):
 
     def connect_login(self):
         self.pushButton.clicked.connect(self.app.worker.loginButtonPress)
+
+    def loginerror(self,text:str):
+        self.errorlabel.setText(text)
+
+        result = self.errorlabel.fontMetrics().boundingRect(self.errorlabel.text()).width() 
+        
+        self.errorlabel.setGeometry(QRect( 330-int(result/3.8) , 280, 350, 40)) #FIXME: i dont have a better idea to do this 
+        self.pushButton.setGeometry(QRect(310, 320, 150, 40))
+        self.errorlabel.show()
+        # This is not the best way to center a text but its good enough atm
+
+    def loginsuccesfull(self):
+        pass
 
     def retranslateUi(self):
         _translate = QCoreApplication.translate
@@ -387,6 +428,8 @@ class APP:
         self.windowmanager.show() # bunu acil durum olduğunda arkaplandan hemen ekranın önüne getirmek için kullanabiliriz
         self.worker.get_windowmanager()
         self.windowmanager.connect_login()
+
+        #self.worker.logged.connect(self.windowmanager.loginsuccesfull())
 
         self.classname = None
         self.schoolname = "ÖRNEK_OKUL"
