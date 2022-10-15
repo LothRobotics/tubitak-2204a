@@ -43,14 +43,11 @@ class Worker(QRunnable):
             self.timer += time.time() - st
 
             if self.app.inapp: #TODO: Add authentication and school login
-                #print(db.connection)
-                try:
-                    if db.connection == "Bağlantı stabil":
-                        self.windowmanager.dbcontrollabel.setText('Veritabanı Durumu: <font color="#2b8a3e">Bağlantı Stabil</font>') 
-                    else:
-                        self.windowmanager.dbcontrollabel.setText('Veritabanı Durumu: <font color="#c92a2a">Bağlantı Bulunamadı</font>') 
-                except:
-                    print("cant get db.connection")
+                    # if db.connection == "Bağlantı stabil":
+                    #     self.windowmanager.dbcontrollabel.setText('Veritabanı Durumu: <font color="#2b8a3e">Bağlantı Stabil</font>') 
+                    # else:
+                    #    self.windowmanager.dbcontrollabel.setText('Veritabanı Durumu: <font color="#c92a2a">Bağlantı Bulunamadı</font>')
+                    self.windowmanager.dbcontrollabel.setText('Veritabanı Durumu: <font color="#c92a2a">NO WAY TO CHECK</font>')
 
             # self.get_announcement() #maybe not put this in here? 
 
@@ -66,6 +63,7 @@ class Worker(QRunnable):
     def check_db_connection(self):
         pass
 
+    
     def loginButtonPress(self):
         _translate = QCoreApplication.translate
         print("LOGIN")
@@ -105,6 +103,47 @@ class Worker(QRunnable):
                 
                 self.app.inapp = True
                 self.app.windowmanager.setCentralWidget(self.app.windowmanager.inapp_container)
+
+    def StartUpLogin(self,inp1:str,inp2:str): #FIXME: I have to create another func for this since I cant give arguments with a slot
+        _translate = QCoreApplication.translate
+        print("LOGIN")
+
+        if len(inp1) < 1 or len(inp2) < 1: 
+            print("ERROR LENGTH OF CLASSNAME OR PASSWORD TOO SHORT")
+            self.windowmanager.loginerror("Şifre veya Sınıf ismi çok kısa") 
+        else:
+            self.app.classname = inp1
+            self.app.password = inp2
+            hashed_password = hashlib.md5(self.app.password.encode()).hexdigest()
+            
+            print(f"password:{self.app.password} hashed password: {hashed_password}")
+            
+            result = db.get("accounts", [f"password == {hashed_password}"] )
+            if len(result) < 1:
+                self.windowmanager.loginerror("Yanlış Şifre")
+                print("WRONG PASSWORD")
+            elif len(result) > 1:
+                print("MORE THAN 1 ACCOUNT WITH THE SAME PASSWORD")
+                self.windowmanager.loginerror("Aynı şifreye sahip birden fazla hesap var") #FIXME: birden fazla aynı şifre olasılığı 
+            else:
+                print("CLASSNAME:",self.app.classname, "SCHOOL:","TESTOKULU")    
+
+                self.windowmanager.classlabel.setText(_translate("MainWindow", f"SINIF: {self.app.classname}"))
+                self.windowmanager.schoollabel.setText(_translate("MainWindow", f"OKUL: {self.app.schoolname}"))
+                self.windowmanager.announcelabel.setText(_translate("MainWindow", f"DUYURU: {self.app.lastannouncement}"))
+
+                try:
+                    if db.connection == "Bağlantı stabil":
+                        self.windowmanager.dbcontrollabel.setText('Veritabanı Durumu: <font color="#2b8a3e">Bağlantı Stabil</font>') 
+                    else:
+                        self.windowmanager.dbcontrollabel.setText('Veritabanı Durumu: <font color="#c92a2a">Bağlantı Bulunamadı</font>') 
+                except:
+                    print("cant get db.connection but in loginbuttonpress func")
+                    pass
+                
+                self.app.inapp = True
+                self.app.windowmanager.setCentralWidget(self.app.windowmanager.inapp_container)
+                print("Succesfull startup login")
 
 class MainWindow(QMainWindow):
     def __init__(self, app, *args, **kwargs):
@@ -402,13 +441,8 @@ class APP:
         self.worker.get_windowmanager()
         self.windowmanager.connect_login()
 
-        with open("data.json","r") as file:
-            self.data = json.load(file)
-        self.version = self.data["version"]
-        print(f"APP VERSION: {self.version}")
+        
 
-        self.classname = None
-        self.schoolname = "ÖRNEK_OKUL"
         self.lastannouncement = "DENEME_DUYURU"
         self.isconnected2db = "CONNECTED_2_DB"
         self.inapp = False
@@ -416,6 +450,21 @@ class APP:
         self.threadpool = QThreadPool()
         print("Multithreading with maximum %d threads" % self.threadpool.maxThreadCount())
         self.threadpool.start(self.worker)
+        self.Check_Updates()
+
+    def Check_Updates(self):
+        with open("data.json","r") as file:
+            self.data = json.load(file)
+        self.version = self.data["version"]
+        self.password = None if self.data["password"] == 'None' else self.data["password"]
+        self.classname = None if self.data["classname"] == 'None' else self.data["classname"]
+        self.schoolname = None if self.data["title"] == 'None' else self.data["title"] #title = schoolname 
+        if "None" in self.data.values():
+            print("NOT LOGGED IN")
+        else:
+            self.worker.StartUpLogin(self.classname,self.password)
+
+
 
     def closeApp(self):
         """called when app is closed"""
