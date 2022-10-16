@@ -30,6 +30,8 @@ class DatabaseHandler():
                 query: list = gathered_collection.where(key, operator, value)
                 gathered_collection = query
             query = query.get()
+
+
         
         if auto_format:
             query = self.format_values(query)
@@ -41,11 +43,7 @@ class DatabaseHandler():
                 lambda x: x.to_dict(),
                 value_list
             )]
-        
-        if len(formatted_values) == 1:
-            pass
-            # formatted_values = formatted_values[0].to_dict()
-        
+      
         return formatted_values
     
     def create(self, collection_name: str, document_name: str, document_values: dict ) -> bool:
@@ -67,9 +65,9 @@ class DatabaseHandler():
         assert gathered_collection.document(document_name).get().exists, 'There is not such a document in the firestore database'
 
         if not isinstance(document_name, str) or len(document_name) <= 1:
-            return gathered_collection.add(replaced_document_values)
+            return False
         else:
-            return gathered_collection.document(document_name).set(replaced_document_values)
+            return gathered_collection.document(document_name).update(replaced_document_values)
 
     def truncate_document(self, collection_name: str, document_name: str, delete_document_values: dict ) -> bool:
         document_ref = self.db.collection(collection_name).document(document_name)
@@ -88,7 +86,6 @@ class DatabaseHandler():
         self.db.collection(collection_name).document(document_name).delete()
 
     def truncate_collection(self, collection_name: str, deleted_documents: list):
-        """Empties the collection"""
         docs: list 
 
         if not deleted_documents:
@@ -102,3 +99,5 @@ class DatabaseHandler():
                 docs
             )
         ]
+        
+db_conn = DatabaseHandler('../../db_credentials.json')
