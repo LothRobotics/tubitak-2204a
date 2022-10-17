@@ -58,7 +58,7 @@ def IndexView(request):
       return redirect('login-page')
         
 @only_non_authenticated
-def LoginView(request, registered_now: bool = False, redirect_to: str = 'register-page'):
+def LoginView(request, registered_now: bool = False):
     if request.POST:
         username, password = request.POST['username'], request.POST['password']
 
@@ -78,10 +78,10 @@ def LoginView(request, registered_now: bool = False, redirect_to: str = 'registe
                   db_conn.update('accounts', user.id, {
                     'last_login': last_login, 
                     'last_login_ip': request.META.get("REMOTE_ADDR"),
-                    'logged_in': os.getlogin()
+                    'osuser_logged_in': os.getlogin()
                     })
                   
-                  return redirect('index-page')
+                return redirect('index-page')
             else:
                 messages.error(request, f'Giriş yapılamadı: {username}', extra_tags=NOTIFICATION_TAGS['error'])
                 return render(request, 'login.html')
@@ -127,7 +127,7 @@ def RegisterView(request):
                     'registiration_date': registiration_date,
                     'last_login': registiration_date,
                     'last_login_ip': request.META.get("REMOTE_ADDR"), 
-                    'logged_in': os.getlogin()
+                    'osuser_logged_in': os.getlogin()
                   })
                   
                   messages.success(request, f'Hesabınız oluşturuldu: {username}', extra_tags=NOTIFICATION_TAGS['success'])
@@ -143,10 +143,14 @@ def RegisterView(request):
     return render(request, 'register.html')
       
 @only_authenticated
-def LogoutView(request):
-    username = request.session['authentication_account']['username']
-    messages.info(request, f'Başarıyla çıkış yapıldı: { username }', extra_tags=NOTIFICATION_TAGS['info']) 
-    
-    db_conn.update('accounts', request.session['authentication_id'], {'logged_in': False})
-    del request.session['authentication_account'], request.session['authentication_id']
+def LogoutView(request):    
+    try:
+      username = request.session['authentication_account']['username']
+      messages.info(request, f'Başarıyla çıkış yapıldı: { username }', extra_tags=NOTIFICATION_TAGS['info']) 
+      db_conn.update('accounts', request.session['authentication_id'], {'logged_in': False})
+    except KeyError:
+      del request.session['authentication_account']
+    else: 
+      del request.session['authentication_account'], request.session['authentication_id']
+
     return redirect('login-page')
