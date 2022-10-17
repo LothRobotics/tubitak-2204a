@@ -7,7 +7,6 @@ from firebase_admin import credentials, firestore
 
 class DatabaseHandler():
 
-    # FIXME: A
     def __init__(self, credentials_path: str) -> None:
         self.credentials_path = credentials_path
         self.login = credentials.Certificate(self.credentials_path)
@@ -25,15 +24,17 @@ class DatabaseHandler():
 
         query = gathered_collection.get()
 
-        if len(where_clauses) >= 1 != '':
+        if len(where_clauses) >= 1:
             for where_clause in where_clauses:
                 key, operator, value, *_ = (where_clause.split(' ')) # *(where_clause.split(''))
                 query: list = gathered_collection.where(key, operator, value)
                 gathered_collection = query
             query = query.get()
+
+
         
         if auto_format:
-           query = self.format_values(query)
+            query = self.format_values(query)
         return query 
 
     def format_values(self, value_list: list) -> list:
@@ -42,11 +43,7 @@ class DatabaseHandler():
                 lambda x: x.to_dict(),
                 value_list
             )]
-        
-        if len(formatted_values) == 1:
-            pass
-            # formatted_values = formatted_values[0].to_dict()
-        
+      
         return formatted_values
     
     def create(self, collection_name: str, document_name: str, document_values: dict ) -> bool:
@@ -68,9 +65,9 @@ class DatabaseHandler():
         assert gathered_collection.document(document_name).get().exists, 'There is not such a document in the firestore database'
 
         if not isinstance(document_name, str) or len(document_name) <= 1:
-            return gathered_collection.add(replaced_document_values)
+            return False
         else:
-            return gathered_collection.document(document_name).set(replaced_document_values)
+            return gathered_collection.document(document_name).update(replaced_document_values)
 
     def truncate_document(self, collection_name: str, document_name: str, delete_document_values: dict ) -> bool:
         document_ref = self.db.collection(collection_name).document(document_name)
@@ -89,7 +86,6 @@ class DatabaseHandler():
         self.db.collection(collection_name).document(document_name).delete()
 
     def truncate_collection(self, collection_name: str, deleted_documents: list):
-        """Empties the collection"""
         docs: list 
 
         if not deleted_documents:
@@ -103,3 +99,5 @@ class DatabaseHandler():
                 docs
             )
         ]
+        
+db_conn = DatabaseHandler('db_credentials.json')
