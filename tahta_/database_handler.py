@@ -100,4 +100,4 @@ class DatabaseHandler():
             )
         ]
         
-db_conn = DatabaseHandler('../../db_credentials.json')
+#db_conn = DatabaseHandler('../../db_credentials.json')
