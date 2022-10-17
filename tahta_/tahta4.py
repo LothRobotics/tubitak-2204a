@@ -15,11 +15,14 @@ db = DatabaseHandler("db_credentials.json")
 
 RUN_PATH = "HKEY_CURRENT_USER\\Software\\Microsoft\\Windows\\CurrentVersion\\Run"
 
+class Workaround(QObject):
+    logged = pyqtSignal()
+    autologged = pyqtSignal()
+
 class Worker(QRunnable):
     '''
     Worker thread
     '''
-    logged = pyqtSignal()
 
     running = True
     def __init__(self,app):
@@ -87,22 +90,7 @@ class Worker(QRunnable):
                 self.windowmanager.loginerror("Aynı şifreye sahip birden fazla hesap var") #FIXME: birden fazla aynı şifre olasılığı 
             else:
                 print("CLASSNAME:",self.app.classname, "SCHOOL:","TESTOKULU")    
-
-                self.windowmanager.classlabel.setText(_translate("MainWindow", f"SINIF: {self.app.classname}"))
-                self.windowmanager.schoollabel.setText(_translate("MainWindow", f"OKUL: {self.app.schoolname}"))
-                self.windowmanager.announcelabel.setText(_translate("MainWindow", f"DUYURU: {self.app.lastannouncement}"))
-
-                try:
-                    if db.connection == "Bağlantı stabil":
-                        self.windowmanager.dbcontrollabel.setText('Veritabanı Durumu: <font color="#2b8a3e">Bağlantı Stabil</font>') 
-                    else:
-                        self.windowmanager.dbcontrollabel.setText('Veritabanı Durumu: <font color="#c92a2a">Bağlantı Bulunamadı</font>') 
-                except:
-                    print("cant get db.connection but in loginbuttonpress func")
-                    pass
-                
-                self.app.inapp = True
-                self.app.windowmanager.setCentralWidget(self.app.windowmanager.inapp_container)
+                self.app.workaround.logged.emit()
 
     def StartUpLogin(self,inp1:str,inp2:str): #FIXME: I have to create another func for this since I cant give arguments with a slot
         _translate = QCoreApplication.translate
@@ -126,24 +114,8 @@ class Worker(QRunnable):
                 print("MORE THAN 1 ACCOUNT WITH THE SAME PASSWORD")
                 self.windowmanager.loginerror("Aynı şifreye sahip birden fazla hesap var") #FIXME: birden fazla aynı şifre olasılığı 
             else:
-                print("CLASSNAME:",self.app.classname, "SCHOOL:","TESTOKULU")    
-
-                self.windowmanager.classlabel.setText(_translate("MainWindow", f"SINIF: {self.app.classname}"))
-                self.windowmanager.schoollabel.setText(_translate("MainWindow", f"OKUL: {self.app.schoolname}"))
-                self.windowmanager.announcelabel.setText(_translate("MainWindow", f"DUYURU: {self.app.lastannouncement}"))
-
-                try:
-                    if db.connection == "Bağlantı stabil":
-                        self.windowmanager.dbcontrollabel.setText('Veritabanı Durumu: <font color="#2b8a3e">Bağlantı Stabil</font>') 
-                    else:
-                        self.windowmanager.dbcontrollabel.setText('Veritabanı Durumu: <font color="#c92a2a">Bağlantı Bulunamadı</font>') 
-                except:
-                    print("cant get db.connection but in loginbuttonpress func")
-                    pass
-                
-                self.app.inapp = True
-                self.app.windowmanager.setCentralWidget(self.app.windowmanager.inapp_container)
-                print("Succesfull startup login")
+                print("CLASSNAME:",self.app.classname, "SCHOOL:","TESTOKULU")
+                self.app.workaround.autologged.emit()
 
 class MainWindow(QMainWindow):
     def __init__(self, app, *args, **kwargs):
@@ -400,8 +372,42 @@ class MainWindow(QMainWindow):
         self.errorlabel.show()
         # This is not the best way to center a text but its good enough atm
 
-    def loginsuccesfull(self):
-        pass
+    def loginsuccesful(self):
+        _translate = QCoreApplication.translate
+
+        self.classlabel.setText(_translate("MainWindow", f"SINIF: {self.app.classname}"))
+        self.schoollabel.setText(_translate("MainWindow", f"OKUL: {self.app.schoolname}"))
+        self.announcelabel.setText(_translate("MainWindow", f"DUYURU: {self.app.lastannouncement}"))
+
+        # try:
+        #     if db.connection == "Bağlantı stabil":
+        #         self.windowmanager.dbcontrollabel.setText('Veritabanı Durumu: <font color="#2b8a3e">Bağlantı Stabil</font>') 
+        #     else:
+        #         self.windowmanager.dbcontrollabel.setText('Veritabanı Durumu: <font color="#c92a2a">Bağlantı Bulunamadı</font>') 
+        
+        self.dbcontrollabel.setText('Veritabanı Durumu: <font color="#c92a2a">No way to check</font>')
+
+        self.app.inapp = True
+        self.setCentralWidget(self.inapp_container)
+        print("login successful")
+
+    def autologinsuccessful(self):
+        _translate = QCoreApplication.translate
+        self.classlabel.setText(_translate("MainWindow", f"SINIF: {self.app.classname}"))
+        self.schoollabel.setText(_translate("MainWindow", f"OKUL: {self.app.schoolname}"))
+        self.announcelabel.setText(_translate("MainWindow", f"DUYURU: {self.app.lastannouncement}"))
+
+        # try:
+        #     if db.connection == "Bağlantı stabil":
+        #         self.windowmanager.dbcontrollabel.setText('Veritabanı Durumu: <font color="#2b8a3e">Bağlantı Stabil</font>') 
+        #     else:
+        #         self.windowmanager.dbcontrollabel.setText('Veritabanı Durumu: <font color="#c92a2a">Bağlantı Bulunamadı</font>') 
+        
+        self.dbcontrollabel.setText('Veritabanı Durumu: <font color="#c92a2a">No way to check</font>')
+        
+        self.app.inapp = True
+        self.setCentralWidget(self.inapp_container)
+        print("Succesfull startup login")
 
     def retranslateUi(self):
         _translate = QCoreApplication.translate
@@ -435,13 +441,16 @@ class MainWindow(QMainWindow):
 
 class APP:
     def __init__(self) -> None:
+        self.workaround = Workaround()
+        
         self.worker = Worker(self)
         self.windowmanager = MainWindow(self)
         self.windowmanager.show() # bunu acil durum olduğunda arkaplandan hemen ekranın önüne getirmek için kullanabiliriz
         self.worker.get_windowmanager()
         self.windowmanager.connect_login()
 
-        
+        self.workaround.logged.connect(self.windowmanager.loginsuccesful)
+        self.workaround.autologged.connect(self.windowmanager.autologinsuccessful)
 
         self.lastannouncement = "DENEME_DUYURU"
         self.isconnected2db = "CONNECTED_2_DB"
@@ -462,6 +471,7 @@ class APP:
         if "None" in self.data.values():
             print("NOT LOGGED IN")
         else:
+            print("DATA IS ALREADY THERE, TRYING TO LOG INTO ACCOUNT")
             self.worker.StartUpLogin(self.classname,self.password)
 
 
