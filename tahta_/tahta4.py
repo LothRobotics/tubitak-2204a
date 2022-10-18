@@ -23,7 +23,6 @@ class Worker(QRunnable):
     '''
     Worker thread
     '''
-
     running = True
     def __init__(self,app):
         super().__init__()
@@ -66,7 +65,6 @@ class Worker(QRunnable):
     def check_db_connection(self):
         pass
 
-    
     def loginButtonPress(self):
         _translate = QCoreApplication.translate
         print("LOGIN")
@@ -87,12 +85,12 @@ class Worker(QRunnable):
                 print("WRONG PASSWORD")
             elif len(result) > 1:
                 print("MORE THAN 1 ACCOUNT WITH THE SAME PASSWORD")
-                self.windowmanager.loginerror("Aynı şifreye sahip birden fazla hesap var") #FIXME: birden fazla aynı şifre olasılığı 
+                self.windowmanager.loginerror("Giriş yapmada belli bir hatayla karşılaşıldı") 
             else:
-                print("CLASSNAME:",self.app.classname, "SCHOOL:","TESTOKULU")    
+                print("CLASSNAME:",self.app.classname, "SCHOOL:","TESTOKULU")
                 self.app.workaround.logged.emit()
 
-    def StartUpLogin(self,inp1:str,inp2:str): #FIXME: I have to create another func for this since I cant give arguments with a slot
+    def StartUpLogin(self,inp1:str,inp2:str): #NOTE: I have to create another func for this since I cant give arguments with a slot
         _translate = QCoreApplication.translate
         print("LOGIN")
 
@@ -112,7 +110,7 @@ class Worker(QRunnable):
                 print("WRONG PASSWORD")
             elif len(result) > 1:
                 print("MORE THAN 1 ACCOUNT WITH THE SAME PASSWORD")
-                self.windowmanager.loginerror("Aynı şifreye sahip birden fazla hesap var") #FIXME: birden fazla aynı şifre olasılığı 
+                self.windowmanager.loginerror("Giriş yapmada belli bir hatayla karşılaşıldı") 
             else:
                 print("CLASSNAME:",self.app.classname, "SCHOOL:","TESTOKULU")
                 self.app.workaround.autologged.emit()
@@ -335,6 +333,7 @@ class MainWindow(QMainWindow):
         self.lineEdit_2.setGeometry(QRect(285, 230, 200, 40))
         self.lineEdit_2.setObjectName("lineEdit_2")
         self.lineEdit_2.setMaxLength(20)
+        self.lineEdit_2.setEchoMode(QLineEdit.Password)
         self.pushButton = QPushButton(self.login_container)
         self.pushButton.setGeometry(QRect(310, 290, 150, 40))
         self.pushButton.setObjectName("pushButton")
@@ -344,7 +343,7 @@ class MainWindow(QMainWindow):
         self.alttext.setObjectName("alttext")
 
         self.errorlabel = QLabel(self.login_container)
-        self.errorlabel.setGeometry(QRect(0, 290, 350, 40))
+        self.errorlabel.setGeometry(QRect(0, 290, 550, 40))
         self.errorlabel.setObjectName("Errorlabel")
         self.errorlabel.setText("TEST")
         self.errorlabel.hide()
@@ -360,14 +359,26 @@ class MainWindow(QMainWindow):
         #QMetaObject.connectSlotsByName(MainWindow)
 
     def connect_login(self):
+        """To connect the signal and slot"""
         self.pushButton.clicked.connect(self.app.worker.loginButtonPress)
+
+    def onlogin(self):
+        """called when login happens"""
+        _translate = QCoreApplication.translate
+        self.classlabel.setText(_translate("MainWindow", f"SINIF: {self.app.classname}"))
+        self.schoollabel.setText(_translate("MainWindow", f"OKUL: {self.app.schoolname}"))
+        self.announcelabel.setText(_translate("MainWindow", f"DUYURU: {self.app.lastannouncement}"))
+        self.dbcontrollabel.setText('Veritabanı Durumu: <font color="#c92a2a">NO WAY TO CHECK</font>')
+
+        self.app.inapp = True
+        self.setCentralWidget(self.inapp_container)
 
     def loginerror(self,text:str):
         self.errorlabel.setText(text)
 
         result = self.errorlabel.fontMetrics().boundingRect(self.errorlabel.text()).width() 
         
-        self.errorlabel.setGeometry(QRect( 388-int(result/2) , 280, 350, 40)) #FIXME: i dont have a better idea to do this
+        self.errorlabel.setGeometry(QRect( 388-int(result/2) , 280, 550, 40)) #FIXME: i dont have a better idea to do this
         self.pushButton.setGeometry(QRect(310, 320, 150, 40))
         self.errorlabel.show()
         # This is not the best way to center a text but its good enough atm
@@ -442,7 +453,6 @@ class MainWindow(QMainWindow):
 class APP:
     def __init__(self) -> None:
         self.workaround = Workaround()
-        
         self.worker = Worker(self)
         self.windowmanager = MainWindow(self)
         self.windowmanager.show() # bunu acil durum olduğunda arkaplandan hemen ekranın önüne getirmek için kullanabiliriz
@@ -473,8 +483,6 @@ class APP:
         else:
             print("DATA IS ALREADY THERE, TRYING TO LOG INTO ACCOUNT")
             self.worker.StartUpLogin(self.classname,self.password)
-
-
 
     def closeApp(self):
         """called when app is closed"""
