@@ -1,14 +1,30 @@
 import pygame as pg
-import sys
+import sys,json
 
 # For creating test maps easiy in pygame and then exporting them to test pathfinder.py
 
+#modes : 
+# add/remove : make the points in this mode
+# connect    : Put the connections in between here
+
+# Keys: 
+# WASD : move
+
+# add_remove: 
+# lmb : add a point
+# rmb : delete a point
+
+# connect:
+# lmb : choose the first point 
+# rmb : choose the second point
+# middle mouse button: connect the two chosen points 
+# Delete key: delete the connection between two chosen points
+# F4 key: Save the map 
 
 SC_SIZE = SW,SH = (800,500)
 HSW,HSH = SW//2,SH//2
 
 pg.font.init()
-
 
 def drawcircle(surf,pos,camerapos):
     pg.draw.circle(surf,"blue",(pos[0]-camerapos[0],pos[1]-camerapos[1]),5)
@@ -60,6 +76,7 @@ class MapManager: #TODO: Save mappos and map as numpy arrays
         i = 0
         for node in self.posmap:
             drawcircle(surf,node["pos"],(self.x,self.y))
+            surf.blit(self.app.font.render(str(i),False,"white"),(node["pos"][0]-self.x,node["pos"][1]-self.y))
             if len(self.map[i]) != 0:
                 for neighbourid in self.map[i]:
                     drawline(surf,self.posmap[i]["pos"],self.posmap[neighbourid]["pos"],"green",(self.x,self.y))
@@ -96,10 +113,15 @@ class MapManager: #TODO: Save mappos and map as numpy arrays
 
     def connect(self):
         if self.chosen1st != None and self.chosen2nd != None:
-            self.map[self.chosen1st].append(self.chosen2nd)
-
-            self.map[self.chosen2nd].append(self.chosen1st)
-
+            
+            # if it already doesnt have a connection
+            if self.map[self.chosen1st].__contains__(self.chosen2nd) == False and self.map[self.chosen2nd].__contains__(self.chosen1st) == False : 
+                self.map[self.chosen1st].append(self.chosen2nd)
+                self.map[self.chosen2nd].append(self.chosen1st)
+                
+            else:
+                print("already has a connection")
+            
             self.chosen1st = None
             self.chosen2nd = None
     
@@ -130,7 +152,7 @@ class MapManager: #TODO: Save mappos and map as numpy arrays
                     self.chosen2nd = None
                 break
             i += 1
-        print(f"1st is {self.chosen1st}          2nd is: {self.chosen2nd}")
+        print(f"1st is {self.chosen1st} \t 2nd is: {self.chosen2nd}")
     
     def choosesecond(self):
         i = 0
@@ -143,7 +165,38 @@ class MapManager: #TODO: Save mappos and map as numpy arrays
                     self.chosen1st = None
                 break
             i += 1
-        print(f"1st is {self.chosen1st}          2nd is: {self.chosen2nd}")
+        print(f"1st is {self.chosen1st} \t 2nd is: {self.chosen2nd}")
+
+    def convert(self):
+        """Converts the map data to be used in pathfinder.py"""
+        # self.map içerisinde her noktanın neighbor listesindeki değerler komşu noktanın id'si olduğundan dolayı direkten bunu sort
+        # edip daha sonra da 0 olmayan(yani connection olmayan) noktaların hepsini 1 yapabiliriz 
+        emptylist = [[] for node in self.map]
+        wanted_count = len(self.posmap)
+        print(f"wanted count is {wanted_count}")
+        x = 0
+        
+        for node in self.map:
+            current_n_count = len(node)
+            #print(f"sorted neihgbour list of {i} looks like: {sorted(node)}")
+            sortedlist = sorted(node)
+
+            for i in range(wanted_count):
+                if sortedlist.__contains__(i):
+                    for t in sortedlist: # there should be a better way to do this
+                        if t == i:
+                            sortedlist[t] = 1 #"VAR"
+                else:
+                    sortedlist.insert(i,0) #None
+            emptylist[x] = sortedlist
+            x += 1
+        
+        return emptylist
+
+    def export(self):
+        with open("testmap.json","w") as file:
+            data = json.dumps(self.convert())
+            file.write(data)
 
 class App:
     def __init__(self) -> None:
@@ -170,7 +223,6 @@ class App:
             self.dt = self.clock.tick(60)
             self.screen.fill("black")
 
-
             for event in pg.event.get():
                 if event.type == pg.QUIT:
                     sys.exit()
@@ -187,16 +239,15 @@ class App:
                             self.mapmanager.connect()
                         if pg.mouse.get_pressed()[2]:
                             self.mapmanager.choosesecond()
-                
                 if event.type == pg.KEYDOWN:
                     if self.mapmanager.mode == "add/remove":
                         if event.key == pg.K_c:
                             self.mapmanager.startconnecting()
                     elif self.mapmanager.mode == "connect":
-                        if event.key == pg.K_p:
+                        if event.key == pg.K_DELETE or event.key == pg.KSCAN_DELETE or event.key == pg.K_BACKSPACE :
                             self.mapmanager.unconnect() 
-
-            
+                    if event.key == pg.K_F4:
+                        self.mapmanager.export()
 
             self.update()
             self.draw()
