@@ -7,12 +7,17 @@ import sys
 SC_SIZE = SW,SH = (800,500)
 HSW,HSH = SW//2,SH//2
 
+pg.font.init()
+
 
 def drawcircle(surf,pos,camerapos):
     pg.draw.circle(surf,"blue",(pos[0]-camerapos[0],pos[1]-camerapos[1]),5)
 
 def drawrect(surf,rect,camerapos):
     pg.draw.rect(surf,"red",(rect[0]-camerapos[0],rect[1]-camerapos[1],rect[2],rect[3]),3)
+
+def drawline(surf,p1,p2,color,camerapos):
+    pg.draw.line(surf,color,(p1[0]-camerapos[0],p1[1]-camerapos[1]),(p2[0]-camerapos[0],p2[1]-camerapos[1]),4)
 
 class MapManager: #TODO: Save mappos and map as numpy arrays
     def __init__(self,app) -> None:
@@ -52,9 +57,24 @@ class MapManager: #TODO: Save mappos and map as numpy arrays
         self.delrect.y = self.y+HSH-(self.delrectw//2)
 
     def draw(self,surf):
+        i = 0
         for node in self.posmap:
             drawcircle(surf,node["pos"],(self.x,self.y))
+            if len(self.map[i]) != 0:
+                for neighbourid in self.map[i]:
+                    drawline(surf,self.posmap[i]["pos"],self.posmap[neighbourid]["pos"],"green",(self.x,self.y))
+            i += 1
         drawrect(surf,self.delrect,(self.x,self.y))
+
+        if self.mode == "connect":
+            surf.blit(self.app.font.render("Connect",False,"white"),(0,0))
+        else:
+            surf.blit(self.app.font.render("Add/remove",False,"white"),(0,0))
+        
+        surf.blit(self.app.font.render("Count:  "+str(len(self.posmap)),False,"white"),(250,0))
+
+        surf.blit(self.app.font.render("1ST:  "+str(self.chosen1st),False,"white"),(0,50))
+        surf.blit(self.app.font.render("2ND:  "+str(self.chosen2nd),False,"white"),(0,100))
 
     def add(self):
         pointamount = len(self.map)
@@ -74,14 +94,63 @@ class MapManager: #TODO: Save mappos and map as numpy arrays
                 break
             i += 1
 
+    def connect(self):
+        if self.chosen1st != None and self.chosen2nd != None:
+            self.map[self.chosen1st].append(self.chosen2nd)
+
+            self.map[self.chosen2nd].append(self.chosen1st)
+
+            self.chosen1st = None
+            self.chosen2nd = None
+    
+    def unconnect(self):
+        print("unconnect")
+        if self.chosen1st != None and self.chosen2nd != None:
+            try:
+                self.map[self.chosen1st].remove(self.chosen2nd)
+
+                self.map[self.chosen2nd].remove(self.chosen1st)
+            except ValueError:
+                print("no connections found")
+
+            self.chosen1st = None
+            self.chosen2nd = None
+
+    def startconnecting(self):
+        self.mode = "connect"
+
     def choosefirst(self): #TODO: Make connection mode
-        pass
+        i = 0
+        for node in self.posmap:
+            if self.delrect.collidepoint(node["pos"]):
+                self.chosen1st = i
+                if self.chosen1st != self.chosen2nd:
+                    pass
+                else:
+                    self.chosen2nd = None
+                break
+            i += 1
+        print(f"1st is {self.chosen1st}          2nd is: {self.chosen2nd}")
+    
+    def choosesecond(self):
+        i = 0
+        for node in self.posmap:
+            if self.delrect.collidepoint(node["pos"]):
+                self.chosen2nd = i
+                if self.chosen2nd != self.chosen1st:
+                    pass
+                else:
+                    self.chosen1st = None
+                break
+            i += 1
+        print(f"1st is {self.chosen1st}          2nd is: {self.chosen2nd}")
 
 class App:
     def __init__(self) -> None:
         self.screen = pg.display.set_mode(SC_SIZE)
         self.clock = pg.time.Clock()
         self.dt = 1
+        self.font = pg.font.Font(pg.font.get_default_font(),24)
 
     def draw(self):
         self.mapmanager.draw(self.screen)
@@ -111,7 +180,23 @@ class App:
                             self.mapmanager.add()
                         if pg.mouse.get_pressed()[2]:
                             self.mapmanager.remove()
+                    if self.mapmanager.mode == "connect":
+                        if pg.mouse.get_pressed()[0]:
+                            self.mapmanager.choosefirst()
+                        if pg.mouse.get_pressed()[1]:
+                            self.mapmanager.connect()
+                        if pg.mouse.get_pressed()[2]:
+                            self.mapmanager.choosesecond()
                 
+                if event.type == pg.KEYDOWN:
+                    if self.mapmanager.mode == "add/remove":
+                        if event.key == pg.K_c:
+                            self.mapmanager.startconnecting()
+                    elif self.mapmanager.mode == "connect":
+                        if event.key == pg.K_p:
+                            self.mapmanager.unconnect() 
+
+            
 
             self.update()
             self.draw()
