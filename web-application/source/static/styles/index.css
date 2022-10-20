@@ -1,0 +1,50 @@
+.wrapper {
+  display: grid;
+  grid-template-rows: auto 1fr auto;
+  height: 100vh;
+  gap: 12.8rem;
+}
+
+.greeting {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  text-align: left;
+  padding: 2rem;
+}
+
+.greeting__welcome-text,
+.greeting__school {
+  color: #222222;
+  font-size: 3rem;
+  font-weight: 600;
+}
+
+.greeting__welcome-label {
+  color: #444;
+  font-size: 2.2rem;
+}
+
+.greeting__start,
+.greeting__end {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.greeting__nav {
+  margin-left: auto;
+}
+
+.greeting__nav-list {
+  display: flex;
+  gap: 1.6rem;
+  list-style: none;
+}
+
+.greeting__nav-link:link,
+.greeting__nav-link:visited {
+  color: #0e3c67;
+  font-size: 2rem;
+  text-decoration: none;
+}

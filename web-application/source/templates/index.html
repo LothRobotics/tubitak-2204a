@@ -1,5 +1,94 @@
-{% extends 'base.html' %} {% block content %} Hesap: {{ username }} <br />
-Password: {{ password }}
+{% extends 'base.html' %} {% block head %}
+<link rel="stylesheet" href="/static/styles/index.css" />
+{% endblock %} {% block content %}
 
-<a href="logout">Logout</a>
+<div class="wrapper">
+  <div class="greeting">
+    <div class="greeting__start">
+      <p class="greeting__welcome-text">Hoş geldin {{ username }},</p>
+      <p class="greeting__welcome-label">
+        Aşağıdaki panelden isteğine göre seçim yapabilirsin.
+      </p>
+    </div>
+
+    <div class="greeting__end">
+      <p class="greeting__school">Sakıp Sabancı Anadolu Lisesi</p>
+      <nav class="greeting__nav">
+        <ul class="greeting__nav-list">
+          <li class="greeting__nav-el">
+            <a href="#" class="greeting__nav-link">Ayarlar</a>
+          </li>
+          <li class="greeting__nav-el">
+            <a href="#" class="greeting__nav-link">Oturumu Kapat</a>
+          </li>
+        </ul>
+      </nav>
+    </div>
+  </div>
+
+  <main class="main">
+    <div class="main__nav">
+      <ul class="nav-box__list">
+        <li class="nav-box">
+          <a href="#" class="work-link">
+            <div class="work-topic">
+              <i class="ph-plus work-icon"></i>
+              <h2 class="work-header">Sınıf Ekle</h2>
+              <p class="work-description">
+                Sınıfları kaydetmek için yeni bir şifre oluştur
+              </p>
+            </div>
+          </a>
+        </li>
+        <li class="nav-box">
+          <a href="#" class="work-link">
+            <div class="work-topic">
+              <i class="ph-screencast work-icon"></i>
+              <h2 class="work-header">Tahtalara Bağlan</h2>
+              <p class="work-description">
+                Tehlike anında akıllı tahtalar aracılığıyla iletişim kur
+              </p>
+            </div>
+          </a>
+        </li>
+        <li class="nav-box">
+          <a href="#" class="work-link">
+            <div class="work-topic">
+              <i class="ph-warning work-icon"></i>
+              <h2 class="work-header">Deprem Var</h2>
+              <p class="work-description">
+                Deprem olduğu anda tüm kurumu hemen bilgilendir
+              </p>
+            </div>
+          </a>
+        </li>
+        <li class="nav-box">
+          <a href="#" class="work-link">
+            <div class="work-topic">
+              <i class="ph-phone work-icon"></i>
+              <h2 class="work-header">Acil Durum Bildir</h2>
+              <p class="work-description">
+                Tehlikeyi acil çağrı merkezlerine bildir
+              </p>
+            </div>
+          </a>
+        </li>
+        <li class="nav-box">
+          <a href="#" class="work-link">
+            <div class="work-topic">
+              <i class="ph-pencil work-icon"></i>
+              <h2 class="work-header">Okulu Düzenle</h2>
+              <p class="work-description">
+                Okulun fiziksel yapısını ve şeklini değiştir
+              </p>
+            </div>
+          </a>
+        </li>
+      </ul>
+    </div>
+  </main>
+
+  <footer></footer>
+</div>
+
 {% endblock content %}

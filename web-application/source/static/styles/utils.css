@@ -100,7 +100,7 @@
 }
 
 .form__input-valid {
-  border: 3px solid #2b8a3e !important; 
+  border: 3px solid #2b8a3e !important;
 }
 
 .form__input:focus:invalid {
@@ -185,4 +185,52 @@
 .form__forgot-password-btn:visited strong {
   color: #666;
   font-weight: 500;
+}
+
+/*  NAV BOX  */
+
+.nav-box__list {
+  display: flex;
+  justify-content: space-evenly;
+  list-style: none;
+}
+
+.work-topics {
+  display: flex;
+  width: 100%;
+  justify-content: space-evenly;
+}
+
+.work-topic {
+  background-image: linear-gradient(to left top, #93e1fa, #3889cd);
+  width: 25rem;
+  height: 25rem;
+  border-radius: 11px;
+  color: #fff4e6;
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+
+.work-icon {
+  font-size: 7.5rem;
+}
+
+.work-header {
+  font-size: 2.4rem;
+  font-weight: 600;
+  margin-top: 3.4rem;
+  margin-bottom: 1rem;
+}
+
+.work-description {
+  font-size: 1.6rem;
+  font-weight: 400;
+  width: 80%;
+}
+
+.work-link {
+  text-decoration: none;
 }

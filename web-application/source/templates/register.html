@@ -49,134 +49,133 @@
   >
     {% csrf_token %}
 
-      <div class="form__inputs">
-        <div class="form__username-box form__input-box">
-          <label for="username" class="form__username-label form__label"
-            >Kullanıcı Adı:</label
-          >
+    <div class="form__inputs">
+      <div class="form__username-box form__input-box">
+        <label for="username" class="form__username-label form__label"
+          >Kullanıcı Adı:</label
+        >
+        <input
+          type="text"
+          name="username"
+          class="form__username form__input"
+          id="username"
+          placeholder="SSALAdmin"
+          required
+        />
+      </div>
+
+      <div class="form__fullname-box form__input-box">
+        <label for="fullname" class="form__fullname-label form__label"
+          >İsim & Soyisim:</label
+        >
+        <div class="form__fullname-inner-box">
           <input
             type="text"
-            name="username"
-            class="form__username form__input"
-            id="username"
-            placeholder="SSALAdmin"
+            name="fullname"
+            class="form__fullname form__input"
+            id="fullname"
+            placeholder="Berker Okan"
+            maxlength="35"
+            minlength="1"
             required
           />
         </div>
+      </div>
 
-        <div class="form__fullname-box form__input-box">
-          <label for="fullname" class="form__fullname-label form__label"
-            >İsim & Soyisim:</label
-          >
-          <div class="form__fullname-inner-box">
-            <input
-              type="text"
-              name="fullname"
-              class="form__fullname form__input"
-              id="fullname"
-              placeholder="Berker Okan"
-              maxlength="15"
-              minlength="1"
-              required
-            />
-          </div>
-        </div>
-
-        <div class="form__email-box form__input-box">
-          <label for="email" class="form__email-label form__label"
-            >Elektronik Posta:</label
-          >
-          <div class="form__email-inner-box">
-            <input
-              type="email"
-              name="email"
-              class="form__email form__input"
-              id="email"
-              placeholder="ornek@me.com"
-              maxlength="50"
-              minlength="1"
-              required
-            />
-          </div>
-        </div>
-
-
-        <div class="form__phonenumber-box form__input-box">
-          <label for="phonenumber" class="form__phonenumber-label form__label"
-            >Telefon Numarası:</label
-          >
-          <div class="form__phonenumber-inner-box">
-            <input
-              onkeyup="phoneNumberFormatter()"
-              type="tel"
-              name="phonenumber"
-              class="form__phonenumber form__input"
-              id="phonenumber"
-              placeholder="(xxx) xxx-xxxx"
-              maxlength="14"
-              minlength="14"
-              required
-            />
-          </div>
-        </div>
-
-        <div class="form__password-box form__input-box">
-          <label for="password" class="form__password-label form__label"
-            >Kullanıcı Parolası:</label
-          >
-          <div class="form__password-inner-box">
-            <input
-              type="password"
-              name="password"
-              class="form__password form__input"
-              id="password"
-              placeholder="******"
-              maxlength="10"
-              minlength="5"
-              pattern="^(?=.*\d{1})(?=.*[a-z]{1})(?=.*[A-Z]{1})(?=.*[!@#$%^&*{|}?~_=+.-]{1})(?=.*[^a-zA-Z0-9])(?!.*\s).{5,10}$"
-              required
-            />
-
-            <a href="#" class="form__password-show-btn">
-              <ion-icon
-                name="eye-off-outline"
-                class="form__password-show-icon"
-              ></ion-icon>
-            </a>
-          </div>
-        </div>
-
-        <div class="form__repassword-box form__input-box">
-          <label for="password" class="form__repassword-label form__label"
-            >Kullanıcı Parolası (Yeniden):</label
-          >
-          <div class="form__password-inner-box">
-            <input
-              type="password"
-              name="repassword"
-              class="form__password form__repassword form__input"
-              id="repassword"
-              placeholder="******"
-              maxlength="10"
-              minlength="5"
-              pattern="^(?=.*\d{1})(?=.*[a-z]{1})(?=.*[A-Z]{1})(?=.*[!@#$%^&*{|}?~_=+.-]{1})(?=.*[^a-zA-Z0-9])(?!.*\s).{5,10}$"
-              required
-            />
-
-            <a href="#" class="form__password-show-btn">
-              <ion-icon
-                name="eye-off-outline"
-                class="form__password-show-icon"
-              ></ion-icon>
-            </a>
-          </div>
-        </div>
-
-        <div class="form__schoolurl-box form__input-box">
-          <label for="schoolurl" class="form__schoolurl-label form__label"
-            >Okul Web Sitesi:</label
-          >
+      <div class="form__email-box form__input-box">
+        <label for="email" class="form__email-label form__label"
+          >Elektronik Posta:</label
+        >
+        <div class="form__email-inner-box">
           <input
+            type="email"
+            name="email"
+            class="form__email form__input"
+            id="email"
+            placeholder="ornek@me.com"
+            maxlength="50"
+            minlength="1"
+            required
+          />
+        </div>
+      </div>
+
+      <div class="form__phonenumber-box form__input-box">
+        <label for="phonenumber" class="form__phonenumber-label form__label"
+          >Telefon Numarası:</label
+        >
+        <div class="form__phonenumber-inner-box">
+          <input
+            onkeyup="phoneNumberFormatter()"
+            type="tel"
+            name="phonenumber"
+            class="form__phonenumber form__input"
+            id="phonenumber"
+            placeholder="(xxx) xxx-xxxx"
+            maxlength="14"
+            minlength="14"
+            required
+          />
+        </div>
+      </div>
+
+      <div class="form__password-box form__input-box">
+        <label for="password" class="form__password-label form__label"
+          >Kullanıcı Parolası:</label
+        >
+        <div class="form__password-inner-box">
+          <input
+            type="password"
+            name="password"
+            class="form__password form__input"
+            id="password"
+            placeholder="******"
+            maxlength="10"
+            minlength="5"
+            pattern="^(?=.*\d{1})(?=.*[a-z]{1})(?=.*[A-Z]{1})(?=.*[!@#$%^&*{|}?~_=+.-]{1})(?=.*[^a-zA-Z0-9])(?!.*\s).{5,10}$"
+            required
+          />
+
+          <a href="#" class="form__password-show-btn">
+            <ion-icon
+              name="eye-off-outline"
+              class="form__password-show-icon"
+            ></ion-icon>
+          </a>
+        </div>
+      </div>
+
+      <div class="form__repassword-box form__input-box">
+        <label for="password" class="form__repassword-label form__label"
+          >Kullanıcı Parolası (Yeniden):</label
+        >
+        <div class="form__password-inner-box">
+          <input
+            type="password"
+            name="repassword"
+            class="form__password form__repassword form__input"
+            id="repassword"
+            placeholder="******"
+            maxlength="10"
+            minlength="5"
+            pattern="^(?=.*\d{1})(?=.*[a-z]{1})(?=.*[A-Z]{1})(?=.*[!@#$%^&*{|}?~_=+.-]{1})(?=.*[^a-zA-Z0-9])(?!.*\s).{5,10}$"
+            required
+          />
+
+          <a href="#" class="form__password-show-btn">
+            <ion-icon
+              name="eye-off-outline"
+              class="form__password-show-icon"
+            ></ion-icon>
+          </a>
+        </div>
+      </div>
+
+      <div class="form__schoolurl-box form__input-box">
+        <label for="schoolurl" class="form__schoolurl-label form__label"
+          >Okul Web Sitesi:</label
+        >
+        <input
           type="url"
           name="schoolurl"
           class="form__schoolurl form__input"
@@ -186,9 +185,8 @@
           minlength="2"
           required
         />
-        </div>
       </div>
-
+    </div>
 
     <div class="form__buttons">
       <div class="first-btn-row">
