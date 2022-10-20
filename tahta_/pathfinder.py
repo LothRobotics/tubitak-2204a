@@ -19,9 +19,7 @@
 # Note: We use a boolean array sptSet[] to represent the set of vertices included in SPT. If a value sptSet[v] is true, then vertex v 
 # is included in SPT, otherwise not. Array dist[] is used to store the shortest distance values of all vertices.
 
-import random
-import sys
-import time
+import random,sys,json
  
 class Pathfinder():
     def __init__(self, vertices):
@@ -63,6 +61,7 @@ class Pathfinder():
             # x is always equal to src in first iteration
             x = self.minDistance(dist, sptSet)
  
+            print(f"{cout} {x}")
             # Put the minimum distance vertex in the
             # shortest path tree
             sptSet[x] = True
@@ -104,7 +103,18 @@ def test(vertex_count:int):
 
     g.dijkstra(random.randint(0,vertex_count-1))
 
-st = time.time()
-for _ in range(100):
-    test(100)
-print(f"it took {time.time()-st}") # It took 6.4 seconds for 100 loops on 100 Vertex sized maps so this is fast enough
+# st = time.time()
+# for _ in range(100):
+#     test(100)
+# print(f"it took {time.time()-st}") # It took 6.4 seconds for 100 loops on 100 Vertex sized maps so this is fast enough
+
+def LoadMap(path:str):
+    with open(path,"r") as file:
+        data = json.load(file)
+    
+    pathfinder = Pathfinder(len(data)) #when we give 9 this means that there are 9 vertices
+    pathfinder.graph = data
+    pathfinder.dijkstra(0)
+
+
+LoadMap("testmap.json")

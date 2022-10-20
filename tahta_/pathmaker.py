@@ -13,6 +13,7 @@ import sys,json
 # add_remove: 
 # lmb : add a point
 # rmb : delete a point
+# C key: open connect mode
 
 # connect:
 # lmb : choose the first point 
@@ -173,7 +174,6 @@ class MapManager: #TODO: Save mappos and map as numpy arrays
         # edip daha sonra da 0 olmayan(yani connection olmayan) noktaların hepsini 1 yapabiliriz 
         emptylist = [[] for node in self.map]
         wanted_count = len(self.posmap)
-        print(f"wanted count is {wanted_count}")
         x = 0
         
         for node in self.map:
@@ -197,6 +197,7 @@ class MapManager: #TODO: Save mappos and map as numpy arrays
         with open("testmap.json","w") as file:
             data = json.dumps(self.convert())
             file.write(data)
+            print("Saved Map")
 
 class App:
     def __init__(self) -> None:
