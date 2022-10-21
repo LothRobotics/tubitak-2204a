@@ -1,25 +1,37 @@
-{% extends 'base.html' %} {% block head %}
+{% extends 'base.html' %} 
+
+
+{% load format_data %}
+{% block head %} 
 <link rel="stylesheet" href="/static/styles/index.css" />
-{% endblock %} {% block content %}
+
+<style>
+  html {
+    overflow: hidden;
+  }
+</style>
+{% endblock %} 
+
+{% block content %}
 
 <div class="wrapper">
   <div class="greeting">
     <div class="greeting__start">
-      <p class="greeting__welcome-text">Hoş geldin {{ username }},</p>
+      <p class="greeting__welcome-text">Hoş geldin {{ full_name }},</p>
       <p class="greeting__welcome-label">
         Aşağıdaki panelden isteğine göre seçim yapabilirsin.
       </p>
     </div>
 
     <div class="greeting__end">
-      <p class="greeting__school">Sakıp Sabancı Anadolu Lisesi</p>
+      <a href="#" class="greeting__school">{% format_school_name school_name %}</a>
       <nav class="greeting__nav">
         <ul class="greeting__nav-list">
           <li class="greeting__nav-el">
             <a href="#" class="greeting__nav-link">Ayarlar</a>
           </li>
           <li class="greeting__nav-el">
-            <a href="#" class="greeting__nav-link">Oturumu Kapat</a>
+            <a href="logout" class="greeting__nav-link">Oturumu Kapat</a>
           </li>
         </ul>
       </nav>
@@ -86,9 +98,104 @@
         </li>
       </ul>
     </div>
+    <div class="main__classes">
+      <table class="classes">
+        <thead>
+          <td>Sınıf Adı</td>
+          <td>Bağlantı</td>
+          <td>Son Denetleme</td>
+          <td>Kayıt Tarihi</td>
+          <td>Tahliye Çıkışı</td>
+          <td></td>
+        </thead>
+
+        <tbody>
+          <tr>
+            <td>9-C</td>
+            <td>Bağlantı var</td>
+            <td>3 sa. önce</td>
+            <td>21.10.22 - 08.11</td>
+            <td>Zemin Kat Çıkışı</td>
+            <td class="edit-icon-box">
+              <a href="#" class="edit-icon-btn">
+                <i class="ph-pencil-bold edit-icon"></i>
+              </a>
+              <a href="#" class="delete-icon-btn">
+                <i class="ph-trash-bold delete-icon"></i>
+              </a>
+            </td>
+          </tr>
+          <tr>
+            <td>9-C</td>
+            <td>Bağlantı var</td>
+            <td>3 sa. önce</td>
+            <td>21.10.22 - 08.11</td>
+            <td>Zemin Kat Çıkışı</td>
+            <td class="edit-icon-box">
+              <a href="#" class="edit-icon-btn">
+                <i class="ph-pencil-bold edit-icon"></i>
+              </a>
+              <a href="#" class="delete-icon-btn">
+                <i class="ph-trash-bold delete-icon"></i>
+              </a>
+            </td>
+          </tr>
+          <tr>
+            <td>9-C</td>
+            <td>Bağlantı var</td>
+            <td>3 sa. önce</td>
+            <td>21.10.22 - 08.11</td>
+            <td>Zemin Kat Çıkışı</td>
+            <td class="edit-icon-box">
+              <a href="#" class="edit-icon-btn">
+                <i class="ph-pencil-bold edit-icon"></i>
+              </a>
+              <a href="#" class="delete-icon-btn">
+                <i class="ph-trash-bold delete-icon"></i>
+              </a>
+            </td>
+          </tr>
+          <tr>
+            <td>9-C</td>
+            <td>Bağlantı var</td>
+            <td>3 sa. önce</td>
+            <td>21.10.22 - 08.11</td>
+            <td>Zemin Kat Çıkışı</td>
+            <td class="edit-icon-box">
+              <a href="#" class="edit-icon-btn">
+                <i class="ph-pencil-bold edit-icon"></i>
+              </a>
+              <a href="#" class="delete-icon-btn">
+                <i class="ph-trash-bold delete-icon"></i>
+              </a>
+            </td>
+          </tr>
+          <tr>
+            <td>9-C</td>
+            <td>Bağlantı var</td>
+            <td>3 sa. önce</td>
+            <td>21.10.22 - 08.11</td>
+            <td>Zemin Kat Çıkışı</td>
+            <td class="edit-icon-box">
+              <a href="#" class="edit-icon-btn">
+                <i class="ph-pencil-bold edit-icon"></i>
+              </a>
+              <a href="#" class="delete-icon-btn">
+                <i class="ph-trash-bold delete-icon"></i>
+              </a>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
   </main>
 
-  <footer></footer>
+  <footer class="footer">
+    <p class="footer__copyright-text">
+      Girdiğiniz bilgilerin doğruluğundan ve uygunluğundan “Tübitak Projesi” ve
+      geliştiricileri sorumlu değildir. <br />Copyrighted by Tübitak Projesi.
+    </p>
+  </footer>
 </div>
 
 {% endblock content %}

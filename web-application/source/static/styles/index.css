@@ -1,8 +1,13 @@
 .wrapper {
   display: grid;
-  grid-template-rows: auto 1fr auto;
+  grid-template-rows: repeat(3, auto);
   height: 100vh;
-  gap: 12.8rem;
+  gap: 6.4rem;
+}
+
+.main {
+  display: flex;
+  flex-direction: column;
 }
 
 .greeting {
@@ -18,6 +23,7 @@
   color: #222222;
   font-size: 3rem;
   font-weight: 600;
+  text-decoration: none;
 }
 
 .greeting__welcome-label {
@@ -47,4 +53,73 @@
   color: #0e3c67;
   font-size: 2rem;
   text-decoration: none;
+  transition: all 0.2s ease-in-out;
+}
+
+.greeting__nav-link:hover,
+.greeting__nav-link:active {
+  color: #3e6385;
+}
+
+.main__nav {
+  margin-bottom: 9.5rem;
+}
+
+.main__classes {
+  max-width: 120rem;
+  margin: 0 auto;
+}
+
+.classes {
+  border-collapse: collapse;
+  color: #fff4e6;
+  text-align: left;
+}
+
+.classes thead {
+  background-color: #3e89c6;
+  font-size: 2rem;
+  font-weight: 600;
+}
+
+.classes td {
+  padding: 1.6rem 3.2rem;
+}
+
+.classes tbody {
+  color: #222222;
+  font-size: 1.8rem;
+  font-weight: 500;
+}
+
+.classes tbody tr:nth-child(odd) {
+  background-color: #94cdfa;
+}
+
+.classes tbody tr:nth-child(even) {
+  background-color: #b8ddfc;
+}
+
+.delete-icon-btn,
+.edit-icon-btn {
+  text-decoration: none;
+  color: #222;
+  transition: color 0.1s ease-in;
+}
+
+.delete-icon-btn:hover,
+.edit-icon-btn:hover {
+  color: #444;
+}
+thead tr:first-child td:first-child {
+  border-top-left-radius: 9px;
+}
+tbody tr:last-child td:first-child {
+  border-bottom-left-radius: 9px;
+}
+thead tr:first-child td:last-child {
+  border-top-right-radius: 9px;
+}
+tbody tr:last-child td:last-child {
+  border-bottom-right-radius: 9px;
 }

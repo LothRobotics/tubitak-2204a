@@ -1,8 +1,10 @@
 import hashlib
 import datetime
 import os
+import random
 import requests
 import bs4
+import uuid    
 
 
 from django.shortcuts import render, redirect
@@ -10,6 +12,7 @@ from django.contrib import messages
 
 from django.core.validators import validate_email
 from django.core.exceptions import ValidationError
+from django.core.mail import send_mail
 
 from database_handler import db_conn
 
@@ -17,16 +20,15 @@ from database_handler import db_conn
 
 
 NOTIFICATION_TAGS = {
-    'success': 'checkmark-circle-outline',
-    'error': 'close-circle-outline',
-    'warning': 'alert-circle-outline',
-    'info': 'information-circle-outline'
+    'success': 'ph-check-circle',
+    'error': 'ph-x-circle',
+    'warning': 'ph-warning-circle',
+    'info': 'ph-info'
 }
 
 # Create your views here.
 
 def is_authenticated(request):
-
     try: 
       request.session['authentication_account']
     except KeyError:
@@ -49,8 +51,6 @@ def only_authenticated(func):
 
     return wrapper
 
-
-
 def IndexView(request):
     if is_authenticated(request):
       return render(request, 'index.html', request.session['authentication_account']) 
@@ -63,7 +63,7 @@ def LoginView(request, registered_now: bool = False):
         username, password = request.POST['username'], request.POST['password']
 
         if username and password:
-            password_hashed: str = hashlib.md5(password.encode()).hexdigest()
+            password_hashed: str = hashlib.sha256(password.encode()).hexdigest()
             user = db_conn.get('accounts', [f'username == {username}', f'password == {password_hashed}'], False)
 
             if user:
@@ -75,10 +75,22 @@ def LoginView(request, registered_now: bool = False):
                 if not registered_now:
                   messages.success(request, f'Başarıyla giriş yaptın: {username}', extra_tags=NOTIFICATION_TAGS['success'])
                   last_login = datetime.datetime.now().strftime("%d.%m.%Y - %H.%M:%S")
+                  try:
+                    serialnumbers = user.to_dict()['motherboard_serialnumber'] 
+                  except KeyError:
+                    serialnumbers = []
+                  current_serialnumber = str(uuid.UUID(int=uuid.getnode()))
+                  if current_serialnumber not in serialnumbers:
+                    send_mail('akillitahliyesistemi.gov.tr - Yeni Konumdan Giriş!', f'Merhaba! Hesabınıza yeni bir lokasyondan giriş yapıldı. [İstanbul / Türkiye | {last_login}]', 'tubitak2204a@gmail.com', [ user.to_dict()['email']])
+
+                  serialnumbers.append(current_serialnumber)
+            
+
                   db_conn.update('accounts', user.id, {
                     'last_login': last_login, 
                     'last_login_ip': request.META.get("REMOTE_ADDR"),
-                    'osuser_logged_in': os.getlogin()
+                    'osuser_logged_in': os.getlogin(),
+                    'motherboard_serialnumbers': serialnumbers
                     })
                   
                 return redirect('index-page')
@@ -108,10 +120,10 @@ def RegisterView(request):
               
               if isinstance(school_name, str):
               
-                query = db_conn.get('accounts', [f'username == {username}'], False)
+                query = db_conn.get('accounts', [f'username == {username}', f'school_name == {school_name}', f'email == {email}', f'full_name == {full_name}', f'phone_number == {phone_number}'], False, 'or')
                 
                 if not query:
-                  password = hashlib.md5(password.encode()).hexdigest()
+                  password = hashlib.sha256(password.encode()).hexdigest()
                   school_location = school_name.split('-')[0].strip()
                   registiration_date = datetime.datetime.now().strftime("%d.%m.%Y - %H.%M:%S")
                   
@@ -127,18 +139,22 @@ def RegisterView(request):
                     'registiration_date': registiration_date,
                     'last_login': registiration_date,
                     'last_login_ip': request.META.get("REMOTE_ADDR"), 
-                    'osuser_logged_in': os.getlogin()
+                    'osuser_logged_in': os.getlogin(),
+                    'motherboard_serialnumbers': [str(uuid.UUID(int=uuid.getnode()))]
                   })
                   
                   messages.success(request, f'Hesabınız oluşturuldu: {username}', extra_tags=NOTIFICATION_TAGS['success'])
                   return LoginView(request, True)
                 else:
-                  messages.error(request, f'Girilen şifreler uyuşmuyor, kontrol ediniz.', extra_tags=NOTIFICATION_TAGS['error'])
+                  messages.error(request, f'Girilen bilgilerinizde hata mevcut.', extra_tags=NOTIFICATION_TAGS['error'])
+                  return RegisterView(request)
               else:
                 messages.error(request, f'Böyle bir okul MEB veritabanında bulunamadı, kontrol edin.', extra_tags=NOTIFICATION_TAGS['error'])
+                return RegisterView(request)
                 
           else:
             messages.error(request, f'Girilen şifreler uyuşmuyor, kontrol ediniz.', extra_tags=NOTIFICATION_TAGS['error'])
+            return RegisterView(request)
     
     return render(request, 'register.html')
       

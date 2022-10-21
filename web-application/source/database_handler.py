@@ -19,7 +19,7 @@ class DatabaseHandler():
 
     def __str__(self): return str(self.db) 
 
-    def get(self, collection_name: str = '', where_clauses: list [str] = [], auto_format: bool = True) -> list | dict:
+    def get(self, collection_name: str = '', where_clauses: list [str] = [], auto_format: bool = True, general_operator: str = 'and') -> list | dict:
         gathered_collection = self.db.collection(collection_name) 
 
         query = gathered_collection.get()
@@ -28,6 +28,9 @@ class DatabaseHandler():
             for where_clause in where_clauses:
                 key, operator, value, *_ = (where_clause.split(' ')) # *(where_clause.split(''))
                 query: list = gathered_collection.where(key, operator, value)
+                if general_operator == 'or' and query.get():
+                    return query
+
                 gathered_collection = query
             query = query.get()
 
