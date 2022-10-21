@@ -116,5 +116,25 @@ def LoadMap(path:str):
     pathfinder.graph = data
     pathfinder.dijkstra(0)
 
+#LoadMap("testmap.json")
 
-LoadMap("testmap.json")
+
+class PathFinder3:
+    def __init__(self) -> None:
+        pass 
+    def load_map(self,path:str):
+        with open(path,"r") as file:
+            data = json.load(file)
+        
+        self.map = data
+    
+    def run(self):
+        pass
+
+
+        
+
+
+
+
+

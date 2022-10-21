@@ -175,6 +175,8 @@ class MapManager: #TODO: Save mappos and map as numpy arrays
         emptylist = [[] for node in self.map]
         wanted_count = len(self.posmap)
         x = 0
+
+        print(self.map)
         
         for node in self.map:
             current_n_count = len(node)
@@ -182,6 +184,7 @@ class MapManager: #TODO: Save mappos and map as numpy arrays
             sortedlist = sorted(node)
 
             for i in range(wanted_count):
+                print(f"node: {i}")
                 if sortedlist.__contains__(i):
                     for t in sortedlist: # there should be a better way to do this
                         if t == i:
