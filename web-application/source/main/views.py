@@ -166,6 +166,8 @@ def LogoutView(request):
       db_conn.update('accounts', request.session['authentication_id'], {'logged_in': False})
     except KeyError:
       del request.session['authentication_account']
+    except AssertionError:
+      del request.session['authentication_account']
     else: 
       del request.session['authentication_account'], request.session['authentication_id']
 
