@@ -77,7 +77,7 @@ class MapManager: #TODO: Save mappos and map as numpy arrays
         i = 0
         for node in self.posmap:
             drawcircle(surf,node["pos"],(self.x,self.y))
-            surf.blit(self.app.font.render(str(i),False,"white"),(node["pos"][0]-self.x,node["pos"][1]-self.y))
+            surf.blit(self.app.font.render(str(i+1),False,"white"),(node["pos"][0]-self.x,node["pos"][1]-self.y))
             if len(self.map[i]) != 0:
                 for neighbourid in self.map[i]:
                     drawline(surf,self.posmap[i]["pos"],self.posmap[neighbourid]["pos"],"green",(self.x,self.y))
@@ -142,7 +142,7 @@ class MapManager: #TODO: Save mappos and map as numpy arrays
     def startconnecting(self):
         self.mode = "connect"
 
-    def choosefirst(self): #TODO: Make connection mode
+    def choosefirst(self):
         i = 0
         for node in self.posmap:
             if self.delrect.collidepoint(node["pos"]):
@@ -175,26 +175,35 @@ class MapManager: #TODO: Save mappos and map as numpy arrays
         emptylist = [[] for node in self.map]
         wanted_count = len(self.posmap)
         x = 0
-
+        
         print(self.map)
-        
+        newmap = []
         for node in self.map:
-            current_n_count = len(node)
-            #print(f"sorted neihgbour list of {i} looks like: {sorted(node)}")
-            sortedlist = sorted(node)
-
-            for i in range(wanted_count):
-                print(f"node: {i}")
-                if sortedlist.__contains__(i):
-                    for t in sortedlist: # there should be a better way to do this
-                        if t == i:
-                            sortedlist[t] = 1 #"VAR"
+            newlist = []
+            for i in range(len(self.map)):
+                if node.__contains__(i):
+                    newlist.append(1)
                 else:
-                    sortedlist.insert(i,0) #None
-            emptylist[x] = sortedlist
-            x += 1
-        
-        return emptylist
+                    newlist.append(0)
+            newmap.append(newlist)
+
+        return newmap
+
+        # for node in self.map:
+        #     current_n_count = len(node)
+        #     #print(f"sorted neihgbour list of {i} looks like: {sorted(node)}")
+        #     sortedlist = sorted(node)
+
+        #     for i in range(wanted_count):
+        #         if sortedlist.__contains__(i):
+        #             for t in sortedlist: # there should be a better way to do this
+        #                 if t == i:
+        #                     sortedlist[t] = 1 #"VAR"
+        #         else:
+        #             sortedlist.insert(i,0) #None
+        #     emptylist[x] = sortedlist
+        #     x += 1
+        # return emptylist
 
     def export(self):
         with open("testmap.json","w") as file:
