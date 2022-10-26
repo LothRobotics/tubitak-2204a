@@ -275,9 +275,8 @@ def DoubleFactorVerificationView(request):
     request.session['2fa_verified'] = True
     del request.session['2fa_code']
   try:
-    print(request.session['2fa_id'])
     AttemptLogin(request, request.session['2fa_account'], request.session['2fa_account']['username'], request.session['2fa_id'], False)
-    del request.session['2fa_verified']
+    del request.session['2fa_verified'], request.session['2fa_id'], request.session['2fa_account']
   except KeyError:
     pass 
   return redirect('index-page')
