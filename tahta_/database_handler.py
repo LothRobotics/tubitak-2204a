@@ -4,30 +4,39 @@ import firebase_admin
 
 from firebase_admin import credentials, firestore
 
-
 class DatabaseHandler():
 
-    def __init__(self, credentials_path: str) -> None:
+    def __init__(self, credentials_path: str):
         self.credentials_path = credentials_path
         self.login = credentials.Certificate(self.credentials_path)
         firebase_admin.initialize_app(self.login)
 
         self.db = firestore.client()
-
+        
+        
+        
 
     def __repr__(self): return str(self.db) 
 
     def __str__(self): return str(self.db) 
 
-    def get(self, collection_name: str = '', where_clauses: list [str] = [], auto_format: bool = True) -> list | dict:
-        gathered_collection = self.db.collection(collection_name) 
 
-        query = gathered_collection.get()
+
+    def get(self, collection_name: str = '', where_clauses: list [str] = [], auto_format: bool = True, general_operator: str = 'and') -> list | dict | bool:
+        gathered_collection = self.db.collection(collection_name) 
+        
+        try:
+            query = gathered_collection.get(timeout=15, retry=False)
+        except:
+            return False
 
         if len(where_clauses) >= 1:
             for where_clause in where_clauses:
                 key, operator, value, *_ = (where_clause.split(' ')) # *(where_clause.split(''))
                 query: list = gathered_collection.where(key, operator, value)
+                if general_operator == 'or' and query.get():
+                    return query
+
                 gathered_collection = query
             query = query.get()
 
@@ -100,4 +109,4 @@ class DatabaseHandler():
             )
         ]
         
-#db_conn = DatabaseHandler('../../db_credentials.json')
+#db_conn = DatabaseHandler('db_credentials.json')

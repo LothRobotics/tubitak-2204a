@@ -8,12 +8,21 @@ import sys,time,os
 
 import hashlib
 
-sys.path.insert(1, '.') #also look for 1 folder back #NOTE: Comment this when releasing the app
+sys.path.insert(1, '.') #also look for 1 folder back #TODO: Comment this when releasing the app
 from database_handler import DatabaseHandler
 
 db = DatabaseHandler("db_credentials.json")
 
 RUN_PATH = "HKEY_CURRENT_USER\\Software\\Microsoft\\Windows\\CurrentVersion\\Run"
+
+# 
+def check_connection():
+    connection = db.get("checkconnection", ["check == True"] )
+
+    if connection == [{'check': 'True'}]:
+        return True
+    else:
+        return False
 
 class Workaround(QObject):
     logged = pyqtSignal()
@@ -45,18 +54,14 @@ class Worker(QRunnable):
             self.timer += time.time() - st
 
             if self.app.inapp: #TODO: Add authentication and school login
-                    # if db.connection == "Bağlantı stabil":
-                    #     self.windowmanager.dbcontrollabel.setText('Veritabanı Durumu: <font color="#2b8a3e">Bağlantı Stabil</font>') 
-                    # else:
-                    #    self.windowmanager.dbcontrollabel.setText('Veritabanı Durumu: <font color="#c92a2a">Bağlantı Bulunamadı</font>')
-                    self.windowmanager.dbcontrollabel.setText('Veritabanı Durumu: <font color="#c92a2a">NO WAY TO CHECK</font>')
+                pass
+            if int(self.timer) % 60 == 0:
+                self.windowmanager.ConnectionSetText() 
 
             # self.get_announcement() #maybe not put this in here? 
 
             if self.timer > 60*10:
                 print("10 Minute check")
-                #db.connection = "BULUNAMADI" # TEMP
-                #self.check_db_connection()
                 self.timer = 0
 
     def get_announcement(self):
@@ -73,22 +78,26 @@ class Worker(QRunnable):
             print("ERROR LENGTH OF CLASSNAME OR PASSWORD TOO SHORT")
             self.windowmanager.loginerror("Şifre veya Sınıf ismi çok kısa") 
         else:
-            self.app.classname = self.windowmanager.lineEdit.text()
-            self.app.password = self.windowmanager.lineEdit_2.text()
-            hashed_password = hashlib.md5(self.app.password.encode()).hexdigest()
+            self.app.classname:str = self.windowmanager.lineEdit.text()
+            self.app.password:str = self.windowmanager.lineEdit_2.text()
+            hashed_password = hashlib.sha256(self.app.password.encode()).hexdigest()
             
             print(f"password:{self.app.password} hashed password: {hashed_password}")
             
             result = db.get("accounts", [f"password == {hashed_password}"] )
-            if len(result) < 1:
-                self.windowmanager.loginerror("Yanlış Şifre")
-                print("WRONG PASSWORD")
-            elif len(result) > 1:
-                print("MORE THAN 1 ACCOUNT WITH THE SAME PASSWORD")
-                self.windowmanager.loginerror("Giriş yapmada belli bir hatayla karşılaşıldı") 
+            if type(result) == bool:
+                pass
+            
             else:
-                print("CLASSNAME:",self.app.classname, "SCHOOL:","TESTOKULU")
-                self.app.workaround.logged.emit()
+                if len(result) < 1:
+                    self.windowmanager.loginerror("Yanlış Şifre")
+                    print("WRONG PASSWORD")
+                elif len(result) > 1:
+                    print("MORE THAN 1 ACCOUNT WITH THE SAME PASSWORD")
+                    self.windowmanager.loginerror("Giriş yapmada belli bir hatayla karşılaşıldı") 
+                else:
+                    print("CLASSNAME:",self.app.classname, "SCHOOL:","TESTOKULU")
+                    self.app.workaround.logged.emit()
 
     def StartUpLogin(self,inp1:str,inp2:str): #NOTE: I have to create another func for this since I cant give arguments with a slot
         _translate = QCoreApplication.translate
@@ -100,20 +109,24 @@ class Worker(QRunnable):
         else:
             self.app.classname = inp1
             self.app.password = inp2
-            hashed_password = hashlib.md5(self.app.password.encode()).hexdigest()
+            hashed_password = hashlib.sha256(self.app.password.encode()).hexdigest()
             
             print(f"password:{self.app.password} hashed password: {hashed_password}")
             
             result = db.get("accounts", [f"password == {hashed_password}"] )
-            if len(result) < 1:
-                self.windowmanager.loginerror("Yanlış Şifre")
-                print("WRONG PASSWORD")
-            elif len(result) > 1:
-                print("MORE THAN 1 ACCOUNT WITH THE SAME PASSWORD")
-                self.windowmanager.loginerror("Giriş yapmada belli bir hatayla karşılaşıldı") 
+            if type(result) == bool:
+                pass
+            
             else:
-                print("CLASSNAME:",self.app.classname, "SCHOOL:","TESTOKULU")
-                self.app.workaround.autologged.emit()
+                if len(result) < 1:
+                    self.windowmanager.loginerror("Yanlış Şifre")
+                    print("WRONG PASSWORD")
+                elif len(result) > 1:
+                    print("MORE THAN 1 ACCOUNT WITH THE SAME PASSWORD")
+                    self.windowmanager.loginerror("Giriş yapmada belli bir hatayla karşılaşıldı") 
+                else:
+                    print("CLASSNAME:",self.app.classname, "SCHOOL:","TESTOKULU")
+                    self.app.workaround.autologged.emit()
 
 class MainWindow(QMainWindow):
     def __init__(self, app, *args, **kwargs):
@@ -126,6 +139,9 @@ class MainWindow(QMainWindow):
         # self.settings.contains("MainWidget")  # checks if it will start on startup
         self.settings.setValue("MainWidget",sys.argv[0]); #set the app for startup
 
+        self.SetupUI()
+
+    def SetupUI(self):
         self.centralwidget = QWidget(self) #TTTT
         self.centralwidget.setStyleSheet(
             "* {\n"
@@ -356,22 +372,16 @@ class MainWindow(QMainWindow):
         self.setCentralWidget(self.centralwidget)
 
         self.retranslateUi()
-        #QMetaObject.connectSlotsByName(MainWindow)
+
+    def ConnectionSetText(self):
+        if check_connection():
+            self.dbcontrollabel.setText('Veritabanı Durumu: <font color="#56cc41">Bağlantı Stabil</font>')
+        else:
+            self.dbcontrollabel.setText('Veritabanı Durumu: <font color="#c92a2a">Bağlantı Bulunamadı</font>')
 
     def connect_login(self):
         """To connect the signal and slot"""
         self.pushButton.clicked.connect(self.app.worker.loginButtonPress)
-
-    def onlogin(self):
-        """called when login happens"""
-        _translate = QCoreApplication.translate
-        self.classlabel.setText(_translate("MainWindow", f"SINIF: {self.app.classname}"))
-        self.schoollabel.setText(_translate("MainWindow", f"OKUL: {self.app.schoolname}"))
-        self.announcelabel.setText(_translate("MainWindow", f"DUYURU: {self.app.lastannouncement}"))
-        self.dbcontrollabel.setText('Veritabanı Durumu: <font color="#c92a2a">NO WAY TO CHECK</font>')
-
-        self.app.inapp = True
-        self.setCentralWidget(self.inapp_container)
 
     def loginerror(self,text:str):
         self.errorlabel.setText(text)
@@ -390,14 +400,8 @@ class MainWindow(QMainWindow):
         self.schoollabel.setText(_translate("MainWindow", f"OKUL: {self.app.schoolname}"))
         self.announcelabel.setText(_translate("MainWindow", f"DUYURU: {self.app.lastannouncement}"))
 
-        # try:
-        #     if db.connection == "Bağlantı stabil":
-        #         self.windowmanager.dbcontrollabel.setText('Veritabanı Durumu: <font color="#2b8a3e">Bağlantı Stabil</font>') 
-        #     else:
-        #         self.windowmanager.dbcontrollabel.setText('Veritabanı Durumu: <font color="#c92a2a">Bağlantı Bulunamadı</font>') 
+        self.ConnectionSetText()
         
-        self.dbcontrollabel.setText('Veritabanı Durumu: <font color="#c92a2a">No way to check</font>')
-
         self.app.inapp = True
         self.setCentralWidget(self.inapp_container)
         print("login successful")
@@ -408,13 +412,7 @@ class MainWindow(QMainWindow):
         self.schoollabel.setText(_translate("MainWindow", f"OKUL: {self.app.schoolname}"))
         self.announcelabel.setText(_translate("MainWindow", f"DUYURU: {self.app.lastannouncement}"))
 
-        # try:
-        #     if db.connection == "Bağlantı stabil":
-        #         self.windowmanager.dbcontrollabel.setText('Veritabanı Durumu: <font color="#2b8a3e">Bağlantı Stabil</font>') 
-        #     else:
-        #         self.windowmanager.dbcontrollabel.setText('Veritabanı Durumu: <font color="#c92a2a">Bağlantı Bulunamadı</font>') 
-        
-        self.dbcontrollabel.setText('Veritabanı Durumu: <font color="#c92a2a">No way to check</font>')
+        self.ConnectionSetText()
         
         self.app.inapp = True
         self.setCentralWidget(self.inapp_container)
@@ -491,7 +489,6 @@ class APP:
         print("autodelete for worker is:",self.worker.autoDelete())
 
 if __name__ == '__main__':
-    # You need one (and only one) QApplication instance per application.
     # Pass in sys.argv to allow command line arguments for your app.
     # If you know you won't use command line arguments QApplication([]) works too.
     qapp = QApplication(sys.argv)
@@ -500,11 +497,8 @@ if __name__ == '__main__':
     # icon için özel .ico dosyası lazım
 
     app = APP()
-
-    # Start the event loop.
     qapp.exec()
-
-    # Your application won't reach here until you exit and the event
-    # loop has stopped.
+    
+    
     app.closeApp()
     print("ended application")
