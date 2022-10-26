@@ -1,5 +1,6 @@
 import hashlib
 import datetime
+import math
 import os
 import random
 import requests
@@ -68,37 +69,74 @@ def LoginView(request, registered_now: bool = False):
 
             if user:
                 user = user[0]
-              
-                request.session['authentication_account'] = user.to_dict()
-                request.session['authentication_id'] = user.id
-                  
-                if not registered_now:
-                  messages.success(request, f'Başarıyla giriş yaptın: {username}', extra_tags=NOTIFICATION_TAGS['success'])
-                  last_login = datetime.datetime.now().strftime("%d.%m.%Y - %H.%M:%S")
-                  try:
-                    serialnumbers = user.to_dict()['motherboard_serialnumber'] 
+                
+
+                if user.to_dict()['2fa_verification']:
+                  try: 
+                    request.session['2fa_verified']
                   except KeyError:
-                    serialnumbers = []
-                  current_serialnumber = str(uuid.UUID(int=uuid.getnode()))
-                  if current_serialnumber not in serialnumbers:
-                    send_mail('akillitahliyesistemi.gov.tr - Yeni Konumdan Giriş!', f'Merhaba! Hesabınıza yeni bir lokasyondan giriş yapıldı. [İstanbul / Türkiye | {last_login}]', 'tubitak2204a@gmail.com', [ user.to_dict()['email']])
 
-                  serialnumbers.append(current_serialnumber)
-            
+                    seed = str(random.randint(100000, 999999))
+                    random_seed = hashlib.sha256(seed.encode()).hexdigest()
+                    
+                    request.session['2fa_verified'] = False 
+                    request.session['2fa_code'] = random_seed
+                    request.session['2fa_account'] = user.to_dict() 
+                    request.session['2fa_id'] = user.id 
 
-                  db_conn.update('accounts', user.id, {
-                    'last_login': last_login, 
-                    'last_login_ip': request.META.get("REMOTE_ADDR"),
-                    'osuser_logged_in': os.getlogin(),
-                    'motherboard_serialnumbers': serialnumbers
-                    })
-                  
+                    send_mail('akillitahliyesistemi.gov.tr - Girişinizi Onaylayın!', f'Merhaba! 2 faktörlü doğrulamanız aktif olduğu için, siteye aşağıdıdaki kodu girin: \n {seed}', 'tubitak2204a@gmail.com', [ user.to_dict()['email']])
+
+                    context = user.to_dict()
+                    context['2fa_enabled'] = True
+
+                    return render(request, '2fa_verification.html', context)
+                  else:
+                    if not request.session['2fa_verified']:
+                      context = user.to_dict()
+                      context['2fa_enabled'] = True
+
+                      return render(request, '2fa_verification.html', context)  
+                    
+
+                AttemptLogin(request, user, username, registered_now)
+
                 return redirect('index-page')
             else:
                 messages.error(request, f'Giriş yapılamadı: {username}', extra_tags=NOTIFICATION_TAGS['error'])
                 return render(request, 'login.html')
     else:
         return render(request, 'login.html')
+
+def AttemptLogin(request, user, username, user_id, registered_now = False):
+    if not isinstance(user, dict):
+      user_id = user.id
+      user = user.to_dict()
+
+
+    request.session['authentication_account'] = user
+    request.session['authentication_id'] = user_id
+    
+    if not registered_now:
+      messages.success(request, f'Başarıyla giriş yaptın: {username}', extra_tags=NOTIFICATION_TAGS['success'])
+      last_login = datetime.datetime.now().strftime("%d.%m.%Y - %H.%M:%S")
+      try:
+        serialnumbers = user['motherboard_serialnumber'] 
+      except KeyError:
+        serialnumbers = []
+      current_serialnumber = str(uuid.UUID(int=uuid.getnode()))
+      if current_serialnumber not in serialnumbers:
+        send_mail('akillitahliyesistemi.gov.tr - Yeni Konumdan Giriş!', f'Merhaba! Hesabınıza yeni bir lokasyondan giriş yapıldı. [İstanbul / Türkiye | {last_login}]', 'tubitak2204a@gmail.com', [ user['email']])
+
+      serialnumbers.append(current_serialnumber)
+
+
+      db_conn.update('accounts', user_id, {
+        'last_login': last_login, 
+        'last_login_ip': request.META.get("REMOTE_ADDR"),
+        'osuser_logged_in': os.getlogin(),
+        'motherboard_serialnumbers': serialnumbers
+        })
+                  
 
 @only_non_authenticated
 def RegisterView(request):
@@ -141,7 +179,8 @@ def RegisterView(request):
                     'last_login': registiration_date,
                     'last_login_ip': request.META.get("REMOTE_ADDR"), 
                     'osuser_logged_in': os.getlogin(),
-                    'motherboard_serialnumbers': [str(uuid.UUID(int=uuid.getnode()))]
+                    'motherboard_serialnumbers': [str(uuid.UUID(int=uuid.getnode()))],
+                    '2fa_verification': False
                   })
 
                   
@@ -180,8 +219,8 @@ def LogoutView(request):
 @only_authenticated 
 def UserPreferencesView(request):
   if request.POST:
-      username, full_name, email, phone_number = request.POST['username'], request.POST['fullname'], request.POST['email'], request.POST['phonenumber']
-      db_conn.update('accounts', request.session['authentication_id'], {'username': username, 'full_name': full_name, 'email': email, 'phone_number': phone_number})
+      username, full_name, email, phone_number, _2fa_verification = request.POST['username'], request.POST['fullname'], request.POST['email'], request.POST['phonenumber'], request.POST['2fa-verif'] 
+      db_conn.update('accounts', request.session['authentication_id'], {'username': username, 'full_name': full_name, 'email': email, 'phone_number': phone_number, '2fa_verification': True if _2fa_verification == "true" else False})
       
       user = db_conn.get('accounts', [f'username == {username}'], False)
 
@@ -191,6 +230,7 @@ def UserPreferencesView(request):
           request.session['authentication_account'] = user.to_dict()
           
           messages.success(request, f'Başarıyla hesap tercihleri değiştirildi: {username}', extra_tags=NOTIFICATION_TAGS['success'])
+
       else:
           messages.error(request, f'Hesap tercihleri değişirken hata oluştu: {username}', extra_tags=NOTIFICATION_TAGS['error'])
 
@@ -221,10 +261,25 @@ def ChangePasswordView(request):
       else:
         messages.error(request, 'Yeni şifreleriniz eşleşmiyor.', extra_tags=NOTIFICATION_TAGS['error'])
     else:
-      print(password_hashed)
 
       messages.error(request, 'Şifreniz doğru değil', extra_tags=NOTIFICATION_TAGS['error'])
  
     return redirect('change-password')
 
   return render(request, 'change-password.html',  request.session['authentication_account'])
+
+def DoubleFactorVerificationView(request):
+  verification_code = request.POST['2fa-code']
+  hashed_code = hashlib.sha256(verification_code.encode()).hexdigest()
+  if hashed_code == request.session['2fa_code']:
+    request.session['2fa_verified'] = True
+    del request.session['2fa_code']
+  try:
+    print(request.session['2fa_id'])
+    AttemptLogin(request, request.session['2fa_account'], request.session['2fa_account']['username'], request.session['2fa_id'], False)
+    del request.session['2fa_verified']
+  except KeyError:
+    pass 
+  return redirect('index-page')
+
+  

@@ -127,20 +127,21 @@
                   disabled
                 />
               </div>
+      
+
               <div class="settings__input-box form__input-box">
                 <label for="username" class="settings__form-label form__label"
                   >2FA Doğrulama:</label
                 >
-                <input
-                  type="text"
-                  name="2fa-verif"
-                  id="2fa-verif"
-                  class="settings__form-input form__input"
-                  placeholder="Doğrulama Aktif (SMS)"
-                  value="Doğrulama Aktif (SMS)"
-                  required
-                  disabled
-                />
+                <select name="2fa-verif" id="2fa-verif" class="settings__form-input form__input" required>
+
+                  <option value="false"{% if 2fa_verification != None %}selected{% endif %}>Doğrulama Yok</option>
+                  <option value="true"{% if 2fa_verification %}selected{% endif %}>Doğrulama Aktif (e-mail)</option>
+
+                    
+
+                </select>
+
               </div>
               <div class="settings__input-box form__input-box">
                 <label for="username" class="settings__form-label form__label"
