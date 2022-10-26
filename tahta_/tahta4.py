@@ -15,7 +15,7 @@ db = DatabaseHandler("db_credentials.json")
 
 RUN_PATH = "HKEY_CURRENT_USER\\Software\\Microsoft\\Windows\\CurrentVersion\\Run"
 
-# 
+
 def check_connection():
     connection = db.get("checkconnection", ["check == True"] )
 
@@ -56,7 +56,7 @@ class Worker(QRunnable):
             if self.app.inapp: #TODO: Add authentication and school login
                 pass
             if int(self.timer) % 60 == 0:
-                self.windowmanager.ConnectionSetText() 
+                self.windowmanager.ConnectionSetText()
 
             # self.get_announcement() #maybe not put this in here? 
 
