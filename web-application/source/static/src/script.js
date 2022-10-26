@@ -35,8 +35,10 @@ function formatPhoneNumber(value) {
 }
 
 function phoneNumberFormatter() {
-  let inputField = document.querySelector(".form__phonenumber");
-  let formattedInputValue = formatPhoneNumber(inputField.value);
+  let inputFields = document.querySelectorAll(".form__phonenumber");
+  inputFields.forEach((inputField) => {
+    let formattedInputValue = formatPhoneNumber(inputField.value);
 
-  inputField.value = formattedInputValue;
+    inputField.value = formattedInputValue;
+  });
 }

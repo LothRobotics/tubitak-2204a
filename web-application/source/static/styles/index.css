@@ -5,6 +5,10 @@
   gap: 6.4rem;
 }
 
+.settings.wrapper {
+  gap: 15.8rem;
+}
+
 .main {
   display: flex;
   flex-direction: column;
@@ -122,4 +126,53 @@ thead tr:first-child td:last-child {
 }
 tbody tr:last-child td:last-child {
   border-bottom-right-radius: 9px;
+}
+
+.settings__form {
+  display: flex;
+  flex-direction: column;
+  gap: 6.4rem;
+}
+
+.settings__input-boxes {
+  display: flex;
+  justify-content: center;
+  gap: 7.6rem !important;
+}
+
+.settings__box {
+  padding: 3rem 6rem;
+  background-color: #f3faff;
+}
+
+.settings__header {
+  display: block;
+  margin-bottom: 4.5rem;
+  text-align: left;
+  font-size: 4rem;
+  font-weight: 600;
+  position: relative;
+}
+
+.settings__header::after {
+  position: absolute;
+  content: "";
+  left: 0;
+  bottom: -0.6rem;
+  width: 100%;
+  display: block;
+  height: 2px;
+  background-color: #333;
+}
+
+.settings__inputs {
+  gap: 1.75rem !important;
+}
+
+.form__input {
+  width: 50%;
+}
+
+.settings__buttons {
+  margin-top: 6rem;
 }

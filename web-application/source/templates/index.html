@@ -9,7 +9,10 @@
   html {
     overflow: hidden;
   }
+
 </style>
+
+
 {% endblock %} 
 
 {% block content %}
@@ -24,11 +27,11 @@
     </div>
 
     <div class="greeting__end">
-      <a href="#" class="greeting__school">{% format_school_name school_name %}</a>
+      <a href="/" class="greeting__school">{% format_school_name school.school_name %}</a>
       <nav class="greeting__nav">
         <ul class="greeting__nav-list">
           <li class="greeting__nav-el">
-            <a href="#" class="greeting__nav-link">Ayarlar</a>
+            <a href="user-preferences" class="greeting__nav-link">Ayarlar</a>
           </li>
           <li class="greeting__nav-el">
             <a href="logout" class="greeting__nav-link">Oturumu Kapat</a>

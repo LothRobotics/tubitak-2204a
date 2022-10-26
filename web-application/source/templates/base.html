@@ -1,16 +1,16 @@
-{% load static %} 
-
-
+{% load static %}
 
 <!DOCTYPE html>
 <html lang="en">
   <head>
-  
     <meta charset="UTF-8" />
-    <meta name="description" content="Akıllı Tahliye Sistemi, ortak çalışma alanlarında gerçekleşesen depremlerden sonra; bölgenin yapay zeka desteğiyle analizini yaparak tahliyesini sağlayan bir (eko)sistemdir.">
-    <meta name="keywords" content="Deprem, tahliye, yapay zeka, akıllı">
-    <meta name="author" content="İhsan Çarkcı, Ferhat Ege Orhan, Furkan Esen">
-    
+    <meta
+      name="description"
+      content="Akıllı Tahliye Sistemi, ortak çalışma alanlarında gerçekleşesen depremlerden sonra; bölgenin yapay zeka desteğiyle analizini yaparak tahliyesini sağlayan bir (eko)sistemdir."
+    />
+    <meta name="keywords" content="Deprem, tahliye, yapay zeka, akıllı" />
+    <meta name="author" content="İhsan Çarkcı, Ferhat Ege Orhan, Furkan Esen" />
+
     <meta http-equiv="X-UA-Compatible" content="IE=edge" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>
@@ -73,6 +73,10 @@
         font-size: 1.6rem;
         color: #345abc;
       }
+
+      .messages {
+        height: 3rem !important;
+      }
     </style>
 
     <link rel="preconnect" href="https://fonts.googleapis.com" />
@@ -86,21 +90,23 @@
 
     <link rel="stylesheet" href="/static/styles/base.css" />
     <link rel="stylesheet" href="/static/styles/utils.css" />
-
+    <script src="/static/src/script.js" defer></script>
     {% block head %} {% endblock head %}
   </head>
   <body>
-    {% block content %} {% endblock content %} {% if messages %}
-    <ul class="messages">
-      {% for message in messages %}
-      <!-- <li{% if message.tags %} class="{{ message.tags }}"{% endif %}> -->
-      <div class="alert showAlert show">
-        <i class="{{ message.extra_tags }}"></i>
-        <span class="msg">{{ message }}!</span>
-      </div>
+    {% block content %} {% endblock content %}
+    
+    {% if messages %}
+      <ul class="messages">
+        {% for message in messages %}
+        <!-- <li{% if message.tags %} class="{{ message.tags }}"{% endif %}> -->
+        <div class="alert showAlert show">
+          <i class="{{ message.extra_tags }}"></i>
+          <span class="msg">{{ message }}!</span>
+        </div>
 
-      {% endfor %}
-    </ul>
+        {% endfor %}
+      </ul>
     {% endif %}
   </body>
 </html>

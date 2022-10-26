@@ -1,6 +1,5 @@
 {% extends 'base.html' %} {% block head %}
 <link rel="stylesheet" href="/static/styles/auth.css" />
-<script src="/static/src/script.js" defer></script>
 {% endblock head %} {% block content %}
 
 <header class="header">
@@ -133,15 +132,12 @@
             maxlength="30"
             minlength="5"
             pattern="^(?=.*\d{1})(?=.*[a-z]{1})(?=.*[A-Z]{1})(?=.*[!@#$%^&*{|}?~_=+.-]{1})(?=.*[^a-zA-Z0-9])(?!.*\s).{5,30}$"
-            oninvalid="setCustomValidity('Şifrenizde en az bir rakam, özel sembol, büyük harf ve küçük harf bulunmalıdır.')" 
+            oninvalid="setCustomValidity('Şifrenizde en az bir rakam, özel sembol, büyük harf ve küçük harf bulunmalıdır.')"
             required
           />
 
           <a href="#" class="form__password-show-btn">
-            <ion-icon
-              name="eye-off-outline"
-              class="form__password-show-icon"
-            ></ion-icon>
+            <i class="ph-eye-slash form__password-show-icon"></i>
           </a>
         </div>
       </div>
@@ -160,15 +156,12 @@
             maxlength="30"
             minlength="5"
             pattern="^(?=.*\d{1})(?=.*[a-z]{1})(?=.*[A-Z]{1})(?=.*[!@#$%^&*{|}?~_=+.-]{1})(?=.*[^a-zA-Z0-9])(?!.*\s).{5,30}$"
-            oninvalid="setCustomValidity('Şifrenizde en az bir rakam, özel sembol, büyük harf ve küçük harf bulunmalıdır.')" 
+            oninvalid="setCustomValidity('Şifrenizde en az bir rakam, özel sembol, büyük harf ve küçük harf bulunmalıdır.')"
             required
           />
 
           <a href="#" class="form__password-show-btn">
-            <ion-icon
-              name="eye-off-outline"
-              class="form__password-show-icon"
-            ></ion-icon>
+            <i class="ph-eye-slash form__password-show-icon"></i>
           </a>
         </div>
       </div>

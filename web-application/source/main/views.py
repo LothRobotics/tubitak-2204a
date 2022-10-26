@@ -100,7 +100,6 @@ def LoginView(request, registered_now: bool = False):
     else:
         return render(request, 'login.html')
 
-# FIXME: Kullanıcı adı, email, okul sitesi sorguya dahil edilecek.
 @only_non_authenticated
 def RegisterView(request):
     if request.POST:
@@ -133,15 +132,19 @@ def RegisterView(request):
                     'email': email, 
                     'phone_number': phone_number,
                     'password': password, 
-                    'school_website_url':school_url,
-                    'school_name': school_name,
-                    'school_location': school_location,
+                    'school': {
+                      'school_website_url':school_url,
+                      'school_name': school_name,
+                      'school_location': school_location,
+                    },
                     'registiration_date': registiration_date,
                     'last_login': registiration_date,
                     'last_login_ip': request.META.get("REMOTE_ADDR"), 
                     'osuser_logged_in': os.getlogin(),
                     'motherboard_serialnumbers': [str(uuid.UUID(int=uuid.getnode()))]
                   })
+
+                  
                   
                   messages.success(request, f'Hesabınız oluşturuldu: {username}', extra_tags=NOTIFICATION_TAGS['success'])
                   return LoginView(request, True)
@@ -172,3 +175,56 @@ def LogoutView(request):
       del request.session['authentication_account'], request.session['authentication_id']
 
     return redirect('login-page')
+
+
+@only_authenticated 
+def UserPreferencesView(request):
+  if request.POST:
+      username, full_name, email, phone_number = request.POST['username'], request.POST['fullname'], request.POST['email'], request.POST['phonenumber']
+      db_conn.update('accounts', request.session['authentication_id'], {'username': username, 'full_name': full_name, 'email': email, 'phone_number': phone_number})
+      
+      user = db_conn.get('accounts', [f'username == {username}'], False)
+
+      if user:
+          user = user[0]
+              
+          request.session['authentication_account'] = user.to_dict()
+          
+          messages.success(request, f'Başarıyla hesap tercihleri değiştirildi: {username}', extra_tags=NOTIFICATION_TAGS['success'])
+      else:
+          messages.error(request, f'Hesap tercihleri değişirken hata oluştu: {username}', extra_tags=NOTIFICATION_TAGS['error'])
+
+      return redirect('user-preferences')
+
+  
+  return render(request, 'user-preferences.html',  request.session['authentication_account'])
+
+
+@only_authenticated 
+def ChangePasswordView(request):
+  if request.POST:
+    password, new_password, new_password_re = request.POST['old-password'], request.POST['new-password'], request.POST['new-password-re']
+
+    password_hashed = hashlib.sha256(password.encode()).hexdigest()
+    
+    if password_hashed == request.session['authentication_account']['password']:
+      if new_password == new_password_re:
+        new_hashed_password = hashlib.sha256(new_password.encode()).hexdigest()
+
+        db_conn.update('accounts', request.session['authentication_id'], {'password': new_hashed_password})
+        messages.success(request, f'Başarıyla şifreniz değiştirildi!', extra_tags=NOTIFICATION_TAGS['success'])
+        
+        request.session['authentication_account']['password'] = new_hashed_password
+
+        return redirect('index-page')
+
+      else:
+        messages.error(request, 'Yeni şifreleriniz eşleşmiyor.', extra_tags=NOTIFICATION_TAGS['error'])
+    else:
+      print(password_hashed)
+
+      messages.error(request, 'Şifreniz doğru değil', extra_tags=NOTIFICATION_TAGS['error'])
+ 
+    return redirect('change-password')
+
+  return render(request, 'change-password.html',  request.session['authentication_account'])
