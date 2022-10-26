@@ -1,0 +1,178 @@
+.wrapper {
+  display: grid;
+  grid-template-rows: repeat(3, auto);
+  height: 100vh;
+  gap: 6.4rem;
+}
+
+.settings.wrapper {
+  gap: 15.8rem;
+}
+
+.main {
+  display: flex;
+  flex-direction: column;
+}
+
+.greeting {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  text-align: left;
+  padding: 2rem;
+}
+
+.greeting__welcome-text,
+.greeting__school {
+  color: #222222;
+  font-size: 3rem;
+  font-weight: 600;
+  text-decoration: none;
+}
+
+.greeting__welcome-label {
+  color: #444;
+  font-size: 2.2rem;
+}
+
+.greeting__start,
+.greeting__end {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.greeting__nav {
+  margin-left: auto;
+}
+
+.greeting__nav-list {
+  display: flex;
+  gap: 1.6rem;
+  list-style: none;
+}
+
+.greeting__nav-link:link,
+.greeting__nav-link:visited {
+  color: #0e3c67;
+  font-size: 2rem;
+  text-decoration: none;
+  transition: all 0.2s ease-in-out;
+}
+
+.greeting__nav-link:hover,
+.greeting__nav-link:active {
+  color: #3e6385;
+}
+
+.main__nav {
+  margin-bottom: 9.5rem;
+}
+
+.main__classes {
+  max-width: 120rem;
+  margin: 0 auto;
+}
+
+.classes {
+  border-collapse: collapse;
+  color: #fff4e6;
+  text-align: left;
+}
+
+.classes thead {
+  background-color: #3e89c6;
+  font-size: 2rem;
+  font-weight: 600;
+}
+
+.classes td {
+  padding: 1.6rem 3.2rem;
+}
+
+.classes tbody {
+  color: #222222;
+  font-size: 1.8rem;
+  font-weight: 500;
+}
+
+.classes tbody tr:nth-child(odd) {
+  background-color: #94cdfa;
+}
+
+.classes tbody tr:nth-child(even) {
+  background-color: #b8ddfc;
+}
+
+.delete-icon-btn,
+.edit-icon-btn {
+  text-decoration: none;
+  color: #222;
+  transition: color 0.1s ease-in;
+}
+
+.delete-icon-btn:hover,
+.edit-icon-btn:hover {
+  color: #444;
+}
+thead tr:first-child td:first-child {
+  border-top-left-radius: 9px;
+}
+tbody tr:last-child td:first-child {
+  border-bottom-left-radius: 9px;
+}
+thead tr:first-child td:last-child {
+  border-top-right-radius: 9px;
+}
+tbody tr:last-child td:last-child {
+  border-bottom-right-radius: 9px;
+}
+
+.settings__form {
+  display: flex;
+  flex-direction: column;
+  gap: 6.4rem;
+}
+
+.settings__input-boxes {
+  display: flex;
+  justify-content: center;
+  gap: 7.6rem !important;
+}
+
+.settings__box {
+  padding: 3rem 6rem;
+  background-color: #f3faff;
+}
+
+.settings__header {
+  display: block;
+  margin-bottom: 4.5rem;
+  text-align: left;
+  font-size: 4rem;
+  font-weight: 600;
+  position: relative;
+}
+
+.settings__header::after {
+  position: absolute;
+  content: "";
+  left: 0;
+  bottom: -0.6rem;
+  width: 100%;
+  display: block;
+  height: 2px;
+  background-color: #333;
+}
+
+.settings__inputs {
+  gap: 1.75rem !important;
+}
+
+.form__input {
+  width: 50%;
+}
+
+.settings__buttons {
+  margin-top: 6rem;
+}
