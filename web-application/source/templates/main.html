@@ -1,0 +1,61 @@
+{% extends 'base.html' %} 
+
+
+{% load format_data %}
+{% load greetings %}
+
+{% block head %} 
+
+<link rel="stylesheet" href="/static/styles/index.css" />
+
+
+<style>
+  html {
+    overflow: hidden;
+  }
+
+</style>
+
+
+{% endblock %} 
+
+{% block content %}
+
+<div class="wrapper {% block subclasses %} {% endblock subclasses %}">
+  <header class="greeting">
+    <div class="greeting__start">
+      <p class="greeting__welcome-text">{% get_greeting %} {{ full_name }},</p>
+      <p class="greeting__welcome-label">
+        Aşağıdaki panelden isteğine göre seçim yapabilirsin.
+      </p>
+    </div>
+
+    <div class="greeting__end">
+      <a href="/" class="greeting__school">{% format_school_name school.school_name %}</a>
+      <nav class="greeting__nav">
+        <ul class="greeting__nav-list">
+          <li class="greeting__nav-el">
+            <a href="user-preferences" class="greeting__nav-link">Ayarlar</a>
+          </li>
+          <li class="greeting__nav-el">
+            <a href="logout" class="greeting__nav-link">Oturumu Kapat</a>
+          </li>
+        </ul>
+      </nav>
+    </div>
+  </header>
+
+  {% block main %} 
+   
+  {% endblock main %}
+
+  <footer class="footer">
+    <p class="footer__copyright-text">
+      Girdiğiniz bilgilerin doğruluğundan ve uygunluğundan “Tübitak Projesi” ve
+      geliştiricileri sorumlu değildir. <br />Copyrighted by Tübitak Projesi.
+    </p>
+  </footer>
+</div>
+
+{% endblock content %}
+

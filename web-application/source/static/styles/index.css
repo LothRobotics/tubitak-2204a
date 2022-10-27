@@ -1,7 +1,7 @@
 .wrapper {
-  display: grid;
-  grid-template-rows: repeat(3, auto);
-  height: 100vh;
+  display: grid !important;
+  grid-template-rows: repeat(3, auto) !important;
+  height: 100vh !important;
   gap: 6.4rem;
 }
 
@@ -19,6 +19,7 @@
   justify-content: space-between;
   align-items: center;
   text-align: left;
+  /* max-height: 9.5rem; */
   padding: 2rem;
 }
 

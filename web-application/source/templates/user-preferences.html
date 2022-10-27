@@ -1,203 +1,164 @@
-{% extends 'base.html' %}
-{% load format_data %} 
-{% block head %}
-<link rel="stylesheet" href="/static/styles/index.css" />
+{% extends 'main.html '%} 
+{% load format_data %}
 
-<style>
-  html {
-    overflow: hidden;
-  }
-</style>
+{% block subclasses %} 
+settings
+{% endblock subclasses %}
 
-{% endblock %} {% block content %}
+{% block main %} 
+<main class="main">
+  <div class="settings__container">
+    <form action="#" class="settings__form" method="POST">
+      {% csrf_token %}
 
-<div class="wrapper settings">
-  <div class="greeting">
-    <div class="greeting__start">
-      <p class="greeting__welcome-text">Hoş geldin {{ full_name }},</p>
-      <p class="greeting__welcome-label">
-        Aşağıdaki panelden isteğine göre seçim yapabilirsin.
-      </p>
-    </div>
+      <div class="settings__input-boxes">
+        <div class="settings__box">
+          <h2 class="settings__header">Kişisel Bilgiler</h2>
+          <div class="settings__inputs form__inputs">
+            <div class="settings__input-box form__input-box">
+              <label for="username" class="settings__form-label form__label"
+                >Kullanıcı Adı:</label
+              >
+              <input
+                type="text"
+                name="username"
+                id="username"
+                class="settings__form-input form__input"
+                placeholder="{{ username }}"
+                value="{{ username }}"
+                required
+              />
+            </div>
+            <div class="settings__input-box form__input-box">
+              <label for="username" class="settings__form-label form__label"
+                >İsim & Soyisim:</label
+              >
+              <input
+                type="text"
+                name="fullname"
+                id="fullname"
+                class="settings__form-input form__input"
+                placeholder="{{ full_name }}"
+                value="{{ full_name }}"
+                required
+              />
+            </div>
+            <div class="settings__input-box form__input-box">
+              <label for="email" class="settings__form-label form__label"
+                >Elektronik Posta:</label
+              >
+              <input
+                type="email"
+                name="email"
+                id="email"
+                class="settings__form-input form__input"
+                placeholder="{{ email }}"
+                value="{{ email }}"
+                required
+              />
+            </div>
+            <div class="settings__input-box form__input-box">
+              <label
+                for="phonenumber"
+                class="form__phonenumber-label form__label settings__form-label"
+                >Telefon Numarası:</label
+              >
+              <input
+                onkeyup="phoneNumberFormatter()"
+                type="tel"
+                name="phonenumber"
+                class="form__phonenumber form__input settings__form-input"
+                id="phonenumber"
+                placeholder="{{ phone_number }}"
+                value="{{ phone_number }}"
+                maxlength="14"
+                minlength="14"
+                required
+              />
+            </div>
+          </div>
+        </div>
+        <div class="settings__box">
+          <h2 class="settings__header">Gizlilik & Güvenlik</h2>
+          <div class="settings__inputs form__inputs">
+            <div class="settings__input-box form__input-box">
+              <label for="username" class="settings__form-label form__label"
+                >Kullanıcı Şifresi:</label
+              >
+              <input
+                type="text"
+                name="password"
+                id="password"
+                class="settings__form-input form__input"
+                placeholder="{% format_hashed_password password %}"
+                value="{% format_hashed_password password %}"
+                required
+                disabled
+              />
+            </div>
+    
 
-    <div class="greeting__end">
-      <a href="/" class="greeting__school"
-        >{% format_school_name school.school_name %}</a
-      >
-      <nav class="greeting__nav">
-        <ul class="greeting__nav-list">
-          <li class="greeting__nav-el">
-            <a href="user-preferences" class="greeting__nav-link">Ayarlar</a>
-          </li>
-          <li class="greeting__nav-el">
-            <a href="logout" class="greeting__nav-link">Oturumu Kapat</a>
-          </li>
-        </ul>
-      </nav>
-    </div>
+            <div class="settings__input-box form__input-box">
+              <label for="username" class="settings__form-label form__label"
+                >2FA Doğrulama:</label
+              >
+              <select name="2fa-verif" id="2fa-verif" class="settings__form-input form__input" required>
+
+                <option value="false"{% if 2fa_verification != None %}selected{% endif %}>Doğrulama Yok</option>
+                <option value="true"{% if 2fa_verification %}selected{% endif %}>Doğrulama Aktif (e-mail)</option>
+
+                  
+
+              </select>
+
+            </div>
+            <div class="settings__input-box form__input-box">
+              <label for="username" class="settings__form-label form__label"
+                >Kurtarma Cihazları:</label
+              >
+              <input
+                type="text"
+                name="recovery-devices"
+                id="recovery-devices"
+                class="settings__form-input form__input"
+                placeholder="Lab30 (1)"
+                value="Lab30 (1)"
+                required
+                disabled
+              />
+            </div>
+            <div class="settings__input-box form__input-box">
+              <label for="username" class="settings__form-label form__label"
+                >Aktif Cihazlar:</label
+              >
+              <input
+                type="tel"
+                name="active-devices"
+                id="active-devices"
+                class="settings__form-input form__input"
+                placeholder="Lab30, 19 (2)"
+                value="Lab30, Lab19 (2)"
+                required
+                disabled
+              />
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="form__buttons">
+        <div class="first-btn-row">
+          <input
+            type="submit"
+            value="Kaydet"
+            class="form__cta-btn form__btn"
+          />
+          <a href="change-password" class="form__semi-btn form__btn"
+            >Şifre Değiştir</a
+          >
+        </div>
+      </div>
+    </form>
   </div>
+</main>
+{% endblock main %}
 
-  <main class="main">
-    <div class="settings__container">
-      <form action="#" class="settings__form" method="POST">
-        {% csrf_token %}
-
-        <div class="settings__input-boxes">
-          <div class="settings__box">
-            <h2 class="settings__header">Kişisel Bilgiler</h2>
-            <div class="settings__inputs form__inputs">
-              <div class="settings__input-box form__input-box">
-                <label for="username" class="settings__form-label form__label"
-                  >Kullanıcı Adı:</label
-                >
-                <input
-                  type="text"
-                  name="username"
-                  id="username"
-                  class="settings__form-input form__input"
-                  placeholder="{{ username }}"
-                  value="{{ username }}"
-                  required
-                />
-              </div>
-              <div class="settings__input-box form__input-box">
-                <label for="username" class="settings__form-label form__label"
-                  >İsim & Soyisim:</label
-                >
-                <input
-                  type="text"
-                  name="fullname"
-                  id="fullname"
-                  class="settings__form-input form__input"
-                  placeholder="{{ full_name }}"
-                  value="{{ full_name }}"
-                  required
-                />
-              </div>
-              <div class="settings__input-box form__input-box">
-                <label for="email" class="settings__form-label form__label"
-                  >Elektronik Posta:</label
-                >
-                <input
-                  type="email"
-                  name="email"
-                  id="email"
-                  class="settings__form-input form__input"
-                  placeholder="{{ email }}"
-                  value="{{ email }}"
-                  required
-                />
-              </div>
-              <div class="settings__input-box form__input-box">
-                <label
-                  for="phonenumber"
-                  class="form__phonenumber-label form__label settings__form-label"
-                  >Telefon Numarası:</label
-                >
-                <input
-                  onkeyup="phoneNumberFormatter()"
-                  type="tel"
-                  name="phonenumber"
-                  class="form__phonenumber form__input settings__form-input"
-                  id="phonenumber"
-                  placeholder="{{ phone_number }}"
-                  value="{{ phone_number }}"
-                  maxlength="14"
-                  minlength="14"
-                  required
-                />
-              </div>
-            </div>
-          </div>
-          <div class="settings__box">
-            <h2 class="settings__header">Gizlilik & Güvenlik</h2>
-            <div class="settings__inputs form__inputs">
-              <div class="settings__input-box form__input-box">
-                <label for="username" class="settings__form-label form__label"
-                  >Kullanıcı Şifresi:</label
-                >
-                <input
-                  type="text"
-                  name="password"
-                  id="password"
-                  class="settings__form-input form__input"
-                  placeholder="{% format_hashed_password password %}"
-                  value="{% format_hashed_password password %}"
-                  required
-                  disabled
-                />
-              </div>
-      
-
-              <div class="settings__input-box form__input-box">
-                <label for="username" class="settings__form-label form__label"
-                  >2FA Doğrulama:</label
-                >
-                <select name="2fa-verif" id="2fa-verif" class="settings__form-input form__input" required>
-
-                  <option value="false"{% if 2fa_verification != None %}selected{% endif %}>Doğrulama Yok</option>
-                  <option value="true"{% if 2fa_verification %}selected{% endif %}>Doğrulama Aktif (e-mail)</option>
-
-                    
-
-                </select>
-
-              </div>
-              <div class="settings__input-box form__input-box">
-                <label for="username" class="settings__form-label form__label"
-                  >Kurtarma Cihazları:</label
-                >
-                <input
-                  type="text"
-                  name="recovery-devices"
-                  id="recovery-devices"
-                  class="settings__form-input form__input"
-                  placeholder="Lab30 (1)"
-                  value="Lab30 (1)"
-                  required
-                  disabled
-                />
-              </div>
-              <div class="settings__input-box form__input-box">
-                <label for="username" class="settings__form-label form__label"
-                  >Aktif Cihazlar:</label
-                >
-                <input
-                  type="tel"
-                  name="active-devices"
-                  id="active-devices"
-                  class="settings__form-input form__input"
-                  placeholder="Lab30, 19 (2)"
-                  value="Lab30, Lab19 (2)"
-                  required
-                  disabled
-                />
-              </div>
-            </div>
-          </div>
-        </div>
-        <div class="form__buttons">
-          <div class="first-btn-row">
-            <input
-              type="submit"
-              value="Kaydet"
-              class="form__cta-btn form__btn"
-            />
-            <a href="change-password" class="form__semi-btn form__btn"
-              >Şifre Değiştir</a
-            >
-          </div>
-        </div>
-      </form>
-    </div>
-  </main>
-
-  <footer class="footer">
-    <p class="footer__copyright-text">
-      Girdiğiniz bilgilerin doğruluğundan ve uygunluğundan “Tübitak Projesi” ve
-      geliştiricileri sorumlu değildir. <br />Copyrighted by Tübitak Projesi.
-    </p>
-  </footer>
-</div>
-
-{% endblock content %}
