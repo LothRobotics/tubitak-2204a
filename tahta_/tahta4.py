@@ -71,7 +71,6 @@ class Worker(QRunnable):
         pass
 
     def loginButtonPress(self):
-        _translate = QCoreApplication.translate
         print("LOGIN")
 
         if len(self.windowmanager.lineEdit.text()) < 1 or len(self.windowmanager.lineEdit_2.text()) < 1: 
@@ -100,7 +99,6 @@ class Worker(QRunnable):
                     self.app.workaround.logged.emit()
 
     def StartUpLogin(self,inp1:str,inp2:str): #NOTE: I have to create another func for this since I cant give arguments with a slot
-        _translate = QCoreApplication.translate
         print("LOGIN")
 
         if len(inp1) < 1 or len(inp2) < 1: 
@@ -498,7 +496,6 @@ if __name__ == '__main__':
 
     app = APP()
     qapp.exec()
-    
     
     app.closeApp()
     print("ended application")
