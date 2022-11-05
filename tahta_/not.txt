@@ -6,3 +6,14 @@ https://www.youtube.com/watch?v=XB4MIexjvY0&t=43s
 algoritmayı anladım sanırım yarın denerim yazmayı belki
 
 
+şöyle ilk başta source(kaynak) noktasının değerine 0 veriyoruz, source(kaynak) kısmına komşu olan her 
+yerin değerine o yerle source arası distance veriyoruz daha sonra komşu olmayan yerlerin hepsinin değerine 
+sonsuzluk/çok büyük bir sayı veriyoruz. Daha sonra (daha önce gitmediğimiz) en küçük uzaklığa sahip yeri seçiyoruz 
+yani source'a komşu olan bir yeri seçiyoruz daha sonra bakıyoruz; (daha önce gitmediğimiz) komşu varmı, varsa kendi distance
+değerimiz + o komşuya olan bağlantı distance değerini topluyoruz, eğer ki bulduğumuz bu değer daha küçükse o zaman
+bu önceden sınırsızlık olan yerin değerini değiştiriyoruz ve ziyaret etmediğimiz yerlere yeniden bakıyoruz 
+
+
+ilk başta bu verilen sourcea göre dist hesaplayabilicek şeyi yap sonra da gidip buna nereleri ziyaret edip nasıl o noktaya 
+giden en küçük noktayı bulduğunu listede tutma şeysini yap
+
