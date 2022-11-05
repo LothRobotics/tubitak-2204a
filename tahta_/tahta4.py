@@ -10,11 +10,46 @@ import hashlib
 
 sys.path.insert(1, '.') #also look for 1 folder back #TODO: Comment this when releasing the app
 from database_handler import DatabaseHandler
+from updater import InvalidReleaseVer, VersionChecker
 
 db = DatabaseHandler("db_credentials.json")
 
 RUN_PATH = "HKEY_CURRENT_USER\\Software\\Microsoft\\Windows\\CurrentVersion\\Run"
 
+import logging 
+
+class CustomFormatter(logging.Formatter):
+    dgrey = "\x1b[1;30m" 
+    grey = "\x1b[38;20m"
+    yellow = "\x1b[33;20m"
+    red = "\x1b[31;20m"
+    bold_red = "\x1b[31;1m"
+    reset = "\x1b[0m"
+    format = "%(asctime)s - %(name)s - (%(filename)s:%(lineno)d) - [%(levelname)s] - %(message)s "
+
+    FORMATS = {
+        logging.DEBUG: grey + format + reset,
+        logging.INFO: dgrey + format + reset,
+        logging.WARNING: yellow + format + reset,
+        logging.ERROR: red + format + reset,
+        logging.CRITICAL: bold_red + format + reset
+    }
+
+    def format(self, record):
+        log_fmt = self.FORMATS.get(record.levelno)
+        formatter = logging.Formatter(log_fmt)
+        return formatter.format(record)
+
+# create logger with 'spam_application'
+logger = logging.getLogger("My_app")
+logger.setLevel(logging.DEBUG)
+# create console handler with a higher log level
+ch = logging.StreamHandler()
+ch.setLevel(logging.DEBUG)
+ch.setFormatter(CustomFormatter())
+logger.addHandler(ch)
+
+logger.debug("STARTING SCRIPT...")
 
 def check_connection():
     connection = db.get("checkconnection", ["check == True"] )
@@ -24,7 +59,7 @@ def check_connection():
     else:
         return False
 
-class Workaround(QObject):
+class SignalManager(QObject):
     logged = pyqtSignal()
     autologged = pyqtSignal()
 
@@ -46,10 +81,10 @@ class Worker(QRunnable):
         '''
         The code goes in this function
         '''
-        print("Thread start")
+        logger.info("Thread start")
         while self.running:
             st = time.time()
-            print(".")
+            logger.info("   .")
             time.sleep(1)
             self.timer += time.time() - st
 
@@ -61,7 +96,7 @@ class Worker(QRunnable):
             # self.get_announcement() #maybe not put this in here? 
 
             if self.timer > 60*10:
-                print("10 Minute check")
+                logger.info("10 Minute check")
                 self.timer = 0
 
     def get_announcement(self):
@@ -71,18 +106,18 @@ class Worker(QRunnable):
         pass
 
     def loginButtonPress(self):
-        print("LOGIN")
+        logger.info("LOGIN")
 
-        if len(self.windowmanager.lineEdit.text()) < 1 or len(self.windowmanager.lineEdit_2.text()) < 1: 
-            print("ERROR LENGTH OF CLASSNAME OR PASSWORD TOO SHORT")
+        if len(self.windowmanager.lineEdit.text()) < 1 or len(self.windowmanager.lineEdit_2.text()) < 1:
+            logger.error("ERROR LENGTH OF CLASSNAME OR PASSWORD TOO SHORT")
             self.windowmanager.loginerror("Şifre veya Sınıf ismi çok kısa") 
         else:
             self.app.classname:str = self.windowmanager.lineEdit.text()
             self.app.password:str = self.windowmanager.lineEdit_2.text()
             hashed_password = hashlib.sha256(self.app.password.encode()).hexdigest()
             
-            print(f"password:{self.app.password} hashed password: {hashed_password}")
-            
+            logger.info(f"password:{self.app.password} hashed password: {hashed_password}")
+
             result = db.get("accounts", [f"password == {hashed_password}"] )
             if type(result) == bool:
                 pass
@@ -90,26 +125,26 @@ class Worker(QRunnable):
             else:
                 if len(result) < 1:
                     self.windowmanager.loginerror("Yanlış Şifre")
-                    print("WRONG PASSWORD")
+                    logger.error("WRONG PASSWORD")
                 elif len(result) > 1:
-                    print("MORE THAN 1 ACCOUNT WITH THE SAME PASSWORD")
+                    logger.error("MORE THAN 1 ACCOUNT WITH THE SAME PASSWORD")
                     self.windowmanager.loginerror("Giriş yapmada belli bir hatayla karşılaşıldı") 
                 else:
-                    print("CLASSNAME:",self.app.classname, "SCHOOL:","TESTOKULU")
-                    self.app.workaround.logged.emit()
+                    logger.info(f"CLASSNAME: {self.app.classname} SCHOOL: {self.app.schoolname}")
+                    self.app.signalmanager.logged.emit()
 
     def StartUpLogin(self,inp1:str,inp2:str): #NOTE: I have to create another func for this since I cant give arguments with a slot
-        print("LOGIN")
+        logger.info("LOGIN")
 
         if len(inp1) < 1 or len(inp2) < 1: 
-            print("ERROR LENGTH OF CLASSNAME OR PASSWORD TOO SHORT")
+            logger.error("ERROR LENGTH OF CLASSNAME OR PASSWORD TOO SHORT")
             self.windowmanager.loginerror("Şifre veya Sınıf ismi çok kısa") 
         else:
             self.app.classname = inp1
             self.app.password = inp2
             hashed_password = hashlib.sha256(self.app.password.encode()).hexdigest()
             
-            print(f"password:{self.app.password} hashed password: {hashed_password}")
+            logger.info(f"password:{self.app.password} hashed password: {hashed_password}")
             
             result = db.get("accounts", [f"password == {hashed_password}"] )
             if type(result) == bool:
@@ -118,13 +153,13 @@ class Worker(QRunnable):
             else:
                 if len(result) < 1:
                     self.windowmanager.loginerror("Yanlış Şifre")
-                    print("WRONG PASSWORD")
+                    logger.error("WRONG PASSWORD")
                 elif len(result) > 1:
-                    print("MORE THAN 1 ACCOUNT WITH THE SAME PASSWORD")
+                    logger.error("MORE THAN 1 ACCOUNT WITH THE SAME PASSWORD")
                     self.windowmanager.loginerror("Giriş yapmada belli bir hatayla karşılaşıldı") 
                 else:
-                    print("CLASSNAME:",self.app.classname, "SCHOOL:","TESTOKULU")
-                    self.app.workaround.autologged.emit()
+                    logger.info("CLASSNAME:",self.app.classname, "SCHOOL:","TESTOKULU")
+                    self.app.signalmanager.autologged.emit()
 
 class MainWindow(QMainWindow):
     def __init__(self, app, *args, **kwargs):
@@ -402,7 +437,7 @@ class MainWindow(QMainWindow):
         
         self.app.inapp = True
         self.setCentralWidget(self.inapp_container)
-        print("login successful")
+        logger.info("login successful")
 
     def autologinsuccessful(self):
         _translate = QCoreApplication.translate
@@ -414,7 +449,7 @@ class MainWindow(QMainWindow):
         
         self.app.inapp = True
         self.setCentralWidget(self.inapp_container)
-        print("Succesfull startup login")
+        logger.info("Succesfull startup login")
 
     def retranslateUi(self):
         _translate = QCoreApplication.translate
@@ -448,43 +483,56 @@ class MainWindow(QMainWindow):
 
 class APP:
     def __init__(self) -> None:
-        self.workaround = Workaround()
+        self.signalmanager = SignalManager()
         self.worker = Worker(self)
         self.windowmanager = MainWindow(self)
         self.windowmanager.show() # bunu acil durum olduğunda arkaplandan hemen ekranın önüne getirmek için kullanabiliriz
         self.worker.get_windowmanager()
         self.windowmanager.connect_login()
 
-        self.workaround.logged.connect(self.windowmanager.loginsuccesful)
-        self.workaround.autologged.connect(self.windowmanager.autologinsuccessful)
+        self.signalmanager.logged.connect(self.windowmanager.loginsuccesful)
+        self.signalmanager.autologged.connect(self.windowmanager.autologinsuccessful)
 
         self.lastannouncement = "DENEME_DUYURU"
         self.isconnected2db = "CONNECTED_2_DB"
         self.inapp = False
 
         self.threadpool = QThreadPool()
-        print("Multithreading with maximum %d threads" % self.threadpool.maxThreadCount())
+        logger.info("Multithreading with maximum %d threads" % self.threadpool.maxThreadCount())
         self.threadpool.start(self.worker)
         self.Check_Updates()
 
     def Check_Updates(self):
         with open("data.json","r") as file:
             self.data = json.load(file)
-        self.version = self.data["version"]
+        self.version:float = float(self.data["version"])
+        
+        logger.info("CHECKING VERSION")
+        self.ver_checker = VersionChecker(self.version)
+        
+        try:
+            result = self.ver_checker.check_version()
+            if result:
+                logger.info("NEW UPDATE")
+            else:
+                logger.info("ALREADY THE NEWEST VERSION")
+        except InvalidReleaseVer:
+            logger.error("INVALID VERSION")
+
         self.password = None if self.data["password"] == 'None' else self.data["password"]
         self.classname = None if self.data["classname"] == 'None' else self.data["classname"]
         self.schoolname = None if self.data["title"] == 'None' else self.data["title"] #title = schoolname 
         if "None" in self.data.values():
-            print("NOT LOGGED IN")
+            logger.info("NOT LOGGED IN")
         else:
-            print("DATA IS ALREADY THERE, TRYING TO LOG INTO ACCOUNT")
+            logger.info("DATA IS ALREADY THERE, TRYING TO LOG INTO ACCOUNT")
             self.worker.StartUpLogin(self.classname,self.password)
 
     def closeApp(self):
         """called when app is closed"""
         self.inapp = False #this is important since if you dont it might give an error since it deleted the QLabel even tho its trying to access it
         self.worker.running = False
-        print("autodelete for worker is:",self.worker.autoDelete())
+        logger.info(f"autodelete for worker is: {self.worker.autoDelete()}")
 
 if __name__ == '__main__':
     # Pass in sys.argv to allow command line arguments for your app.
@@ -498,4 +546,4 @@ if __name__ == '__main__':
     qapp.exec()
     
     app.closeApp()
-    print("ended application")
+    logger.info("ended application")
