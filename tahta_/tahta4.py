@@ -25,7 +25,9 @@ class CustomFormatter(logging.Formatter):
     red = "\x1b[31;20m"
     bold_red = "\x1b[31;1m"
     reset = "\x1b[0m"
-    format = "%(asctime)s - %(name)s - (%(filename)s:%(lineno)d) - [%(levelname)s] - %(message)s "
+    #format = "%(asctime)s - %(name)s - (%(filename)s:%(lineno)d) - [%(levelname)s] - %(message)s "
+
+    format = " [%(levelname)s] - %(message)s "
 
     FORMATS = {
         logging.DEBUG: grey + format + reset,
@@ -40,14 +42,17 @@ class CustomFormatter(logging.Formatter):
         formatter = logging.Formatter(log_fmt)
         return formatter.format(record)
 
-# create logger with 'spam_application'
-logger = logging.getLogger("My_app")
-logger.setLevel(logging.DEBUG)
+logging.basicConfig(level=logging.ERROR   #,filename="log.log"   #TODO: Maybe use this to find bugs  
+)
+logger = logging.getLogger()
+#logger.critical("START")
 # create console handler with a higher log level
-ch = logging.StreamHandler()
-ch.setLevel(logging.DEBUG)
-ch.setFormatter(CustomFormatter())
-logger.addHandler(ch)
+#ch = logging.StreamHandler()
+#ch.setLevel(logging.DEBUG)
+#ch.setFormatter(CustomFormatter())         
+############# While the logging module is certainly useful, for some reason it considerably reduces my performance
+############# Which is why I've disabled it
+#logger.addHandler(ch)
 
 logger.debug("STARTING SCRIPT...")
 
@@ -62,6 +67,10 @@ def check_connection():
 class SignalManager(QObject):
     logged = pyqtSignal()
     autologged = pyqtSignal()
+
+    remindupdate = pyqtSignal()
+    close_updatereminder = pyqtSignal()
+    startupdating = pyqtSignal()
 
 class Worker(QRunnable):
     '''
@@ -84,7 +93,7 @@ class Worker(QRunnable):
         logger.info("Thread start")
         while self.running:
             st = time.time()
-            logger.info("   .")
+            #logger.info("   .")
             time.sleep(1)
             self.timer += time.time() - st
 
@@ -160,6 +169,10 @@ class Worker(QRunnable):
                 else:
                     logger.info("CLASSNAME:",self.app.classname, "SCHOOL:","TESTOKULU")
                     self.app.signalmanager.autologged.emit()
+                    if self.app.shouldupdate:
+                        self.app.signalmanager.remindupdate.emit()
+                    else:
+                        self.app.signalmanager.close_updatereminder.emit()
 
 class MainWindow(QMainWindow):
     def __init__(self, app, *args, **kwargs):
@@ -171,7 +184,6 @@ class MainWindow(QMainWindow):
         self.settings = QSettings(RUN_PATH, QSettings.NativeFormat) 
         # self.settings.contains("MainWidget")  # checks if it will start on startup
         self.settings.setValue("MainWidget",sys.argv[0]); #set the app for startup
-
         self.SetupUI()
 
     def SetupUI(self):
@@ -277,6 +289,18 @@ class MainWindow(QMainWindow):
             "#dbcontrollabel {\n"
             "    font-size: 26px;\n"
             "}\n"
+            "#UpdateContainer {\n"
+            "    background-color: #2a4980; border-radius: 6px;  \n"
+            "}\n"
+            "#UpdateText {\n"
+            "    font-size: 22px; color: #cbdbf7  ;\n"
+            "}\n"
+            "#UpdateRefuseButton {\n"
+            "    font-size: 22px;\n"
+            "}\n"
+            "#UpdateAcceptButton {\n"
+            "    font-size: 22px;\n"
+            "}\n"
             "\n" 
             "#indicator {\n"
             "    background-color: #333;\n"
@@ -356,6 +380,24 @@ class MainWindow(QMainWindow):
         self.dbcontrollabel.setAlignment(Qt.AlignmentFlag.AlignLeft | Qt.AlignTop)
         self.dbcontrollabel.setObjectName("dbcontrollabel")
         
+        self.updatecontainer = QFrame(self.inapp_container)
+        self.updatecontainer.setGeometry((776//2) - (500//2) ,120,500,200)
+        self.updatecontainer.setObjectName("UpdateContainer")
+
+        self.updatetext = QLabel(self.inapp_container)
+        self.updatetext.setText(" Uygulama için yeni bir güncelleme bulundu,\n     uygulamayı güncellemek ister misiniz?")
+        self.updatetext.setGeometry((776//2) - (440//2),90,440,200)
+        self.updatetext.setObjectName("UpdateText")
+
+        self.updateacceptbut = QPushButton(self.inapp_container)
+        self.updateacceptbut.setText("Evet")
+        self.updateacceptbut.setGeometry(510,250,100,50)
+        self.updateacceptbut.setObjectName("UpdateAcceptButton")
+
+        self.updaterefusebut = QPushButton(self.inapp_container)
+        self.updaterefusebut.setText("Hayır")
+        self.updaterefusebut.setGeometry(168,250,100,50)
+        self.updaterefusebut.setObjectName("UpdateRefuseButton")
 
         self.indicator2 = QFrame(self.inapp_container)
         self.indicator2.setGeometry(QRect(88, 60, 600, 2))
@@ -403,8 +445,20 @@ class MainWindow(QMainWindow):
         self.alttext2.setObjectName("alttext2")
 
         self.setCentralWidget(self.centralwidget)
-
         self.retranslateUi()
+
+    def remind_update(self):
+        print("UPDATE UI SHOW")
+        self.updatecontainer.show()
+        self.updatetext.show()
+        self.updateacceptbut.show()
+        self.updaterefusebut.show()
+    def close_update_reminder(self):
+        print("UPDATE UI CLOSE")
+        self.updatecontainer.hide()
+        self.updatetext.hide()
+        self.updateacceptbut.hide()
+        self.updaterefusebut.hide()
 
     def ConnectionSetText(self):
         if check_connection():
@@ -492,6 +546,12 @@ class APP:
 
         self.signalmanager.logged.connect(self.windowmanager.loginsuccesful)
         self.signalmanager.autologged.connect(self.windowmanager.autologinsuccessful)
+        self.signalmanager.remindupdate.connect(self.windowmanager.remind_update)
+        self.signalmanager.close_updatereminder.connect(self.windowmanager.close_update_reminder)
+        self.windowmanager.updateacceptbut.clicked.connect(self.signalmanager.startupdating)
+        #self.windowmanager.updateacceptbut.clicked.connect(self.signalmanager.close_updatereminder)
+        self.windowmanager.updaterefusebut.clicked.connect(self.signalmanager.close_updatereminder)
+        # self.signalmanager.startupdating.connect() #TODO: add checker.update to here
 
         self.lastannouncement = "DENEME_DUYURU"
         self.isconnected2db = "CONNECTED_2_DB"
@@ -510,12 +570,15 @@ class APP:
         logger.info("CHECKING VERSION")
         self.ver_checker = VersionChecker(self.version)
         
+        self.shouldupdate = False
+
         try:
             result = self.ver_checker.check_version()
             if result:
                 logger.info("NEW UPDATE")
             else:
                 logger.info("ALREADY THE NEWEST VERSION")
+            self.shouldupdate = result
         except InvalidReleaseVer:
             logger.error("INVALID VERSION")
 
