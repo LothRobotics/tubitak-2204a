@@ -12,7 +12,7 @@ sys.path.insert(1, '.') #also look for 1 folder back #TODO: Comment this when re
 from database_handler import DatabaseHandler
 from updater import InvalidReleaseVer, VersionChecker
 
-db = DatabaseHandler("db_credentials.json")
+db = DatabaseHandler("data/db_credentials.json")
 
 RUN_PATH = "HKEY_CURRENT_USER\\Software\\Microsoft\\Windows\\CurrentVersion\\Run"
 
@@ -72,6 +72,8 @@ class SignalManager(QObject):
     close_updatereminder = pyqtSignal()
     startupdating = pyqtSignal()
 
+    updatedone = pyqtSignal()
+
 class Worker(QRunnable):
     '''
     Worker thread
@@ -97,7 +99,7 @@ class Worker(QRunnable):
             time.sleep(1)
             self.timer += time.time() - st
 
-            if self.app.inapp: #TODO: Add authentication and school login
+            if self.app.inapp: #TODO: Add classroom adding
                 pass
             if int(self.timer) % 60 == 0:
                 self.windowmanager.ConnectionSetText()
@@ -459,6 +461,12 @@ class MainWindow(QMainWindow):
         self.updatetext.hide()
         self.updateacceptbut.hide()
         self.updaterefusebut.hide()
+    def set_updating_text(self):
+        print("JUST DO IT")
+        self.updaterefusebut.hide()
+        self.updateacceptbut.hide()
+        self.updatetext.setText(" Uygulama şu anda güncelleştiriliyor,    \n         lütfen uygulamayı kapatmayınız.   ")
+
 
     def ConnectionSetText(self):
         if check_connection():
@@ -548,10 +556,12 @@ class APP:
         self.signalmanager.autologged.connect(self.windowmanager.autologinsuccessful)
         self.signalmanager.remindupdate.connect(self.windowmanager.remind_update)
         self.signalmanager.close_updatereminder.connect(self.windowmanager.close_update_reminder)
-        self.windowmanager.updateacceptbut.clicked.connect(self.signalmanager.startupdating)
+        self.signalmanager.updatedone.connect(self.windowmanager.close_update_reminder)
+        
+        self.windowmanager.updateacceptbut.clicked.connect(self.start_updating)
         #self.windowmanager.updateacceptbut.clicked.connect(self.signalmanager.close_updatereminder)
+
         self.windowmanager.updaterefusebut.clicked.connect(self.signalmanager.close_updatereminder)
-        # self.signalmanager.startupdating.connect() #TODO: add checker.update to here
 
         self.lastannouncement = "DENEME_DUYURU"
         self.isconnected2db = "CONNECTED_2_DB"
@@ -562,14 +572,26 @@ class APP:
         self.threadpool.start(self.worker)
         self.Check_Updates()
 
+    def start_updating(self):
+        self.windowmanager.updaterefusebut.hide()
+        self.windowmanager.updateacceptbut.hide()
+        self.windowmanager.updatetext.setText(" Uygulama şu anda güncelleştiriliyor,    \n         lütfen uygulamayı kapatmayınız.   ")
+        #self.windowmanager.set_updating_text()
+        print("why wont it change text bruhh")
+        #self.signalmanager.startupdating.emit()
+        self.ver_checker.update()
+        print("done?")
+
     def Check_Updates(self):
-        with open("data.json","r") as file:
+        with open("data/data.json","r") as file:
             self.data = json.load(file)
-        self.version:float = float(self.data["version"])
+        with open("data/version.json","r") as file:
+            self.version:float = json.load(file)["version"]
         
         logger.info("CHECKING VERSION")
-        self.ver_checker = VersionChecker(self.version)
-        
+        self.ver_checker = VersionChecker(self,self.version)
+        #self.signalmanager.startupdating.connect(self.ver_checker.update)
+
         self.shouldupdate = False
 
         try:
