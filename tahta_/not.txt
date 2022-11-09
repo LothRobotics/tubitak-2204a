@@ -17,3 +17,34 @@ bu önceden sınırsızlık olan yerin değerini değiştiriyoruz ve ziyaret etm
 ilk başta bu verilen sourcea göre dist hesaplayabilicek şeyi yap sonra da gidip buna nereleri ziyaret edip nasıl o noktaya 
 giden en küçük noktayı bulduğunu listede tutma şeysini yap
 
+
+ÖNEMLİ:::
+
+pyqtSignal(int)
+
+pyqtsignallarda data taşıyabiliyormuşuz
+bu önemli tüm kodu refactor etmem lazım
+
+abi mesela progress bar varsa gidip hem finished hem de progress signalları var progress signalına da mesela işlemde sildiği veya 
+güncelleştirdiği her dosya için kendi progress signalına 1 ekler ve emit eder gui da buna göre günceller bunu.
+
+benim bu uygulama kodunu refactor etmem lazım
+signal ve slotları daha da fazla kullanmam lazım
+
+YAPMAM GEREKENLER:
+updater.py'ı refactor et ce ayrı bir threade/worker threadine taşı
+updater.py'ın progress signali olucak
+
+her yeni bir adımda progress signalini emit edicek ve yeni bir str vericek.
+mesela "Versiyon numarası alınıyor","Güncelleme indiriliyor","Eski dosyalar siliniyor","Dosyalar kuruluyor" gibi
+
+
+önemli kaynaklar
+https://www.youtube.com/watch?v=VU0TpmA465A&list=PL3JVwFmb_BnRpvOeIh_To4YSiebiggyXS&index=38
+https://www.youtube.com/watch?v=ORJI3_DbJyE&list=PL3JVwFmb_BnRpvOeIh_To4YSiebiggyXS&index=4
+https://www.techwithtim.net/tutorials/pyqt5-tutorial/images/
+https://realpython.com/python-pyqt-qthread/
+
+
+https://dotnettutorials.net/lesson/customized-logging-in-python/ 
+logger için

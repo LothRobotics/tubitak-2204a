@@ -4,7 +4,7 @@ from PyQt5.QtGui import *
 from PyQt5.QtCore import Qt
 
 import json
-import sys,time,os
+import sys,time,os,datetime
 
 import hashlib
 
@@ -18,6 +18,17 @@ RUN_PATH = "HKEY_CURRENT_USER\\Software\\Microsoft\\Windows\\CurrentVersion\\Run
 
 import logging 
 
+class AppTray(QSystemTrayIcon):
+    def __init__(self):
+        super().__init__(QIcon("icon.ico"))
+        self.setToolTip("Hello")
+        self.show()
+        self.menu = QMenu()
+        exitaction = self.menu.addAction("Exit")
+        exitaction.triggered.connect(qapp.quit)
+        
+        self.setContextMenu(self.menu)
+
 class CustomFormatter(logging.Formatter):
     dgrey = "\x1b[1;30m" 
     grey = "\x1b[38;20m"
@@ -25,9 +36,7 @@ class CustomFormatter(logging.Formatter):
     red = "\x1b[31;20m"
     bold_red = "\x1b[31;1m"
     reset = "\x1b[0m"
-    #format = "%(asctime)s - %(name)s - (%(filename)s:%(lineno)d) - [%(levelname)s] - %(message)s "
-
-    format = " [%(levelname)s] - %(message)s "
+    format = "%(asctime)s - %(name)s - (%(filename)s:%(lineno)d) - [%(levelname)s] :::  %(message)s "
 
     FORMATS = {
         logging.DEBUG: grey + format + reset,
@@ -42,19 +51,24 @@ class CustomFormatter(logging.Formatter):
         formatter = logging.Formatter(log_fmt)
         return formatter.format(record)
 
-logging.basicConfig(level=logging.ERROR   #,filename="log.log"   #TODO: Maybe use this to find bugs  
-)
-logger = logging.getLogger()
-#logger.critical("START")
+# create logger with 'spam_application'
+logger = logging.getLogger("My_app")
+logger.setLevel(logging.DEBUG)
 # create console handler with a higher log level
-#ch = logging.StreamHandler()
-#ch.setLevel(logging.DEBUG)
-#ch.setFormatter(CustomFormatter())         
-############# While the logging module is certainly useful, for some reason it considerably reduces my performance
-############# Which is why I've disabled it
-#logger.addHandler(ch)
+consolehandler = logging.StreamHandler()
+consolehandler.setLevel(logging.DEBUG)
+consolehandler.setFormatter(CustomFormatter())
 
-logger.debug("STARTING SCRIPT...")
+# Create file handler for logging to a file (logs all five levels)
+today = datetime.date.today()
+file_handler = logging.FileHandler('logs/uygulama {} .log'.format(today.strftime('%Y_%m_%d')))
+file_handler.setLevel(logging.DEBUG)
+file_handler.setFormatter(CustomFormatter())
+
+logger.addHandler(consolehandler)
+logger.addHandler(file_handler)
+
+logger.warning("STARTING SCRIPT...")
 
 def check_connection():
     connection = db.get("checkconnection", ["check == True"] )
@@ -73,7 +87,7 @@ class SignalManager(QObject):
     startupdating = pyqtSignal()
 
     updatedone = pyqtSignal()
-
+    
 class Worker(QRunnable):
     '''
     Worker thread
@@ -95,7 +109,6 @@ class Worker(QRunnable):
         logger.info("Thread start")
         while self.running:
             st = time.time()
-            #logger.info("   .")
             time.sleep(1)
             self.timer += time.time() - st
 
@@ -109,6 +122,11 @@ class Worker(QRunnable):
             if self.timer > 60*10:
                 logger.info("10 Minute check")
                 self.timer = 0
+
+    def testupdate(self):
+        print("worker testupdate start")
+        self.app.ver_checker.update()
+        print("worker testupdate END")
 
     def get_announcement(self):
         pass
@@ -167,7 +185,7 @@ class Worker(QRunnable):
                     logger.error("WRONG PASSWORD")
                 elif len(result) > 1:
                     logger.error("MORE THAN 1 ACCOUNT WITH THE SAME PASSWORD")
-                    self.windowmanager.loginerror("Giriş yapmada belli bir hatayla karşılaşıldı") 
+                    self.windowmanager.loginerror("Giriş yapmada belli bir hatayla karşılaşıldı")
                 else:
                     logger.info("CLASSNAME:",self.app.classname, "SCHOOL:","TESTOKULU")
                     self.app.signalmanager.autologged.emit()
@@ -349,8 +367,6 @@ class MainWindow(QMainWindow):
             "    font-weight: 400;\n"
             "}"
         )
-        #self.infowidget = InfoWidget(self)
-        #self.infowidget.setParent(self.inapp_container)
 
         self.apptitle = QLabel(self.login_container)
         self.apptitle.setGeometry(QRect(0, 0, 776, 60))
@@ -461,12 +477,13 @@ class MainWindow(QMainWindow):
         self.updatetext.hide()
         self.updateacceptbut.hide()
         self.updaterefusebut.hide()
-    def set_updating_text(self):
+    def set_updating_text(self,message:str):
         print("JUST DO IT")
-        self.updaterefusebut.hide()
-        self.updateacceptbut.hide()
-        self.updatetext.setText(" Uygulama şu anda güncelleştiriliyor,    \n         lütfen uygulamayı kapatmayınız.   ")
+        self.updatetext.setText(message)
 
+    def close_update_buttons(self):
+        self.updateacceptbut.hide()
+        self.updaterefusebut.hide()
 
     def ConnectionSetText(self):
         if check_connection():
@@ -545,12 +562,24 @@ class MainWindow(QMainWindow):
 
 class APP:
     def __init__(self) -> None:
+        logger.info("Create APP Instance")
         self.signalmanager = SignalManager()
+        logger.info("Create SignalManager Instance")
         self.worker = Worker(self)
+        logger.info("Create Worker Instance")
         self.windowmanager = MainWindow(self)
+        logger.info("Create WindowManager Instance")
         self.windowmanager.show() # bunu acil durum olduğunda arkaplandan hemen ekranın önüne getirmek için kullanabiliriz
+        logger.info("Show Window")
         self.worker.get_windowmanager()
+        logger.info("Connect Login")
         self.windowmanager.connect_login()
+        
+        with open("data/version.json","r") as file:
+            self.version:float = json.load(file)["version"]
+        
+        self.tray = AppTray()
+        self.ver_checker = VersionChecker(self,self.version)
 
         self.signalmanager.logged.connect(self.windowmanager.loginsuccesful)
         self.signalmanager.autologged.connect(self.windowmanager.autologinsuccessful)
@@ -558,40 +587,30 @@ class APP:
         self.signalmanager.close_updatereminder.connect(self.windowmanager.close_update_reminder)
         self.signalmanager.updatedone.connect(self.windowmanager.close_update_reminder)
         
-        self.windowmanager.updateacceptbut.clicked.connect(self.start_updating)
-        #self.windowmanager.updateacceptbut.clicked.connect(self.signalmanager.close_updatereminder)
+        self.windowmanager.updateacceptbut.clicked.connect(self.worker.testupdate) #TODO:
+        self.windowmanager.updateacceptbut.clicked.connect(self.windowmanager.close_update_buttons)
+        
+        #self.ver_checker.progresssignal.connect(self.windowmanager.set_updating_text)
+        #self.ver_checker.finishedsignal.connect(self.windowmanager.close_update_reminder)
 
         self.windowmanager.updaterefusebut.clicked.connect(self.signalmanager.close_updatereminder)
 
-        self.lastannouncement = "DENEME_DUYURU"
-        self.isconnected2db = "CONNECTED_2_DB"
+        self.lastannouncement = "DENEME_DUYURU" #TODO:
+        self.isconnected2db = "CONNECTED_2_DB" 
         self.inapp = False
 
         self.threadpool = QThreadPool()
         logger.info("Multithreading with maximum %d threads" % self.threadpool.maxThreadCount())
         self.threadpool.start(self.worker)
+        logger.info("Start Worker")
         self.Check_Updates()
 
-    def start_updating(self):
-        self.windowmanager.updaterefusebut.hide()
-        self.windowmanager.updateacceptbut.hide()
-        self.windowmanager.updatetext.setText(" Uygulama şu anda güncelleştiriliyor,    \n         lütfen uygulamayı kapatmayınız.   ")
-        #self.windowmanager.set_updating_text()
-        print("why wont it change text bruhh")
-        #self.signalmanager.startupdating.emit()
-        self.ver_checker.update()
-        print("done?")
-
     def Check_Updates(self):
-        with open("data/data.json","r") as file:
+        with open("data/data.json","r",encoding="utf-8") as file:
             self.data = json.load(file)
-        with open("data/version.json","r") as file:
-            self.version:float = json.load(file)["version"]
         
         logger.info("CHECKING VERSION")
-        self.ver_checker = VersionChecker(self,self.version)
         #self.signalmanager.startupdating.connect(self.ver_checker.update)
-
         self.shouldupdate = False
 
         try:
@@ -632,3 +651,5 @@ if __name__ == '__main__':
     
     app.closeApp()
     logger.info("ended application")
+    
+    sys.exit()

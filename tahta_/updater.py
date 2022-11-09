@@ -5,6 +5,7 @@ import requests
 import os
 import shutil
 import json
+from PyQt5.QtCore import pyqtSignal,QObject,pyqtBoundSignal
 
 class InvalidReleaseVer(Exception):
     def __init__(self,value) -> None:
@@ -19,7 +20,11 @@ class VersionChecker:
     def __init__(self,app,app_ver:float) -> None:
         self.app = app
         self.g = gtb.Github( #login_or_token="bruh" #TODO: REMOVE MY TOKEN
-        ) 
+        )
+        
+        self.progressignal = pyqtBoundSignal()
+        self.progressignal
+        
         try:
             self.repo = self.g.get_repo("LothRobotics/tubitak-2204a")
         except gtb.RateLimitExceededException:
@@ -136,7 +141,7 @@ class VersionChecker:
             pass
 
 if __name__ == '__main__':
-    checker = VersionChecker(0.02)
+    checker = VersionChecker(None,0.02)
     #result = checker.check_version()
-    print(f"IS UPDATE NEEDED: {checker.update()}")
+    print(f"IS UPDATE NEEDED: {checker.check_version()}")
     #checker.delete_files()
