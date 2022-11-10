@@ -147,7 +147,20 @@ class Worker(QRunnable):
             
             logger.info(f"password:{self.app.password} hashed password: {hashed_password}")
 
-            result = db.get("accounts", [f"password == {hashed_password}"] )
+            result = db.get("accounts", [f"password == {hashed_password}"], auto_format = False )
+            id = result[0].id
+            classrooms:dict = result[0].to_dict()["classrooms"]
+            
+            found = False
+            for key, val in classrooms.items():
+                if self.app.classname == key:
+                    found = True
+            
+            if found: #hesap zaten var
+                importantloginkey = classrooms[self.app.classname]
+            else: #hesap yok, yeni hesap oluştur
+                classrooms[self.app.classname] = "ADD SOMETHING TO HERE" #TODO: ADD KEY ALGORITHM TO HERE
+            
             if type(result) == bool:
                 pass
             
@@ -160,6 +173,7 @@ class Worker(QRunnable):
                     self.windowmanager.loginerror("Giriş yapmada belli bir hatayla karşılaşıldı") 
                 else:
                     logger.info(f"CLASSNAME: {self.app.classname} SCHOOL: {self.app.schoolname}")
+                    result = db.update('accounts', id, {'classrooms': {}}) #TODO: AAAA
                     self.app.signalmanager.logged.emit()
 
     def StartUpLogin(self,inp1:str,inp2:str): #NOTE: I have to create another func for this since I cant give arguments with a slot
@@ -422,7 +436,6 @@ class MainWindow(QMainWindow):
         self.indicator2.setFrameShape(QFrame.HLine)
         self.indicator2.setFrameShadow(QFrame.Sunken)
         self.indicator2.setObjectName("indicator")
-
 
         self.indicator = QFrame(self.login_container)
         self.indicator.setGeometry(QRect(88, 60, 600, 2))

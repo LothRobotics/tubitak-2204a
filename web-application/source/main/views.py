@@ -175,6 +175,7 @@ def RegisterView(request):
                       'school_name': school_name,
                       'school_location': school_location,
                     },
+                    'clasrooms': {},
                     'registiration_date': registiration_date,
                     'last_login': registiration_date,
                     'last_login_ip': request.META.get("REMOTE_ADDR"), 
