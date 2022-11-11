@@ -16,18 +16,8 @@ db = DatabaseHandler("data/db_credentials.json")
 
 RUN_PATH = "HKEY_CURRENT_USER\\Software\\Microsoft\\Windows\\CurrentVersion\\Run"
 
-import logging 
-
-class AppTray(QSystemTrayIcon):
-    def __init__(self):
-        super().__init__(QIcon("icon.ico"))
-        self.setToolTip("Hello")
-        self.show()
-        self.menu = QMenu()
-        exitaction = self.menu.addAction("Exit")
-        exitaction.triggered.connect(qapp.quit)
-        
-        self.setContextMenu(self.menu)
+from logging.handlers import TimedRotatingFileHandler
+import logging
 
 class CustomFormatter(logging.Formatter):
     dgrey = "\x1b[1;30m" 
@@ -61,14 +51,41 @@ consolehandler.setFormatter(CustomFormatter())
 
 # Create file handler for logging to a file (logs all five levels)
 today = datetime.date.today()
-file_handler = logging.FileHandler('logs/uygulama {} .log'.format(today.strftime('%Y_%m_%d')))
-file_handler.setLevel(logging.DEBUG)
-file_handler.setFormatter(CustomFormatter())
+#file_handler = logging.FileHandler('logs/uygulama {} .log'.format(today.strftime('%Y_%m_%d')))
+#file_handler.setLevel(logging.DEBUG)
+#file_handler.setFormatter(CustomFormatter())
+
+g = time.localtime()
+minute = g.tm_min
+hour = g.tm_hour
+second = g.tm_sec
+
+if os.path.isdir("logs"):
+    print("logs folder found")
+else: #make sure that the logs folder is ready to put files in so filehandler doesnt raise an error
+    print("no logs folder found")
+    os.makedirs("logs")
+
+timed_file_handler = TimedRotatingFileHandler(filename='logs/uygulama {}.log'.format(today.strftime('%Y_%m_%d')),
+    when='D', interval=1, backupCount=5, encoding='utf-8', delay=False)
+timed_file_handler.setLevel(logging.INFO)
+timed_file_handler.setFormatter(CustomFormatter())
 
 logger.addHandler(consolehandler)
-logger.addHandler(file_handler)
+logger.addHandler(timed_file_handler)
 
-logger.warning("STARTING SCRIPT...")
+logger.warning("________________________STARTING SCRIPT_______________________")
+
+class AppTray(QSystemTrayIcon):
+    def __init__(self):
+        super().__init__(QIcon("icon.ico"))
+        self.setToolTip("Hello")
+        self.show()
+        self.menu = QMenu()
+        exitaction = self.menu.addAction("Exit")
+        exitaction.triggered.connect(qapp.quit)
+        
+        self.setContextMenu(self.menu)
 
 def check_connection():
     connection = db.get("checkconnection", ["check == True"] )
@@ -115,7 +132,8 @@ class Worker(QRunnable):
             if self.app.inapp: #TODO: Add classroom adding
                 pass
             if int(self.timer) % 60 == 0:
-                self.windowmanager.ConnectionSetText()
+                logger.warning("ConnectionSetText directly called from worker")
+                self.windowmanager.ConnectionSetText() #FIXME: WHY does this not use a signal
 
             # self.get_announcement() #maybe not put this in here? 
 
@@ -148,22 +166,9 @@ class Worker(QRunnable):
             logger.info(f"password:{self.app.password} hashed password: {hashed_password}")
 
             result = db.get("accounts", [f"password == {hashed_password}"], auto_format = False )
-            id = result[0].id
-            classrooms:dict = result[0].to_dict()["classrooms"]
-            
-            found = False
-            for key, val in classrooms.items():
-                if self.app.classname == key:
-                    found = True
-            
-            if found: #hesap zaten var
-                importantloginkey = classrooms[self.app.classname]
-            else: #hesap yok, yeni hesap oluştur
-                classrooms[self.app.classname] = "ADD SOMETHING TO HERE" #TODO: ADD KEY ALGORITHM TO HERE
-            
+
             if type(result) == bool:
                 pass
-            
             else:
                 if len(result) < 1:
                     self.windowmanager.loginerror("Yanlış Şifre")
@@ -173,7 +178,27 @@ class Worker(QRunnable):
                     self.windowmanager.loginerror("Giriş yapmada belli bir hatayla karşılaşıldı") 
                 else:
                     logger.info(f"CLASSNAME: {self.app.classname} SCHOOL: {self.app.schoolname}")
-                    result = db.update('accounts', id, {'classrooms': {}}) #TODO: AAAA
+                    
+                    id:str = result[0].id
+                    classrooms:dict = result[0].to_dict()["classrooms"]
+                    
+                    found = False
+                    for key, val in classrooms.items():
+                        if self.app.classname == key:
+                            found = True
+                            logger.info("FOUND THE CLASS")
+                            
+                    loginkey = None
+                    if found: #hesap zaten var
+                        loginkey = classrooms[self.app.classname]
+                        logger.info(f"CLASS ALREADY EXISTS, KEY: {loginkey}")
+                    else: #hesap yok, yeni hesap oluştur
+                        loginkey = hashlib.sha256((id + self.app.classname).encode()).hexdigest()
+                        classrooms[self.app.classname] = loginkey
+                        logger.info(f"CLASS DOESN'T EXIST, CREATED KEY: {loginkey}")
+
+                    db.update('accounts', id, {'classrooms': classrooms }) #TODO: Save the data and change autologin to use the key instead
+
                     self.app.signalmanager.logged.emit()
 
     def StartUpLogin(self,inp1:str,inp2:str): #NOTE: I have to create another func for this since I cant give arguments with a slot

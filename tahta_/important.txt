@@ -1,0 +1,10 @@
+Notes for developing & releasing new versions
+
+
+dont put data folder or any data files with the actual github release
+we will actually create a seperate version with those folders
+
+when creating the zip, choose all the files in the dist/tahta4 
+folder and say add to archive, then choose zip compression type 
+and compress it
+
