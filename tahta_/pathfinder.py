@@ -1,5 +1,5 @@
 
-import random,sys,json
+import sys,json
 from typing import List
 
 class PathFinder2:
