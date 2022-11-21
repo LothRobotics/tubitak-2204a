@@ -38,9 +38,19 @@ class PathFinder2:
             alreadyvisited[nodeid] = True #write that we've visited this place
 
             for t in range(self.vertex_count):
+                neighbours:List[int] = self.data[nodeid]
+                if neighbours.__contains__(t):
+                    print(f"{t} is contained in {neighbours}")
+                    sth = t
+                else:
+                    sth = False
                 #if connection does exist and we haven't visited it before and  distance is bigger than the nodeid + connection 
-                if self.data[nodeid][t] > 0 and alreadyvisited[t] == False and self.distances[t] > self.distances[nodeid] + self.data[nodeid][t]: 
-                    self.distances[t] = self.distances[nodeid] + self.data[nodeid][t]
+                if sth != False:
+                    if sth > 0 and alreadyvisited[t] == False and self.distances[t] > self.distances[nodeid] + sth: 
+                        self.distances[t] = self.distances[nodeid] + 1 #sth
+                elif sth == False:
+                    pass
+
 
         for nodeid in range(self.vertex_count):
             print(f"{nodeid} dist: {self.distances[nodeid]} ")

@@ -77,10 +77,10 @@ class MapManager: #TODO: Save mappos and map as numpy arrays
         i = 0
         for node in self.posmap:
             drawcircle(surf,node["pos"],(self.x,self.y))
-            surf.blit(self.app.font.render(str(i+1),False,"white"),(node["pos"][0]-self.x,node["pos"][1]-self.y))
             if len(self.map[i]) != 0:
                 for neighbourid in self.map[i]:
                     drawline(surf,self.posmap[i]["pos"],self.posmap[neighbourid]["pos"],"green",(self.x,self.y))
+            surf.blit(self.app.font.render(str(i),False,(240,240,240)),(node["pos"][0]-self.x,node["pos"][1]-self.y))
             i += 1
         drawrect(surf,self.delrect,(self.x,self.y))
 
@@ -172,7 +172,9 @@ class MapManager: #TODO: Save mappos and map as numpy arrays
         """Converts the map data to be used in pathfinder.py"""
         # self.map içerisinde her noktanın neighbor listesindeki değerler komşu noktanın id'si olduğundan dolayı direkten bunu sort
         # edip daha sonra da 0 olmayan(yani connection olmayan) noktaların hepsini 1 yapabiliriz 
-        emptylist = [[] for node in self.map]
+        return self.map
+        
+        """emptylist = [[] for node in self.map]
         wanted_count = len(self.posmap)
         x = 0
         
@@ -187,7 +189,7 @@ class MapManager: #TODO: Save mappos and map as numpy arrays
                     newlist.append(0)
             newmap.append(newlist)
 
-        return newmap
+        return newmap"""
 
         # for node in self.map:
         #     current_n_count = len(node)
@@ -207,7 +209,7 @@ class MapManager: #TODO: Save mappos and map as numpy arrays
 
     def export(self):
         with open("testmap.json","w") as file:
-            data = json.dumps(self.convert())
+            data = json.dumps(self.convert(),indent=4)
             file.write(data)
             print("Saved Map")
 

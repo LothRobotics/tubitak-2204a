@@ -228,7 +228,7 @@ class Worker(QRunnable):
                     logger.error("MORE THAN 1 ACCOUNT WITH THE SAME PASSWORD")
                     self.windowmanager.loginerror("Giriş yapmada belli bir hatayla karşılaşıldı")
                 else:
-                    logger.info("CLASSNAME:",self.app.classname, "SCHOOL:","TESTOKULU")
+                    logger.info(f"CLASSNAME:{self.app.classname} SCHOOL:{self.app.schoolname}")
                     self.app.signalmanager.autologged.emit()
                     logger.info("Succesfull startup login")
                     if self.app.shouldupdate:
@@ -285,6 +285,8 @@ class APP:
         with open("data/data.json","r",encoding="utf-8") as file:
             self.data = json.load(file)
         
+        # password, classname, title
+
         logger.info("CHECKING VERSION")
         #self.signalmanager.startupdating.connect(self.ver_checker.update)
         self.shouldupdate = False
@@ -301,7 +303,7 @@ class APP:
 
         self.password = None if self.data["password"] == 'None' else self.data["password"]
         self.classname = None if self.data["classname"] == 'None' else self.data["classname"]
-        self.schoolname = None if self.data["title"] == 'None' else self.data["title"] #title = schoolname 
+        self.schoolname = None if self.data["schoolname"] == 'None' else self.data["schoolname"] #changed this from title to schoolname
         if "None" in self.data.values():
             logger.info("NOT LOGGED IN")
         else:

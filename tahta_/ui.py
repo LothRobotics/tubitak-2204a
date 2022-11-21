@@ -288,23 +288,20 @@ class MainWindow(QMainWindow):
         self.updatetext.hide()
         self.updateacceptbut.hide()
         self.updaterefusebut.hide()
-    def set_updating_text(self,message:str):
-        print("JUST DO IT")
-        self.updatetext.setText(message)
 
     def close_update_buttons(self):
         self.updateacceptbut.hide()
         self.updaterefusebut.hide()
 
     def ConnectionSetText(self): #FIXME: Im too tired to fix checkconnection
-        raise Exception("Fix later")
-        
+        #raise Exception("Fix later")
+        pass
         #if check_connection():
         #    self.dbcontrollabel.setText('Veritabanı Durumu: <font color="#56cc41">Bağlantı Stabil</font>')
         #else:
         #    self.dbcontrollabel.setText('Veritabanı Durumu: <font color="#c92a2a">Bağlantı Bulunamadı</font>')
 
-    def connect_login(self):
+    def connect_login(self): #FIXME: 
         """To connect the signal and slot"""
         self.pushButton.clicked.connect(self.app.worker.loginButtonPress)
 
