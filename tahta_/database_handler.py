@@ -4,6 +4,7 @@ import firebase_admin
 
 from firebase_admin import credentials, firestore
 
+
 class DatabaseHandler():
 
     def __init__(self, credentials_path: str):
