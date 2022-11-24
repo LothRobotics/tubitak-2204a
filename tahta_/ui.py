@@ -2,6 +2,8 @@
 from PyQt5.QtWidgets import (QMainWindow,QWidget,QFrame,QLabel,QLineEdit,QPushButton)
 from PyQt5.QtCore import (QSettings,QRect,Qt,QCoreApplication)
 
+from PyQt5.QtCore import pyqtSlot,pyqtSignal
+from PyQt5 import QtCore
 import sys
 
 RUN_PATH = "HKEY_CURRENT_USER\\Software\\Microsoft\\Windows\\CurrentVersion\\Run"
@@ -293,9 +295,10 @@ class MainWindow(QMainWindow):
         self.updateacceptbut.hide()
         self.updaterefusebut.hide()
 
-    def ConnectionSetText(self): #FIXME: Im too tired to fix checkconnection
+    @QtCore.pyqtSlot(str)
+    def ConnectionSetText(self,msg:str):
         #raise Exception("Fix later")
-        pass
+        self.dbcontrollabel.setText(msg)
         #if check_connection():
         #    self.dbcontrollabel.setText('Veritabanı Durumu: <font color="#56cc41">Bağlantı Stabil</font>')
         #else:

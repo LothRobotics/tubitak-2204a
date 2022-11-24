@@ -17,7 +17,6 @@ from updater import InvalidReleaseVer, VersionChecker
 from ui import MainWindow
 
 db = DatabaseHandler("data/db_credentials.json")
-
 RUN_PATH = "HKEY_CURRENT_USER\\Software\\Microsoft\\Windows\\CurrentVersion\\Run"
 
 class CustomFormatter(logging.Formatter):
@@ -56,6 +55,7 @@ today = datetime.date.today()
 #file_handler = logging.FileHandler('logs/uygulama {} .log'.format(today.strftime('%Y_%m_%d')))
 #file_handler.setLevel(logging.DEBUG)
 #file_handler.setFormatter(CustomFormatter())
+
 
 g = time.localtime()
 minute = g.tm_min
@@ -106,6 +106,8 @@ class SignalManager(QObject):
     startupdating = pyqtSignal()
 
     updatedone = pyqtSignal()
+
+    connectionsettext = pyqtSignal()
     
 class Worker(QRunnable):
     '''
@@ -135,7 +137,11 @@ class Worker(QRunnable):
                 pass
             if int(self.timer) % 60 == 0:
                 logger.warning("ConnectionSetText directly called from worker")
-                self.windowmanager.ConnectionSetText() #FIXME: WHY does this not use a signal
+                #self.windowmanager.ConnectionSetText() #FIXME: WHY does this not use a signal
+                if check_connection():
+                    self.app.signalmanager.connectionsettext.emit('Veritabanı Durumu: <font color="#56cc41">Bağlantı Stabil</font>')
+                else:
+                    self.app.signalmanager.connectionsettext.emit('Veritabanı Durumu: <font color="#c92a2a">Bağlantı Bulunamadı</font>')
 
             # self.get_announcement() #maybe not put this in here? 
 
@@ -144,14 +150,11 @@ class Worker(QRunnable):
                 self.timer = 0
 
     def testupdate(self):
-        print("worker testupdate start")
+        logger.info("worker testupdate START")
         self.app.ver_checker.update()
-        print("worker testupdate END")
+        logger.info("worker testupdate END")
 
     def get_announcement(self):
-        pass
-
-    def check_db_connection(self):
         pass
 
     def loginButtonPress(self):
@@ -167,7 +170,7 @@ class Worker(QRunnable):
             
             logger.info(f"password:{self.app.password} hashed password: {hashed_password}")
 
-            result = db.get("accounts", [f"password == {hashed_password}"], auto_format = False )
+            result = db.get("accounts", [f"password == {self.app.password}"], auto_format = False ) #TODO: FIXME: TODO: FIXME: Add username check as well
 
             if type(result) == bool:
                 pass
@@ -175,8 +178,8 @@ class Worker(QRunnable):
                 if len(result) < 1:
                     self.windowmanager.loginerror("Yanlış Şifre")
                     logger.error("WRONG PASSWORD")
-                elif len(result) > 1:
-                    logger.error("MORE THAN 1 ACCOUNT WITH THE SAME PASSWORD")
+                elif len(result) > 1: #FIXME: Hesapların isimlerini de girmesi lazım giriş yapmak için 
+                    logger.error("ACCOUNT PROBLEMS")
                     self.windowmanager.loginerror("Giriş yapmada belli bir hatayla karşılaşıldı") 
                 else:
                     logger.info(f"CLASSNAME: {self.app.classname} SCHOOL: {self.app.schoolname}")
@@ -199,24 +202,30 @@ class Worker(QRunnable):
                         classrooms[self.app.classname] = loginkey
                         logger.info(f"CLASS DOESN'T EXIST, CREATED KEY: {loginkey}")
 
-                    db.update('accounts', id, {'classrooms': classrooms }) #TODO: Save the data and change autologin to use the key instead
+                    with open("data\data.json","+") as datafile:
+                        data = json.load(datafile)
+                        data["classkey"] = loginkey
+                        json.dump(data, datafile)
 
+                    db.update('accounts', id, {'classrooms': classrooms }) #TODO: Save the data and change autologin to use the key instead
                     self.app.signalmanager.logged.emit()
 
-    def StartUpLogin(self,inp1:str,inp2:str): #NOTE: I have to create another func for this since I cant give arguments with a slot
-        logger.info("LOGIN")
-
-        if len(inp1) < 1 or len(inp2) < 1: 
+    def StartUpLogin(self): #NOTE: I have to create another func for this since I cant give arguments with a slot
+        logger.info("LOGIN") #TODO: FIXME: I really have to fix this
+        
+        if len(self.app.classname) < 1 or len(self.app.password) < 1: 
             logger.error("ERROR LENGTH OF CLASSNAME OR PASSWORD TOO SHORT")
             self.windowmanager.loginerror("Şifre veya Sınıf ismi çok kısa") 
         else:
-            self.app.classname = inp1
-            self.app.password = inp2
-            hashed_password = hashlib.sha256(self.app.password.encode()).hexdigest()
+            # classname, password
+            # hashed_password = hashlib.sha256(self.app.password.encode()).hexdigest()
             
             logger.info(f"password:{self.app.password} hashed password: {hashed_password}")
             
-            result = db.get("accounts", [f"password == {hashed_password}"] )
+            result = db.get("accounts", [f"username == {self.app.username}"] ) #TODO: 
+            
+            # HAZD,şfiresi,key
+
             if type(result) == bool:
                 pass
             
@@ -262,12 +271,10 @@ class APP:
         self.signalmanager.remindupdate.connect(self.windowmanager.remind_update)
         self.signalmanager.close_updatereminder.connect(self.windowmanager.close_update_reminder)
         self.signalmanager.updatedone.connect(self.windowmanager.close_update_reminder)
+        self.signalmanager.connectionsettext.connect(self.windowmanager.ConnectionSetText)
         
         self.windowmanager.updateacceptbut.clicked.connect(self.worker.testupdate) #TODO:
         self.windowmanager.updateacceptbut.clicked.connect(self.windowmanager.close_update_buttons)
-        
-        #self.ver_checker.progresssignal.connect(self.windowmanager.set_updating_text)
-        #self.ver_checker.finishedsignal.connect(self.windowmanager.close_update_reminder)
 
         self.windowmanager.updaterefusebut.clicked.connect(self.signalmanager.close_updatereminder)
 
@@ -301,14 +308,16 @@ class APP:
         except InvalidReleaseVer:
             logger.error("INVALID VERSION")
 
-        self.password = None if self.data["password"] == 'None' else self.data["password"]
+        self.password = None if self.data["classkey"] == 'None' else self.data["password"] #changed this from password to classkey
         self.classname = None if self.data["classname"] == 'None' else self.data["classname"]
         self.schoolname = None if self.data["schoolname"] == 'None' else self.data["schoolname"] #changed this from title to schoolname
+        self.username = None if self.data["username"] == 'None' else self.data["username"]
+
         if "None" in self.data.values():
             logger.info("NOT LOGGED IN")
         else:
             logger.info("DATA IS ALREADY THERE, TRYING TO LOG INTO ACCOUNT")
-            self.worker.StartUpLogin(self.classname,self.password)
+            self.worker.StartUpLogin()
 
     def closeApp(self):
         """called when app is closed"""
@@ -326,7 +335,7 @@ if __name__ == '__main__':
 
     app = APP()
     qapp.exec()
-    
+
     app.closeApp()
     logger.info("ended application")
     

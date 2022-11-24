@@ -105,8 +105,8 @@ class VersionChecker:
                 json.dump(data,file,indent=4,ensure_ascii=False)
 
             print("EXTRACTING THE ZIP")
+            # Extract all the contents of zip file in current directory
             with z as zipObj:
-                # Extract all the contents of zip file in current directory
                 zipObj.extractall()
             print("EXTRACTED THE ZIP")
 
