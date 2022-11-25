@@ -3,6 +3,9 @@
 # import matplotlib.pyplot as plt
 # import matplotlib.patches as patches
 # import matplotlib.image as mpimg
+ 
+import cv2, time
+import numpy as np
 
 from ast import Pass
 from math import comb
@@ -15,7 +18,7 @@ import extcolors
 
 from colormap import rgb2hex
 
-img_url = 'color\KABATAS.jpg'
+img_url = 'color\SABANCI.jpg'
 output_width = 900                   #set the output size
 img = Image.open(img_url)
 wpercent = (output_width/float(img.size[0]))
@@ -100,4 +103,29 @@ colors_x = extcolors.extract_from_path(img_url, tolerance = 12, limit = 12)
 tolerance = 30
 colorAmount = 5
 print(combineColors(removeOccurence(colors_x), tolerance, colorAmount,tryLimit=abs((len(colors_x) - colorAmount)), tryAmount=0))
+
+colors = combineColors(removeOccurence(colors_x), tolerance, colorAmount,tryLimit=abs((len(colors_x) - colorAmount)), tryAmount=0)
+img = np.zeros((300,650,3), np.uint8)
+window_name = 'Trackbar Color Palette'
+cv2.namedWindow(window_name, cv2.WINDOW_AUTOSIZE)
+print(colors[0])
+while(True):
+
+    for i in colors:
+        for j in range(len(colors)):
+
+            cv2.imshow(window_name,img)
+            key = cv2.waitKey(1) & 0xFF
+
+            print(i, i[j][2], "-", i[j][1], "-", i[j][0])
+
+            # img[:] = [i[j][2], i[j][1], i[j][0]]
+            time.sleep(1)
+            if key == ord('q'):
+                break
+cv2.destroyAllWindows()
+
+
+
+
 
