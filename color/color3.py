@@ -3,7 +3,7 @@
 # import matplotlib.pyplot as plt
 # import matplotlib.patches as patches
 # import matplotlib.image as mpimg
- 
+import colorsys 
 import cv2, time
 import numpy as np
 
@@ -57,7 +57,9 @@ def newColor(c1, c2):
     # return (red,green,blue)
 
 def combineColors(colorList, tolerance, colorAmount, tryAmount, tryLimit):
+
     changedColors = []
+    hsl_Colors = []
     tryAmount += 1
 
     for c1 in colorList:
@@ -77,19 +79,25 @@ def combineColors(colorList, tolerance, colorAmount, tryAmount, tryLimit):
                 colorList.remove(c1)
                 colorList.remove(c2)
                 colorList.append(combinedColor)
-                changedColors.append((c1,c2,combinedColor))
+                # changedColors.append((c1,c2,combinedColor))
                 break
     print(tryAmount, " - ", tryLimit)
 
     if tryAmount == tryLimit:
-        return colorList
+        for color in colorList:
+            hsl_Colors.append(colorsys.rgb_to_hls(color[0], color[1], color[2]))
+        return colorList, hsl_Colors
 
     if len(colorList) > colorAmount:
         combineColors(colorList, tolerance, colorAmount, tryAmount, tryLimit)
 
-    return[colorList]
+    for color in colorList:
+        hsl_Colors.append(colorsys.rgb_to_hls(color[0], color[1], color[2]))
 
-colors_x = extcolors.extract_from_path(img_url, tolerance = 12, limit = 12)
+    return colorList, hsl_Colors
+
+
+
 # print(colors_x[0][0][1]) output in RGB
 
 # print(colors_x[0])
@@ -100,31 +108,33 @@ colors_x = extcolors.extract_from_path(img_url, tolerance = 12, limit = 12)
 
 # print(removeOccurence(colors_x))
 
+colors_x = extcolors.extract_from_path(img_url, tolerance = 12, limit = 12)
 tolerance = 30
 colorAmount = 5
 print(combineColors(removeOccurence(colors_x), tolerance, colorAmount,tryLimit=abs((len(colors_x) - colorAmount)), tryAmount=0))
 
-colors = combineColors(removeOccurence(colors_x), tolerance, colorAmount,tryLimit=abs((len(colors_x) - colorAmount)), tryAmount=0)
-img = np.zeros((300,650,3), np.uint8)
-window_name = 'Trackbar Color Palette'
-cv2.namedWindow(window_name, cv2.WINDOW_AUTOSIZE)
-print(colors[0])
-while(True):
+# colors = combineColors(removeOccurence(colors_x), tolerance, colorAmount,tryLimit=abs((len(colors_x) - colorAmount)), tryAmount=0)
+# img = np.zeros((300,650,3), np.uint8)
+# window_name = 'Trackbar Color Palette'
+# cv2.namedWindow(window_name, cv2.WINDOW_AUTOSIZE)
 
-    for i in colors:
-        for j in range(len(colors)):
+# print(colors)
+# while True:
 
-            cv2.imshow(window_name,img)
-            key = cv2.waitKey(1) & 0xFF
+#     for i in colors:
 
-            print(i, i[j][2], "-", i[j][1], "-", i[j][0])
+#         cv2.imshow(window_name,img)
+#         key = cv2.waitKey(1) & 0xFF
 
-            # img[:] = [i[j][2], i[j][1], i[j][0]]
-            time.sleep(1)
-            if key == ord('q'):
-                break
-cv2.destroyAllWindows()
+#         print(i)
 
+#         img[:] = [i[0], i[1], i[2]]
+
+#         time.sleep(1)
+#         if key == ord('q'):
+#             break
+
+# cv2.destroyAllWindows()
 
 
 
