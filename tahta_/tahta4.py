@@ -1,7 +1,6 @@
-from PyQt5.QtCore import *
-from PyQt5.QtWidgets import *
-from PyQt5.QtGui import *
-from PyQt5.QtCore import Qt
+from PyQt5.QtWidgets import QSystemTrayIcon,QApplication,QMenu
+from PyQt5.QtCore import QObject,pyqtSignal,QRunnable,pyqtSlot,QThreadPool
+from PyQt5.QtGui import QIcon
 
 import json
 import sys,time,os,datetime
@@ -107,7 +106,7 @@ class SignalManager(QObject):
 
     updatedone = pyqtSignal()
 
-    connectionsettext = pyqtSignal()
+    connectionsettext = pyqtSignal(str)
     
 class Worker(QRunnable):
     '''
@@ -138,7 +137,7 @@ class Worker(QRunnable):
             if int(self.timer) % 60 == 0:
                 logger.warning("ConnectionSetText directly called from worker")
                 #self.windowmanager.ConnectionSetText() #FIXME: WHY does this not use a signal
-                if check_connection():
+                if check_connection(): #TODO: there is an problem in here 
                     self.app.signalmanager.connectionsettext.emit('Veritabanı Durumu: <font color="#56cc41">Bağlantı Stabil</font>')
                 else:
                     self.app.signalmanager.connectionsettext.emit('Veritabanı Durumu: <font color="#c92a2a">Bağlantı Bulunamadı</font>')
@@ -170,8 +169,8 @@ class Worker(QRunnable):
             
             logger.info(f"password:{self.app.password} hashed password: {hashed_password}")
 
-            result = db.get("accounts", [f"password == {self.app.password}"], auto_format = False ) #TODO: FIXME: TODO: FIXME: Add username check as well
-
+            result = db.get("accounts", [f"password == TEST"], auto_format = False ) #TODO: FIXME: TODO: FIXME: Add username check as well
+            logger.info(f"result {result}")
             if type(result) == bool:
                 pass
             else:
@@ -202,12 +201,19 @@ class Worker(QRunnable):
                         classrooms[self.app.classname] = loginkey
                         logger.info(f"CLASS DOESN'T EXIST, CREATED KEY: {loginkey}")
 
-                    with open("data\data.json","+") as datafile:
+                    with open("data\data.json","r") as datafile:
                         data = json.load(datafile)
                         data["classkey"] = loginkey
-                        json.dump(data, datafile)
+                    with open("data\data.json","w") as datafile:
+                        json.dump(data, datafile,indent=4)
 
                     db.update('accounts', id, {'classrooms': classrooms }) #TODO: Save the data and change autologin to use the key instead
+
+                    if check_connection():
+                        self.app.signalmanager.connectionsettext.emit('Veritabanı Durumu: <font color="#56cc41">Bağlantı Stabil</font>')
+                    else:
+                        self.app.signalmanager.connectionsettext.emit('Veritabanı Durumu: <font color="#c92a2a">Bağlantı Bulunamadı</font>')
+                    
                     self.app.signalmanager.logged.emit()
 
     def StartUpLogin(self): #NOTE: I have to create another func for this since I cant give arguments with a slot
@@ -239,6 +245,12 @@ class Worker(QRunnable):
                 else:
                     logger.info(f"CLASSNAME:{self.app.classname} SCHOOL:{self.app.schoolname}")
                     self.app.signalmanager.autologged.emit()
+
+                    if check_connection():
+                        self.app.signalmanager.connectionsettext.emit('Veritabanı Durumu: <font color="#56cc41">Bağlantı Stabil</font>')
+                    else:
+                        self.app.signalmanager.connectionsettext.emit('Veritabanı Durumu: <font color="#c92a2a">Bağlantı Bulunamadı</font>')
+                    
                     logger.info("Succesfull startup login")
                     if self.app.shouldupdate:
                         self.app.signalmanager.remindupdate.emit()
@@ -308,7 +320,7 @@ class APP:
         except InvalidReleaseVer:
             logger.error("INVALID VERSION")
 
-        self.password = None if self.data["classkey"] == 'None' else self.data["password"] #changed this from password to classkey
+        self.password = None if self.data["classkey"] == 'None' else self.data["classkey"] #changed this from password to classkey
         self.classname = None if self.data["classname"] == 'None' else self.data["classname"]
         self.schoolname = None if self.data["schoolname"] == 'None' else self.data["schoolname"] #changed this from title to schoolname
         self.username = None if self.data["username"] == 'None' else self.data["username"]

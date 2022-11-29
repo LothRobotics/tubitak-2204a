@@ -1,9 +1,7 @@
 
 from PyQt5.QtWidgets import (QMainWindow,QWidget,QFrame,QLabel,QLineEdit,QPushButton)
-from PyQt5.QtCore import (QSettings,QRect,Qt,QCoreApplication)
-
-from PyQt5.QtCore import pyqtSlot,pyqtSignal
-from PyQt5 import QtCore
+from PyQt5.QtCore import (QSettings,QRect,Qt,QCoreApplication,pyqtSlot,pyqtSignal)
+#from PyQt5 import QtCore
 import sys
 
 RUN_PATH = "HKEY_CURRENT_USER\\Software\\Microsoft\\Windows\\CurrentVersion\\Run"
@@ -295,7 +293,7 @@ class MainWindow(QMainWindow):
         self.updateacceptbut.hide()
         self.updaterefusebut.hide()
 
-    @QtCore.pyqtSlot(str)
+    @pyqtSlot(str) #bunu kullanmak için qobject olması lazım classın
     def ConnectionSetText(self,msg:str):
         #raise Exception("Fix later")
         self.dbcontrollabel.setText(msg)
@@ -324,8 +322,6 @@ class MainWindow(QMainWindow):
         self.classlabel.setText(_translate("MainWindow", f"SINIF: {self.app.classname}"))
         self.schoollabel.setText(_translate("MainWindow", f"OKUL: {self.app.schoolname}"))
         self.announcelabel.setText(_translate("MainWindow", f"DUYURU: {self.app.lastannouncement}"))
-
-        self.ConnectionSetText()
         
         self.app.inapp = True
         self.setCentralWidget(self.inapp_container)
@@ -335,8 +331,6 @@ class MainWindow(QMainWindow):
         self.classlabel.setText(_translate("MainWindow", f"SINIF: {self.app.classname}"))
         self.schoollabel.setText(_translate("MainWindow", f"OKUL: {self.app.schoolname}"))
         self.announcelabel.setText(_translate("MainWindow", f"DUYURU: {self.app.lastannouncement}"))
-
-        self.ConnectionSetText()
         
         self.app.inapp = True
         self.setCentralWidget(self.inapp_container)
