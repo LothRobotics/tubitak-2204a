@@ -293,14 +293,9 @@ class MainWindow(QMainWindow):
         self.updateacceptbut.hide()
         self.updaterefusebut.hide()
 
-    @pyqtSlot(str) #bunu kullanmak için qobject olması lazım classın
+    @pyqtSlot(str) #bunu kullanmak için qobject olması lazım classın?
     def ConnectionSetText(self,msg:str):
-        #raise Exception("Fix later")
         self.dbcontrollabel.setText(msg)
-        #if check_connection():
-        #    self.dbcontrollabel.setText('Veritabanı Durumu: <font color="#56cc41">Bağlantı Stabil</font>')
-        #else:
-        #    self.dbcontrollabel.setText('Veritabanı Durumu: <font color="#c92a2a">Bağlantı Bulunamadı</font>')
 
     def connect_login(self): #FIXME: 
         """To connect the signal and slot"""
