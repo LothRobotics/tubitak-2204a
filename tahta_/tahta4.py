@@ -56,7 +56,6 @@ today = datetime.datetime.now()
 #file_handler.setLevel(logging.DEBUG)
 #file_handler.setFormatter(CustomFormatter())
 
-
 g = time.localtime()
 minute = g.tm_min
 hour = g.tm_hour
@@ -79,14 +78,24 @@ logger.addHandler(timed_file_handler)
 
 logger.warning("_______________________ STARTING APP _______________________")
 
+class Theme:
+    def __init__(self) -> None:
+        pass
+
 class AppTray(QSystemTrayIcon):
     def __init__(self):
-        super().__init__(QIcon("appdata/app_logo.ico"))
+        super().__init__(QIcon("appdata/app_icon.ico"))
+        self.wm_closewindow = wm_closewindow
+        self.wm_openwindow = wm_openwindow
         self.setToolTip("Hello")
         self.show()
         self.menu = QMenu()
-        exitaction = self.menu.addAction("Exit")
+        exitaction = self.menu.addAction("Uygulamayı kapat")
         exitaction.triggered.connect(qapp.quit)
+        self.closewindow = self.menu.addAction("Pencereyi gizle")
+        self.closewindow.triggered.connect(self.wm_closewindow)
+        self.openwindow = self.menu.addAction("Pencereyi göster")
+        self.openwindow.triggered.connect(self.wm_openwindow)
         
         self.setContextMenu(self.menu)
 
@@ -105,7 +114,6 @@ class SignalManager(QObject):
     remindupdate = pyqtSignal()
     close_updatereminder = pyqtSignal()
     startupdating = pyqtSignal()
-
     updatedone = pyqtSignal()
 
     conn_settext_signal = pyqtSignal(str)
@@ -137,6 +145,7 @@ class Worker(QRunnable):
             if self.app.inapp:
                 pass
             if int(self.timer) % 10 == 0:
+                logger.info("Connectionsettext check")
                 if check_connection(): 
                     self.app.signalmanager.conn_settext_signal.emit('Veritabanı Durumu: <font color="#56cc41">Bağlantı Stabil</font>')
                 else:
@@ -156,19 +165,18 @@ class Worker(QRunnable):
     def get_announcement(self):
         pass
 
-    def loginButtonPress(self): 
-        # login old. şifreyi giricek, claskey varsa al, yoksa oluştur ve kaydet hem db hem data.json
-        # autologin ise claskey dene, olursa giriş yap, olmazsa logine geri at, schoolname dbden alınacak
+    def loginButtonPress(self):
         logger.info("ATTEMPTING LOGIN")
 
         if len(self.windowmanager.lineEdit.text()) < 1 or len(self.windowmanager.lineEdit_2.text()) < 1:
+            logger.error("LENGTH")
             return None
         
         self.app.classname = self.windowmanager.lineEdit.text() #Class name
         password = self.windowmanager.lineEdit_2.text()         # User password
         hashed_password = hashlib.sha256(password.encode()).hexdigest()
         
-        logger.info(f"CLASSNAME: {self.app.classname} PASSWORD: {password} HASHED_PASSWORD: {hashed_password}")
+        logger.info(f"CREATED HASHED PASSWORD")
 
         # This looks at username even tho there are only ways to enter classname and password
         # I should add a 3rd lineedit that has username inside TODO: 
@@ -187,7 +195,7 @@ class Worker(QRunnable):
             return None
         
         # no problem, will login
-        logger.info(f"{self.app.classname} {self.app.schoolname}")
+        logger.info(f" CLASSNAME: {self.app.classname} SCHOOLNAME: {self.app.schoolname}")
         
         id = result[0].id
 
@@ -201,7 +209,7 @@ class Worker(QRunnable):
             logger.info(f"CLASSKEY {classkey}")
         else:
             logger.info(f"CLASSMAME DOESN'T EXIST IN DB")
-            logger.info(f"CREATING NEW KEY FOR CLASS {self.app.classname}")
+            logger.info(f"CREATING NEW KEY FOR CLASS: {self.app.classname}")
             classkey = hashlib.sha256((id + self.app.classname).encode()).hexdigest()
             classrooms[self.app.classname] = classkey
         
@@ -223,42 +231,54 @@ class Worker(QRunnable):
             self.app.signalmanager.conn_settext_signal.emit('Veritabanı Durumu: <font color="#c92a2a">Bağlantı Bulunamadı</font>')
             self.app.signalmanager.logged.emit()
 
-    def StartUpLogin(self): #NOTE: I have to create another func for this since I cant give arguments with a slot
+    def StartUpLogin(self): 
         logger.info("ATTEMPTING AUTO-LOGIN")
-        
-        if len(self.app.classname) < 1 or len(self.app.classkey) < 1: 
-            logger.error("ERROR LENGTH OF CLASSNAME OR PASSWORD TOO SHORT")
-            self.windowmanager.loginerror("Şifre veya Sınıf ismi çok kısa") 
-        else:
-            result = db.get("accounts", [f"username == {self.app.username}"],auto_format=True ) #TODO: 
-            if type(result) == bool:
-                pass
-            else:
-                if len(result) < 1:
-                    self.windowmanager.loginerror("Yanlış Şifre")
-                    logger.error("WRONG PASSWORD")
-                elif len(result) > 1:
-                    logger.error("MORE THAN 1 ACCOUNT WITH THE SAME PASSWORD")
-                    self.windowmanager.loginerror("Giriş yapmada belli bir hatayla karşılaşıldı")
-                else:
-                    classrooms:Dict[str] = result[0]["classrooms"] #FIXME: the db_handler doesn't have a way to just find a val from map in document
-                    key_in_database = classrooms.get(self.app.classname, None)
-                    
-                    if key_in_database != None: #val exists in there
-                        if self.app.classkey == key_in_database:
-                            logger.info(f"SUCCESSFUL AUTO-LOGIN WITH CLASSKEY:{self.app.classkey} CLASSNAME:{self.app.classname} SCHOOL:{self.app.schoolname}")
-                            self.app.signalmanager.autologged.emit()
 
-                            if check_connection():
-                                self.app.signalmanager.conn_settext_signal.emit('Veritabanı Durumu: <font color="#56cc41">Bağlantı Stabil</font>')
-                            else:
-                                self.app.signalmanager.conn_settext_signal.emit('Veritabanı Durumu: <font color="#c92a2a">Bağlantı Bulunamadı</font>')
-                            
-                            logger.info("Succesfull startup login")
-                            if self.app.shouldupdate:
-                                self.app.signalmanager.remindupdate.emit()
-                            else:
-                                self.app.signalmanager.close_updatereminder.emit()
+        result = db.get("accounts", [f"username == {self.app.username}"], auto_format=False )
+        if type(result) == bool:
+            return None
+        if len(result) < 1:
+            self.windowmanager.loginerror("Yanlış Şifre.")
+            logger.error("WRONG PASSWORD")
+            return None
+        elif len(result) > 1:
+            logger.error("ACCOUNT PROBLEMS")
+            self.windowmanager.loginerror("Giriş yapmada hatayla karşılaşıldı.")
+            return None
+
+        formatted_result = result[0].to_dict()
+        classrooms:dict = formatted_result["classrooms"] 
+        
+        if classrooms.__contains__(self.app.classname) == False:
+            self.windowmanager.loginerror("Otomatik giriş yapılamadı.")
+            logger.error("CLASSROOMS DOESNT HAVE CLASSNAME IN DB")
+            return None
+        if (classrooms.__contains__(self.app.classname)) and (classrooms[self.app.classname] != self.app.classkey):
+            self.windowmanager.loginerror("Otomatik giriş yapılamadı.")
+            logger.error("CLASSKEY != DB CLASSKEY")
+            return None
+
+        # get the schoolname from db
+        self.app.schoolname = formatted_result["school"]["school_name"]
+
+        with open("data\data.json","r", encoding="utf-8") as datafile:
+            data = json.load(datafile)
+            data["schoolname"] = self.app.schoolname
+        with open("data\data.json","w", encoding="utf-8") as datafile:
+            json.dump(data, datafile, ensure_ascii=False, indent=4)
+
+        if check_connection():
+            self.app.signalmanager.conn_settext_signal.emit('Veritabanı Durumu: <font color="#56cc41">Bağlantı Stabil</font>')
+        else:
+            self.app.signalmanager.conn_settext_signal.emit('Veritabanı Durumu: <font color="#c92a2a">Bağlantı Bulunamadı</font>')
+        self.app.signalmanager.autologged.emit()
+
+        if self.app.shouldupdate:
+            self.app.signalmanager.remindupdate.emit()
+        else:
+            self.app.signalmanager.close_updatereminder.emit()
+        logger.info("SUCCESSFUL AUTO-LOGIN")
+
 
 class APP:
     def __init__(self) -> None:
@@ -279,7 +299,7 @@ class APP:
         with open("data/version.json","r") as file:
             self.version:float = json.load(file)["version"]
         
-        self.tray = AppTray()
+        self.tray = AppTray(  self.windowmanager.hide, self.windowmanager.show )
         self.ver_checker = VersionChecker(self,self.version)
 
         self.signalmanager.logged.connect(self.windowmanager.loginsuccesful)
@@ -292,11 +312,11 @@ class APP:
         self.signalmanager.conn_settext_signal.connect( intercept ) #you create an intermediary func(with lambda) like this when you want to pass data in signals 
         #TODO: FIXME: From what I've read this can result in a memory leak but if this creates an problem we should fix it
 
-        self.windowmanager.updateacceptbut.clicked.connect(self.worker.testupdate) #TODO:
+        self.windowmanager.updateacceptbut.clicked.connect(self.worker.testupdate)
         self.windowmanager.updateacceptbut.clicked.connect(self.windowmanager.close_update_buttons)
 
         self.windowmanager.updaterefusebut.clicked.connect(self.signalmanager.close_updatereminder)
-        self.lastannouncement = "DENEME_DUYURU" #TODO:
+        self.lastannouncement = "DENEME_DUYURU"
         self.isconnected2db = "CONNECTED_2_DB" 
         self.inapp = False
 
@@ -346,8 +366,10 @@ if __name__ == '__main__':
     # If you know you won't use command line arguments QApplication([]) works too.
     qapp = QApplication(sys.argv)
 
-    qapp.setWindowIcon(QIcon('appdata/app_logo.ico'))
-    # icon için özel .ico dosyası lazım
+    qapp.setWindowIcon(QIcon('icon.ico'))
+    # FIXME: https://stackoverflow.com/questions/17914960/pyqt-runtimeerror-wrapped-c-c-object-has-been-deleted
+    # https://stackoverflow.com/questions/5339062/python-pyside-internal-c-object-already-deleted
+    # I dont think this will happen but if it does, here are some links to fix it 
 
     app = APP()
     qapp.exec()

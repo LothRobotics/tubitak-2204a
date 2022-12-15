@@ -1,10 +1,10 @@
 Notes for developing & releasing new versions
 
-
 dont put data folder or any data files with the actual github release
-we will actually create a seperate version with those folders
+we will actually create a seperate version with those folders for distribution to schools
 
-when creating the zip, choose all the files in the dist/tahta4 
-folder and say add to archive, then choose zip compression type 
+when creating the distribution zip, choose all the files in the dist/tahta4 
+folder and say add to archive, then choose zip compression type
 and compress it
 
+ALSO: Make sure to change the version.json file as well as change every value in data.json to "None"
