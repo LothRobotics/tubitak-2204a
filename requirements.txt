@@ -13,3 +13,4 @@ bs4==0.0.1
 uuid==1.30
 pathlib==1.0.1
 PyGithub==1.56
+autopep8==2.0.0

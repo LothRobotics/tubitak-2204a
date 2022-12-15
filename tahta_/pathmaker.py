@@ -3,7 +3,7 @@ import sys,json
 
 # For creating test maps easiy in pygame and then exporting them to test pathfinder.py
 
-#modes : 
+# modes : 
 # add/remove : make the points in this mode
 # connect    : Put the connections in between here
 

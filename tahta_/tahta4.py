@@ -16,6 +16,9 @@ from ui import MainWindow
 db = DatabaseHandler("data/db_credentials.json")
 RUN_PATH = "HKEY_CURRENT_USER\\Software\\Microsoft\\Windows\\CurrentVersion\\Run"
 
+class Theme:
+    pass
+
 class CustomFormatter(logging.Formatter):
     dgrey = "\x1b[1;30m" 
     grey = "\x1b[38;20m"
@@ -78,7 +81,7 @@ logger.warning("_______________________ STARTING APP _______________________")
 
 class AppTray(QSystemTrayIcon):
     def __init__(self):
-        super().__init__(QIcon("icon.ico"))
+        super().__init__(QIcon("appdata/app_logo.ico"))
         self.setToolTip("Hello")
         self.show()
         self.menu = QMenu()
@@ -153,75 +156,75 @@ class Worker(QRunnable):
     def get_announcement(self):
         pass
 
-    def loginButtonPress(self):
-        logger.info("LOGIN")
+    def loginButtonPress(self): 
+        # login old. şifreyi giricek, claskey varsa al, yoksa oluştur ve kaydet hem db hem data.json
+        # autologin ise claskey dene, olursa giriş yap, olmazsa logine geri at, schoolname dbden alınacak
+        logger.info("ATTEMPTING LOGIN")
 
         if len(self.windowmanager.lineEdit.text()) < 1 or len(self.windowmanager.lineEdit_2.text()) < 1:
-            logger.error("ERROR LENGTH OF CLASSNAME OR PASSWORD TOO SHORT")
-            self.windowmanager.loginerror("Şifre veya Sınıf ismi çok kısa") 
+            return None
+        
+        self.app.classname = self.windowmanager.lineEdit.text() #Class name
+        password = self.windowmanager.lineEdit_2.text()         # User password
+        hashed_password = hashlib.sha256(password.encode()).hexdigest()
+        
+        logger.info(f"CLASSNAME: {self.app.classname} PASSWORD: {password} HASHED_PASSWORD: {hashed_password}")
+
+        # This looks at username even tho there are only ways to enter classname and password
+        # I should add a 3rd lineedit that has username inside TODO: 
+        result = db.get("accounts", [
+            f"password == {hashed_password}",f"username == {self.app.username}" 
+            ],auto_format = False )
+
+        if len(result)<1:
+            self.windowmanager.loginerror("Yanlış Şifre")
+            logger.error("WRONG PASSWORD")
+            return None
+        
+        if len(result)>1:
+            self.windowmanager.loginerror("Hesaba giriş yapmakta bazı sorunlar yaşandı")
+            logger.error("ACCOUNT PROBLEMS")
+            return None
+        
+        # no problem, will login
+        logger.info(f"{self.app.classname} {self.app.schoolname}")
+        
+        id = result[0].id
+
+        formatted_result = result[0].to_dict()
+        classrooms = formatted_result["classrooms"]
+        self.app.schoolname = formatted_result["school"]["school_name"]
+        
+        if classrooms.__contains__(self.app.classname):
+            logger.info("CLASSNAME EXISTS IN DB")
+            classkey = classrooms[self.app.classname]
+            logger.info(f"CLASSKEY {classkey}")
         else:
-            self.app.classname:str = self.windowmanager.lineEdit.text()
-            password = self.windowmanager.lineEdit_2.text()
-            hashed_password = hashlib.sha256(password.encode()).hexdigest()
-            
-            logger.info(f"password:{password} hashed password: {hashed_password}")
+            logger.info(f"CLASSMAME DOESN'T EXIST IN DB")
+            logger.info(f"CREATING NEW KEY FOR CLASS {self.app.classname}")
+            classkey = hashlib.sha256((id + self.app.classname).encode()).hexdigest()
+            classrooms[self.app.classname] = classkey
+        
+        with open("data\data.json","r") as datafile:
+            data = json.load(datafile)
+            data["classkey"] = classkey
+            data["schoolname"] = self.app.schoolname
+            data["classname"] = self.app.classname
 
-            result = db.get("accounts", [ #TODO: this looks at username even tho there are only ways to enter classname and password this is a bug
-                f"password == {hashed_password}",f"username == {self.app.username}" ], 
-                auto_format = False )
-            
-            # print(db.format_values(result))
-            if type(result) == bool:
-                pass
-            else:
-                if len(result) < 1:
-                    self.windowmanager.loginerror("Yanlış Şifre")
-                    logger.error("WRONG PASSWORD")
-                elif len(result) > 1:
-                    logger.error("ACCOUNT PROBLEMS")
-                    self.windowmanager.loginerror("Giriş yapmada belli bir hatayla karşılaşıldı") 
-                else:
-                    logger.info(f"CLASSNAME: {self.app.classname} SCHOOL: {self.app.schoolname}")
-                    
-                    id:str = result[0].id
-
-                    formatted_result = result[0].to_dict()
-
-                    classrooms:dict = formatted_result["classrooms"] #get the classrooms
-                    self.app.schoolname = formatted_result["school"]["school_name"] #get the schoolname from db
-                    
-                    found = False
-                    for key, val in classrooms.items(): #TODO: I should refactor this
-                        if self.app.classname == key:
-                            found = True
-                            logger.info("FOUND THE CLASS")
-                            
-                    classkey = None
-                    if found: #classkey zaten var
-                        classkey= classrooms[self.app.classname]
-                        logger.info(f"CLASS ALREADY EXISTS, KEY: {classkey}")
-                    else: #classkey yok, yeni hesap oluştur
-                        classkey = hashlib.sha256((id + self.app.classname).encode()).hexdigest()
-                        classrooms[self.app.classname] = classkey
-                        logger.info(f"CLASS DOESN'T EXIST, CREATED KEY: {classkey}")
-
-                    with open("data\data.json","r") as datafile:
-                        data = json.load(datafile)
-                        data["classkey"] = classkey
-                        data["schoolname"] = self.app.schoolname
-                    with open("data\data.json","w") as datafile:
-                        json.dump(data, datafile,indent=4)
-
-                    db.update('accounts', id, {'classrooms': classrooms})# update the new
-                    if check_connection():
-                        self.app.signalmanager.conn_settext_signal.emit('Veritabanı Durumu: <font color="#56cc41">Bağlantı Stabil</font>')
-                    else:
-                        self.app.signalmanager.conn_settext_signal.emit('Veritabanı Durumu: <font color="#c92a2a">Bağlantı Bulunamadı</font>')
-                    
-                    self.app.signalmanager.logged.emit()
+            logger.info(f"data is :{data}")
+        with open("data\data.json","w", encoding="utf-8") as datafile:
+            json.dump(data, datafile,indent=4, ensure_ascii=False)
+        
+        db.update('accounts', id, {'classrooms': classrooms})# update the new
+        if check_connection():
+            self.app.signalmanager.conn_settext_signal.emit('Veritabanı Durumu: <font color="#56cc41">Bağlantı Stabil</font>')
+            self.app.signalmanager.logged.emit()
+        else:
+            self.app.signalmanager.conn_settext_signal.emit('Veritabanı Durumu: <font color="#c92a2a">Bağlantı Bulunamadı</font>')
+            self.app.signalmanager.logged.emit()
 
     def StartUpLogin(self): #NOTE: I have to create another func for this since I cant give arguments with a slot
-        logger.info("LOGIN")
+        logger.info("ATTEMPTING AUTO-LOGIN")
         
         if len(self.app.classname) < 1 or len(self.app.classkey) < 1: 
             logger.error("ERROR LENGTH OF CLASSNAME OR PASSWORD TOO SHORT")
@@ -265,6 +268,7 @@ class APP:
         self.worker = Worker(self)
         logger.info("Create Worker Instance")
         self.windowmanager = MainWindow(self)
+        self.windowmanager.setWindowTitle("Akıllı Tahliye Sistemi") #TODO: change this name if the project name changes to Deprem Tahliye Sistemi
         logger.info("Create WindowManager Instance")
         self.windowmanager.show() # bunu acil durum olduğunda arkaplandan hemen ekranın önüne getirmek için kullanabiliriz
         logger.info("Show Window")
@@ -325,7 +329,7 @@ class APP:
         self.schoolname = None if self.data["schoolname"] == 'None' else self.data["schoolname"] #changed this from title to schoolname
         self.username = None if self.data["username"] == 'None' else self.data["username"]
 
-        if "None" in self.data.values():
+        if "None" in self.data.values() or "NONE" in self.data.values():
             logger.info("NOT LOGGED IN")
         else:
             logger.info("DATA IS ALREADY THERE, TRYING TO LOG INTO ACCOUNT")
@@ -342,7 +346,7 @@ if __name__ == '__main__':
     # If you know you won't use command line arguments QApplication([]) works too.
     qapp = QApplication(sys.argv)
 
-    qapp.setWindowIcon(QIcon('icon.ico'))
+    qapp.setWindowIcon(QIcon('appdata/app_logo.ico'))
     # icon için özel .ico dosyası lazım
 
     app = APP()

@@ -1,87 +1,33 @@
 
-from PyQt5.QtWidgets import (QMainWindow,QWidget,QFrame,QLabel,QLineEdit,QPushButton)
-from PyQt5.QtCore import (QSettings,QRect,Qt,QCoreApplication,pyqtSlot,pyqtSignal)
+from ui_theme import central_widget_theme, inapp_container_theme
+
+from PyQt5.QtWidgets import (
+    QMainWindow, QWidget, QFrame, QLabel, QLineEdit, QPushButton)
+from PyQt5.QtCore import (QSettings, QRect, Qt,
+                          QCoreApplication, pyqtSlot, pyqtSignal)
 #from PyQt5 import QtCore
 import sys
 
 RUN_PATH = "HKEY_CURRENT_USER\\Software\\Microsoft\\Windows\\CurrentVersion\\Run"
 
+
 class MainWindow(QMainWindow):
     def __init__(self, app, *args, **kwargs):
         super(MainWindow, self).__init__(*args, **kwargs)
         self.app = app
-        #self.setObjectName("MainWindow")
+        # self.setObjectName("MainWindow")
         self.setFixedSize(776, 448)
 
-        self.settings = QSettings(RUN_PATH, QSettings.NativeFormat) 
+        self.settings = QSettings(RUN_PATH, QSettings.NativeFormat)
         # self.settings.contains("MainWidget")  # checks if it will start on startup
-        self.settings.setValue("MainWidget",sys.argv[0]); #set the app for startup
+        # set the app for startup
+        self.settings.setValue("MainWidget", sys.argv[0])
         self.SetupUI()
 
     def SetupUI(self):
-        self.centralwidget = QWidget(self) #TTTT
+        self.centralwidget = QWidget(self)  # TTTT
         self.centralwidget.setStyleSheet(
-            "* {\n"
-            "    font-family: 'Roboto', sans-serif;\n"
-            "}\n"
-            "\n"
-            "#frame {\n"
-            "    background-color: #e7f5ff;\n"
-            "    font-size: 16px;\n"
-            "}\n"
-            "\n"
-            "#apptitle {\n"
-            "    font-size: 44px;\n"
-            "}\n"
-            "\n"
-            "#indicator {\n"
-            "    background-color: #333;\n"
-            "}\n"
-            "\n"
-            "#description {\n"
-            "    color: #555;\n"
-            "    font-size: 20px\n"
-            "}\n"
-            "#Errorlabel {\n"
-            "    color: #e01f1f;\n"
-            "    font-size: 20px\n"
-            "}\n"
-            "\n"
-            "QLineEdit {\n"
-            "    background-color: #333333;\n"
-            "    border-radius: 6px;\n"
-            "    color: #AAA;\n"
-            "    font-size: 16px;\n"
-            "    font-weight: 400;\n"
-            "    font-family: 'Roboto', sans-serif;\n"
-            "    padding-left: 5px;\n"
-            "}\n"
-            "\n"
-            "QLineEdit:hover {\n"
-            "    background-color: #444;\n"
-            "}\n"
-            "\n"
-            "QLineEdit:focus {\n"
-            "    border: 2px solid #4dabf7;\n"
-            "}\n"
-            "\n"
-            "QPushButton {\n"
-            "    background-color: #1c7ed6;\n"
-            "    color: #EDF2FF;\n"
-            "    border: none;\n"
-            "    border-radius: 9px;\n"
-            "    font-size: 16px;\n"
-            "}\n"
-            "\n"
-            "QPushButton:hover, QPushButton:focus {\n"
-            "    background-color: #228be6;\n"
-            "}\n"
-            "\n"
-            "#alttext {\n"
-            "    color: #777;\n"
-            "    font-size: 14px;\n"
-            "    font-weight: 400;\n"
-            "}"
+            central_widget_theme
         )
         self.centralwidget.setObjectName("centralwidget")
 
@@ -97,87 +43,7 @@ class MainWindow(QMainWindow):
         self.inapp_container.setFrameShadow(QFrame.Raised)
         self.inapp_container.setObjectName("frame2")
         self.inapp_container.setStyleSheet(
-            "* {\n"
-            "    font-family: 'Roboto', sans-serif;\n"
-            "}\n"
-            "\n"
-            "#frame2 {\n"
-            "    background-color: #e7f5ff;\n"
-            "    font-size: 16px;\n"
-            "}\n"
-            "\n"
-            "#apptitle {\n"
-            "    font-size: 44px;\n"
-            "}\n"
-            "#classlabel {\n"
-            "    font-size: 26px;\n"
-            "}\n"
-            "#schoollabel {\n"
-            "    font-size: 26px;\n"
-            "}\n"
-            "#announcelabel {\n"
-            "    font-size: 26px;\n"
-            "}\n"
-            "#dbcontrollabel {\n"
-            "    font-size: 26px;\n"
-            "}\n"
-            "#UpdateContainer {\n"
-            "    background-color: #2a4980; border-radius: 6px;  \n"
-            "}\n"
-            "#UpdateText {\n"
-            "    font-size: 22px; color: #cbdbf7  ;\n"
-            "}\n"
-            "#UpdateRefuseButton {\n"
-            "    font-size: 22px;\n"
-            "}\n"
-            "#UpdateAcceptButton {\n"
-            "    font-size: 22px;\n"
-            "}\n"
-            "\n" 
-            "#indicator {\n"
-            "    background-color: #333;\n"
-            "}\n"
-            "\n"
-            "#description {\n"
-            "    color: #555;\n"
-            "    font-size: 20px\n"
-            "}\n"
-            "\n"
-            "QLineEdit {\n"
-            "    background-color: #333333;\n"
-            "    border-radius: 6px;\n"
-            "    color: #AAA;\n"
-            "    font-size: 16px;\n"
-            "    font-weight: 400;\n"
-            "    font-family: 'Roboto', sans-serif;\n"
-            "    padding-left: 5px;\n"
-            "}\n"
-            "\n"
-            "QLineEdit:hover {\n"
-            "    background-color: #444;\n"
-            "}\n"
-            "\n"
-            "QLineEdit:focus {\n"
-            "    border: 2px solid #4dabf7;\n"
-            "}\n"
-            "\n"
-            "QPushButton {\n"
-            "    background-color: #1c7ed6;\n"
-            "    color: #EDF2FF;\n"
-            "    border: none;\n"
-            "    border-radius: 9px;\n"
-            "    font-size: 16px;\n"
-            "}\n"
-            "\n"
-            "QPushButton:hover, QPushButton:focus {\n"
-            "    background-color: #228be6;\n"
-            "}\n"
-            "\n"
-            "#alttext2 {\n"
-            "    color: #777;\n"
-            "    font-size: 14px;\n"
-            "    font-weight: 400;\n"
-            "}"
+            inapp_container_theme
         )
 
         self.apptitle = QLabel(self.login_container)
@@ -189,44 +55,47 @@ class MainWindow(QMainWindow):
         self.apptitle2.setGeometry(QRect(0, 0, 776, 60))
         self.apptitle2.setAlignment(Qt.AlignHCenter | Qt.AlignTop)
         self.apptitle2.setObjectName("apptitle")
-        
+
         self.classlabel = QLabel(self.inapp_container)
         self.classlabel.setGeometry(QRect(150, 93, 500, 50))
         self.classlabel.setAlignment(Qt.AlignmentFlag.AlignLeft | Qt.AlignTop)
         self.classlabel.setObjectName("classlabel")
-        
+
         self.schoollabel = QLabel(self.inapp_container)
-        self.schoollabel.setGeometry(QRect(150, 150, 500, 50))
+        self.schoollabel.setGeometry(QRect(150, 150, 600, 50))
         self.schoollabel.setAlignment(Qt.AlignmentFlag.AlignLeft | Qt.AlignTop)
         self.schoollabel.setObjectName("schoollabel")
 
         self.announcelabel = QLabel(self.inapp_container)
         self.announcelabel.setGeometry(QRect(150, 200, 500, 50))
-        self.announcelabel.setAlignment(Qt.AlignmentFlag.AlignLeft | Qt.AlignTop)
+        self.announcelabel.setAlignment(
+            Qt.AlignmentFlag.AlignLeft | Qt.AlignTop)
         self.announcelabel.setObjectName("announcelabel")
-        
+
         self.dbcontrollabel = QLabel(self.inapp_container)
         self.dbcontrollabel.setGeometry(QRect(150, 250, 500, 50))
-        self.dbcontrollabel.setAlignment(Qt.AlignmentFlag.AlignLeft | Qt.AlignTop)
+        self.dbcontrollabel.setAlignment(
+            Qt.AlignmentFlag.AlignLeft | Qt.AlignTop)
         self.dbcontrollabel.setObjectName("dbcontrollabel")
-        
+
         self.updatecontainer = QFrame(self.inapp_container)
-        self.updatecontainer.setGeometry((776//2) - (500//2) ,120,500,200)
+        self.updatecontainer.setGeometry((776//2) - (500//2), 120, 500, 200)
         self.updatecontainer.setObjectName("UpdateContainer")
 
         self.updatetext = QLabel(self.inapp_container)
-        self.updatetext.setText(" Uygulama için yeni bir güncelleme bulundu,\n     uygulamayı güncellemek ister misiniz?")
-        self.updatetext.setGeometry((776//2) - (440//2),90,440,200)
+        self.updatetext.setText(
+            " Uygulama için yeni bir güncelleme bulundu,\n     uygulamayı güncellemek ister misiniz?")
+        self.updatetext.setGeometry((776//2) - (440//2), 90, 440, 200)
         self.updatetext.setObjectName("UpdateText")
 
         self.updateacceptbut = QPushButton(self.inapp_container)
         self.updateacceptbut.setText("Evet")
-        self.updateacceptbut.setGeometry(510,250,100,50)
+        self.updateacceptbut.setGeometry(510, 250, 100, 50)
         self.updateacceptbut.setObjectName("UpdateAcceptButton")
 
         self.updaterefusebut = QPushButton(self.inapp_container)
         self.updaterefusebut.setText("Hayır")
-        self.updaterefusebut.setGeometry(168,250,100,50)
+        self.updaterefusebut.setGeometry(168, 250, 100, 50)
         self.updaterefusebut.setObjectName("UpdateRefuseButton")
 
         self.indicator2 = QFrame(self.inapp_container)
@@ -282,6 +151,7 @@ class MainWindow(QMainWindow):
         self.updatetext.show()
         self.updateacceptbut.show()
         self.updaterefusebut.show()
+
     def close_update_reminder(self):
         print("UPDATE UI CLOSE")
         self.updatecontainer.hide()
@@ -293,20 +163,21 @@ class MainWindow(QMainWindow):
         self.updateacceptbut.hide()
         self.updaterefusebut.hide()
 
-    @pyqtSlot(str) #bunu kullanmak için qobject olması lazım classın?
-    def ConnectionSetText(self,msg:str):
+    @pyqtSlot(str)  # bunu kullanmak için qobject olması lazım classın?
+    def ConnectionSetText(self, msg: str):
         self.dbcontrollabel.setText(msg)
 
-    def connect_login(self): #FIXME: 
+    def connect_login(self):  # FIXME:
         """To connect the signal and slot"""
         self.pushButton.clicked.connect(self.app.worker.loginButtonPress)
 
-    def loginerror(self,text:str):
+    def loginerror(self, text: str):
         self.errorlabel.setText(text)
 
-        result = self.errorlabel.fontMetrics().boundingRect(self.errorlabel.text()).width() 
-        
-        self.errorlabel.setGeometry(QRect( 388-int(result/2) , 280, 550, 40)) #FIXME: i dont have a better idea to do this
+        result = self.errorlabel.fontMetrics().boundingRect(self.errorlabel.text()).width()
+
+        # FIXME: i dont have a better idea to do this
+        self.errorlabel.setGeometry(QRect(388-int(result/2), 280, 550, 40))
         self.pushButton.setGeometry(QRect(310, 320, 150, 40))
         self.errorlabel.show()
         # This is not the best way to center a text but its good enough atm
@@ -314,19 +185,25 @@ class MainWindow(QMainWindow):
     def loginsuccesful(self):
         _translate = QCoreApplication.translate
 
-        self.classlabel.setText(_translate("MainWindow", f"SINIF: {self.app.classname}"))
-        self.schoollabel.setText(_translate("MainWindow", f"OKUL: {self.app.schoolname}"))
-        self.announcelabel.setText(_translate("MainWindow", f"DUYURU: {self.app.lastannouncement}"))
-        
+        self.classlabel.setText(_translate(
+            "MainWindow", f"SINIF: {self.app.classname}"))
+        self.schoollabel.setText(_translate(
+            "MainWindow", f"OKUL: {self.app.schoolname}"))
+        self.announcelabel.setText(_translate(
+            "MainWindow", f"DUYURU: {self.app.lastannouncement}"))
+
         self.app.inapp = True
         self.setCentralWidget(self.inapp_container)
 
     def autologinsuccessful(self):
         _translate = QCoreApplication.translate
-        self.classlabel.setText(_translate("MainWindow", f"SINIF: {self.app.classname}"))
-        self.schoollabel.setText(_translate("MainWindow", f"OKUL: {self.app.schoolname}"))
-        self.announcelabel.setText(_translate("MainWindow", f"DUYURU: {self.app.lastannouncement}"))
-        
+        self.classlabel.setText(_translate(
+            "MainWindow", f"SINIF: {self.app.classname}"))
+        self.schoollabel.setText(_translate(
+            "MainWindow", f"OKUL: {self.app.schoolname}"))
+        self.announcelabel.setText(_translate(
+            "MainWindow", f"DUYURU: {self.app.lastannouncement}"))
+
         self.app.inapp = True
         self.setCentralWidget(self.inapp_container)
 
