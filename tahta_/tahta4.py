@@ -83,7 +83,7 @@ class Theme:
         pass
 
 class AppTray(QSystemTrayIcon):
-    def __init__(self):
+    def __init__(self, wm_closewindow, wm_openwindow):
         super().__init__(QIcon("appdata/app_icon.ico"))
         self.wm_closewindow = wm_closewindow
         self.wm_openwindow = wm_openwindow
@@ -299,7 +299,7 @@ class APP:
         with open("data/version.json","r") as file:
             self.version:float = json.load(file)["version"]
         
-        self.tray = AppTray(  self.windowmanager.hide, self.windowmanager.show )
+        self.tray = AppTray( self.windowmanager.hide, self.windowmanager.show )
         self.ver_checker = VersionChecker(self,self.version)
 
         self.signalmanager.logged.connect(self.windowmanager.loginsuccesful)
@@ -366,7 +366,7 @@ if __name__ == '__main__':
     # If you know you won't use command line arguments QApplication([]) works too.
     qapp = QApplication(sys.argv)
 
-    qapp.setWindowIcon(QIcon('icon.ico'))
+    qapp.setWindowIcon(QIcon('appdata/app_icon.ico'))
     # FIXME: https://stackoverflow.com/questions/17914960/pyqt-runtimeerror-wrapped-c-c-object-has-been-deleted
     # https://stackoverflow.com/questions/5339062/python-pyside-internal-c-object-already-deleted
     # I dont think this will happen but if it does, here are some links to fix it 
