@@ -114,17 +114,26 @@ class MainWindow(QMainWindow):
         self.description.setAlignment(Qt.AlignCenter)
         self.description.setWordWrap(True)
         self.description.setObjectName("description")
+
         self.lineEdit = QLineEdit(self.login_container)
-        self.lineEdit.setGeometry(QRect(285, 175, 200, 40))
+        self.lineEdit.setGeometry(QRect(285, 140, 200, 40))
         self.lineEdit.setObjectName("lineEdit")
         self.lineEdit.setMaxLength(20)
         self.lineEdit_2 = QLineEdit(self.login_container)
-        self.lineEdit_2.setGeometry(QRect(285, 230, 200, 40))
+        self.lineEdit_2.setGeometry(QRect(285, 195, 200, 40))
         self.lineEdit_2.setObjectName("lineEdit_2")
         self.lineEdit_2.setMaxLength(20)
         self.lineEdit_2.setEchoMode(QLineEdit.Password)
-        self.pushButton = QPushButton(self.login_container)
-        self.pushButton.setGeometry(QRect(310, 290, 150, 40))
+
+        self.lineEdit_3 = QLineEdit(self.login_container)
+        self.lineEdit_3.setGeometry(QRect(285, 250, 200, 40))
+        self.lineEdit_3.setObjectName("lineEdit_3")
+        self.lineEdit_3.setMaxLength(20)
+        self.lineEdit_3.setEchoMode(QLineEdit.Password)
+
+
+        self.pushButton = QPushButton(self.login_container) #sınıfı kaydet butonu
+        self.pushButton.setGeometry(QRect(310, 310, 150, 40))
         self.pushButton.setObjectName("pushButton")
         self.alttext = QLabel(self.login_container)
         self.alttext.setGeometry(QRect(0, 400, 776, 41))
@@ -219,7 +228,9 @@ class MainWindow(QMainWindow):
             )
         )
         self.lineEdit.setPlaceholderText(_translate("MainWindow", "Sınıf Adı"))
-        self.lineEdit_2.setPlaceholderText(_translate("MainWindow", "Şifre"))
+        self.lineEdit_2.setPlaceholderText(_translate("MainWindow", "Kullanıcı Adı"))
+        self.lineEdit_3.setPlaceholderText(_translate("MainWindow", "Şifre"))
+
         self.pushButton.setText(_translate("MainWindow", "Sınıfı Kaydet"))
         self.alttext.setText(
             _translate(

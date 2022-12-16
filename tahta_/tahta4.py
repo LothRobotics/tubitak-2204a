@@ -1,26 +1,37 @@
-from PyQt5.QtWidgets import QSystemTrayIcon,QApplication,QMenu
-from PyQt5.QtCore import QObject,pyqtSignal,QRunnable,pyqtSlot,QThreadPool
+from ui import MainWindow
+from updater import InvalidReleaseVer, VersionChecker
+from database_handler import DatabaseHandler
+from PyQt5.QtWidgets import QSystemTrayIcon, QApplication, QMenu
+from PyQt5.QtCore import QObject, pyqtSignal, QRunnable, pyqtSlot, QThreadPool
 from PyQt5.QtGui import QIcon
 
-import json,sys,time,os,datetime,hashlib
+import json
+import sys
+import time
+import os
+import datetime
+import hashlib
 from typing import Dict
 
 from logging.handlers import TimedRotatingFileHandler
 import logging
 
-sys.path.insert(1, '.') #also look for 1 folder back #TODO: Comment this when releasing the app
-from database_handler import DatabaseHandler
-from updater import InvalidReleaseVer, VersionChecker
-from ui import MainWindow
+# also look for 1 folder back #TODO: Comment this when releasing the app
+sys.path.insert(1, '.')
 
 db = DatabaseHandler("data/db_credentials.json")
 RUN_PATH = "HKEY_CURRENT_USER\\Software\\Microsoft\\Windows\\CurrentVersion\\Run"
 
+
 class Theme:
-    pass
+    lightcolor="#cbdbf7"
+    midcolor="#1c7ed6"
+    darkcolor="#2a4980" 
+    black="#121212"
+    white="#f7f7f7"
 
 class CustomFormatter(logging.Formatter):
-    dgrey = "\x1b[1;30m" 
+    dgrey = "\x1b[1;30m"
     grey = "\x1b[38;20m"
     yellow = "\x1b[33;20m"
     red = "\x1b[31;20m"
@@ -41,6 +52,7 @@ class CustomFormatter(logging.Formatter):
         formatter = logging.Formatter(log_fmt)
         return formatter.format(record)
 
+
 # create logger with 'spam_application'
 logger = logging.getLogger("My_app")
 logger.setLevel(logging.DEBUG)
@@ -53,8 +65,8 @@ today = datetime.datetime.now()
 
 # Create file handler for logging to a file (logs all five levels)
 #file_handler = logging.FileHandler('logs/uygulama {} .log'.format(today.strftime('%Y_%m_%d')))
-#file_handler.setLevel(logging.DEBUG)
-#file_handler.setFormatter(CustomFormatter())
+# file_handler.setLevel(logging.DEBUG)
+# file_handler.setFormatter(CustomFormatter())
 
 g = time.localtime()
 minute = g.tm_min
@@ -63,13 +75,13 @@ second = g.tm_sec
 
 if os.path.isdir("logs"):
     print("logs folder found")
-else: #make sure that the logs folder is ready to put files in so filehandler doesnt raise an error
+else:  # make sure that the logs folder is ready to put files in so filehandler doesnt raise an error
     print("no logs folder found")
     os.makedirs("logs")
 
-timed_file_handler = TimedRotatingFileHandler(filename='logs/uygulama {}.log'.format( today.strftime('%Y_%m_%d') #today.strftime('%Y_%m_%d - %H_%M_%S')
-),
-    when='D', interval=1, backupCount=5, encoding='utf-8', delay=False)
+timed_file_handler = TimedRotatingFileHandler(filename='logs/uygulama {}.log'.format(today.strftime('%Y_%m_%d')  # today.strftime('%Y_%m_%d - %H_%M_%S')
+                                                                                     ),
+                                              when='D', interval=1, backupCount=5, encoding='utf-8', delay=False)
 timed_file_handler.setLevel(logging.INFO)
 timed_file_handler.setFormatter(CustomFormatter())
 
@@ -78,9 +90,11 @@ logger.addHandler(timed_file_handler)
 
 logger.warning("_______________________ STARTING APP _______________________")
 
+
 class Theme:
     def __init__(self) -> None:
         pass
+
 
 class AppTray(QSystemTrayIcon):
     def __init__(self, wm_closewindow, wm_openwindow):
@@ -96,11 +110,10 @@ class AppTray(QSystemTrayIcon):
         self.closewindow.triggered.connect(self.wm_closewindow)
         self.openwindow = self.menu.addAction("Pencereyi göster")
         self.openwindow.triggered.connect(self.wm_openwindow)
-        
         self.setContextMenu(self.menu)
 
-def check_connection(): #FIXME: There must be a better way to do this
-    connection = db.get("checkconnection", ["check == True"] )
+def check_connection():  # FIXME: There must be a better way to do this
+    connection = db.get("checkconnection", ["check == True"])
 
     if connection == [{'check': 'True'}]:
         return True
@@ -117,16 +130,18 @@ class SignalManager(QObject):
     updatedone = pyqtSignal()
 
     conn_settext_signal = pyqtSignal(str)
-    
+
+
 class Worker(QRunnable):
     '''
     Worker thread
     '''
     running = True
-    def __init__(self,app):
+
+    def __init__(self, app):
         super().__init__()
         self.app = app
-        self.timer = 0 #timer in seconds
+        self.timer = 0  # timer in seconds
 
     def get_windowmanager(self):
         self.windowmanager = self.app.windowmanager
@@ -143,15 +158,16 @@ class Worker(QRunnable):
             self.timer += time.time() - st
 
             if self.app.inapp:
-                pass
-            if int(self.timer) % 10 == 0:
-                logger.info("Connectionsettext check")
-                if check_connection(): 
-                    self.app.signalmanager.conn_settext_signal.emit('Veritabanı Durumu: <font color="#56cc41">Bağlantı Stabil</font>')
-                else:
-                    self.app.signalmanager.conn_settext_signal.emit('Veritabanı Durumu: <font color="#c92a2a">Bağlantı Bulunamadı</font>')
+                if int(self.timer) % 10 == 0:
+                    logger.info("Connectionsettext check")
+                    if check_connection():
+                        self.app.signalmanager.conn_settext_signal.emit(
+                            'Veritabanı Durumu: <font color="#56cc41">Bağlantı Stabil</font>')
+                    else:
+                        self.app.signalmanager.conn_settext_signal.emit(
+                            'Veritabanı Durumu: <font color="#c92a2a">Bağlantı Bulunamadı</font>')
 
-            # self.get_announcement() #maybe not put this in here? 
+            # self.get_announcement() #maybe not put this in here?
 
             if self.timer > 60*10:
                 logger.info("10 Minute check")
@@ -168,41 +184,51 @@ class Worker(QRunnable):
     def loginButtonPress(self):
         logger.info("ATTEMPTING LOGIN")
 
-        if len(self.windowmanager.lineEdit.text()) < 1 or len(self.windowmanager.lineEdit_2.text()) < 1:
+        # self.lineEdit   == Sınıf Adı
+        # self.lineEdit_2 == Kullanıcı Adı
+        # self.lineEdit_3 == Şifre
+
+        if len(self.windowmanager.lineEdit.text()) < 1 or len(self.windowmanager.lineEdit_2.text()) < 1 or len(self.windowmanager.lineEdit_3.text()) < 1:
             logger.error("LENGTH")
+            self.windowmanager.loginerror(
+                "Sınıf, Kullanıcı adı veya Şifre çok kısa")
             return None
-        
-        self.app.classname = self.windowmanager.lineEdit.text() #Class name
-        password = self.windowmanager.lineEdit_2.text()         # User password
+
+        self.app.classname = self.windowmanager.lineEdit.text()  # Class name
+        self.app.username = self.windowmanager.lineEdit_2.text()  # Username
+        password = self.windowmanager.lineEdit_3.text()          # Password
         hashed_password = hashlib.sha256(password.encode()).hexdigest()
-        
+
         logger.info(f"CREATED HASHED PASSWORD")
 
         # This looks at username even tho there are only ways to enter classname and password
-        # I should add a 3rd lineedit that has username inside TODO: 
-        result = db.get("accounts", [
-            f"password == {hashed_password}",f"username == {self.app.username}" 
-            ],auto_format = False )
+        # I should add a 3rd lineedit that has username inside TODO:
+        result = db.get("accounts",
+                        [f"password == {hashed_password}",
+                            f"username == {self.app.username}"],
+                        auto_format=False)
 
-        if len(result)<1:
+        if len(result) < 1:
             self.windowmanager.loginerror("Yanlış Şifre")
             logger.error("WRONG PASSWORD")
             return None
-        
-        if len(result)>1:
-            self.windowmanager.loginerror("Hesaba giriş yapmakta bazı sorunlar yaşandı")
+
+        if len(result) > 1:
+            self.windowmanager.loginerror(
+                "Hesaba giriş yapmakta bazı sorunlar yaşandı")
             logger.error("ACCOUNT PROBLEMS")
             return None
-        
+
         # no problem, will login
-        logger.info(f" CLASSNAME: {self.app.classname} SCHOOLNAME: {self.app.schoolname}")
-        
+        logger.info(
+            f" CLASSNAME: {self.app.classname} SCHOOLNAME: {self.app.schoolname}")
+
         id = result[0].id
 
         formatted_result = result[0].to_dict()
         classrooms = formatted_result["classrooms"]
         self.app.schoolname = formatted_result["school"]["school_name"]
-        
+
         if classrooms.__contains__(self.app.classname):
             logger.info("CLASSNAME EXISTS IN DB")
             classkey = classrooms[self.app.classname]
@@ -210,31 +236,35 @@ class Worker(QRunnable):
         else:
             logger.info(f"CLASSMAME DOESN'T EXIST IN DB")
             logger.info(f"CREATING NEW KEY FOR CLASS: {self.app.classname}")
-            classkey = hashlib.sha256((id + self.app.classname).encode()).hexdigest()
+            classkey = hashlib.sha256(
+                (id + self.app.classname).encode()).hexdigest()
             classrooms[self.app.classname] = classkey
-        
-        with open("data\data.json","r") as datafile:
+
+        with open("data\data.json", "r") as datafile:
             data = json.load(datafile)
             data["classkey"] = classkey
             data["schoolname"] = self.app.schoolname
             data["classname"] = self.app.classname
-
+            data["username"] = self.app.username
             logger.info(f"data is :{data}")
-        with open("data\data.json","w", encoding="utf-8") as datafile:
-            json.dump(data, datafile,indent=4, ensure_ascii=False)
-        
-        db.update('accounts', id, {'classrooms': classrooms})# update the new
+        with open("data\data.json", "w", encoding="utf-8") as datafile:
+            json.dump(data, datafile, indent=4, ensure_ascii=False)
+
+        db.update('accounts', id, {'classrooms': classrooms})  # update the new
         if check_connection():
-            self.app.signalmanager.conn_settext_signal.emit('Veritabanı Durumu: <font color="#56cc41">Bağlantı Stabil</font>')
+            self.app.signalmanager.conn_settext_signal.emit(
+                'Veritabanı Durumu: <font color="#56cc41">Bağlantı Stabil</font>')
             self.app.signalmanager.logged.emit()
         else:
-            self.app.signalmanager.conn_settext_signal.emit('Veritabanı Durumu: <font color="#c92a2a">Bağlantı Bulunamadı</font>')
+            self.app.signalmanager.conn_settext_signal.emit(
+                'Veritabanı Durumu: <font color="#c92a2a">Bağlantı Bulunamadı</font>')
             self.app.signalmanager.logged.emit()
 
-    def StartUpLogin(self): 
+    def StartUpLogin(self):
         logger.info("ATTEMPTING AUTO-LOGIN")
 
-        result = db.get("accounts", [f"username == {self.app.username}"], auto_format=False )
+        result = db.get(
+            "accounts", [f"username == {self.app.username}"], auto_format=False)
         if type(result) == bool:
             return None
         if len(result) < 1:
@@ -243,12 +273,13 @@ class Worker(QRunnable):
             return None
         elif len(result) > 1:
             logger.error("ACCOUNT PROBLEMS")
-            self.windowmanager.loginerror("Giriş yapmada hatayla karşılaşıldı.")
+            self.windowmanager.loginerror(
+                "Giriş yapmada hatayla karşılaşıldı.")
             return None
 
         formatted_result = result[0].to_dict()
-        classrooms:dict = formatted_result["classrooms"] 
-        
+        classrooms: dict = formatted_result["classrooms"]
+
         if classrooms.__contains__(self.app.classname) == False:
             self.windowmanager.loginerror("Otomatik giriş yapılamadı.")
             logger.error("CLASSROOMS DOESNT HAVE CLASSNAME IN DB")
@@ -261,16 +292,18 @@ class Worker(QRunnable):
         # get the schoolname from db
         self.app.schoolname = formatted_result["school"]["school_name"]
 
-        with open("data\data.json","r", encoding="utf-8") as datafile:
+        with open("data\data.json", "r", encoding="utf-8") as datafile:
             data = json.load(datafile)
             data["schoolname"] = self.app.schoolname
-        with open("data\data.json","w", encoding="utf-8") as datafile:
+        with open("data\data.json", "w", encoding="utf-8") as datafile:
             json.dump(data, datafile, ensure_ascii=False, indent=4)
 
         if check_connection():
-            self.app.signalmanager.conn_settext_signal.emit('Veritabanı Durumu: <font color="#56cc41">Bağlantı Stabil</font>')
+            self.app.signalmanager.conn_settext_signal.emit(
+                'Veritabanı Durumu: <font color="#56cc41">Bağlantı Stabil</font>')
         else:
-            self.app.signalmanager.conn_settext_signal.emit('Veritabanı Durumu: <font color="#c92a2a">Bağlantı Bulunamadı</font>')
+            self.app.signalmanager.conn_settext_signal.emit(
+                'Veritabanı Durumu: <font color="#c92a2a">Bağlantı Bulunamadı</font>')
         self.app.signalmanager.autologged.emit()
 
         if self.app.shouldupdate:
@@ -288,50 +321,58 @@ class APP:
         self.worker = Worker(self)
         logger.info("Create Worker Instance")
         self.windowmanager = MainWindow(self)
-        self.windowmanager.setWindowTitle("Akıllı Tahliye Sistemi") #TODO: change this name if the project name changes to Deprem Tahliye Sistemi
+        self.windowmanager.setWindowTitle("Akıllı Tahliye Sistemi")
         logger.info("Create WindowManager Instance")
-        self.windowmanager.show() # bunu acil durum olduğunda arkaplandan hemen ekranın önüne getirmek için kullanabiliriz
+        self.windowmanager.show()
         logger.info("Show Window")
         self.worker.get_windowmanager()
         logger.info("Connect Login")
         self.windowmanager.connect_login()
-        
-        with open("data/version.json","r") as file:
-            self.version:float = json.load(file)["version"]
-        
-        self.tray = AppTray( self.windowmanager.hide, self.windowmanager.show )
-        self.ver_checker = VersionChecker(self,self.version)
+
+        with open("data/version.json", "r") as file:
+            self.version: float = json.load(file)["version"]
+
+        self.tray = AppTray(self.windowmanager.hide, self.windowmanager.show)
+        self.ver_checker = VersionChecker(self, self.version)
 
         self.signalmanager.logged.connect(self.windowmanager.loginsuccesful)
-        self.signalmanager.autologged.connect(self.windowmanager.autologinsuccessful)
-        self.signalmanager.remindupdate.connect(self.windowmanager.remind_update)
-        self.signalmanager.close_updatereminder.connect(self.windowmanager.close_update_reminder)
-        self.signalmanager.updatedone.connect(self.windowmanager.close_update_reminder)
-        
-        intercept = lambda msg : self.windowmanager.ConnectionSetText(msg)
-        self.signalmanager.conn_settext_signal.connect( intercept ) #you create an intermediary func(with lambda) like this when you want to pass data in signals 
-        #TODO: FIXME: From what I've read this can result in a memory leak but if this creates an problem we should fix it
+        self.signalmanager.autologged.connect(
+            self.windowmanager.autologinsuccessful)
+        self.signalmanager.remindupdate.connect(
+            self.windowmanager.remind_update)
+        self.signalmanager.close_updatereminder.connect(
+            self.windowmanager.close_update_reminder)
+        self.signalmanager.updatedone.connect(
+            self.windowmanager.close_update_reminder)
 
-        self.windowmanager.updateacceptbut.clicked.connect(self.worker.testupdate)
-        self.windowmanager.updateacceptbut.clicked.connect(self.windowmanager.close_update_buttons)
+        def intercept(msg): return self.windowmanager.ConnectionSetText(msg)
+        # you create an intermediary func(with lambda) like this when you want to pass data in signals
+        self.signalmanager.conn_settext_signal.connect(intercept)
+        # TODO: FIXME: From what I've read this can result in a memory leak but if this creates an problem we should fix it
 
-        self.windowmanager.updaterefusebut.clicked.connect(self.signalmanager.close_updatereminder)
+        self.windowmanager.updateacceptbut.clicked.connect(
+            self.worker.testupdate)
+        self.windowmanager.updateacceptbut.clicked.connect(
+            self.windowmanager.close_update_buttons)
+
+        self.windowmanager.updaterefusebut.clicked.connect(
+            self.signalmanager.close_updatereminder)
         self.lastannouncement = "DENEME_DUYURU"
-        self.isconnected2db = "CONNECTED_2_DB" 
+        self.isconnected2db = "CONNECTED_2_DB"
         self.inapp = False
 
         self.threadpool = QThreadPool()
-        logger.info("Multithreading with maximum %d threads" % self.threadpool.maxThreadCount())
+        logger.info("Multithreading with maximum %d threads" %
+                    self.threadpool.maxThreadCount())
         self.threadpool.start(self.worker)
         logger.info("Start Worker")
         self.Check_Updates()
 
     def Check_Updates(self):
-        with open("data/data.json","r",encoding="utf-8") as file:
+        with open("data/data.json", "r", encoding="utf-8") as file:
             self.data = json.load(file)
 
         logger.info("CHECKING VERSION")
-        #self.signalmanager.startupdating.connect(self.ver_checker.update)
         self.shouldupdate = False
 
         try:
@@ -344,9 +385,9 @@ class APP:
         except InvalidReleaseVer:
             logger.error("INVALID VERSION")
 
-        self.classkey = None if self.data["classkey"] == 'None' else self.data["classkey"] #changed this from password to classkey
+        self.classkey = None if self.data["classkey"] == 'None' else self.data["classkey"]
         self.classname = None if self.data["classname"] == 'None' else self.data["classname"]
-        self.schoolname = None if self.data["schoolname"] == 'None' else self.data["schoolname"] #changed this from title to schoolname
+        self.schoolname = None if self.data["schoolname"] == 'None' else self.data["schoolname"]
         self.username = None if self.data["username"] == 'None' else self.data["username"]
 
         if "None" in self.data.values() or "NONE" in self.data.values():
@@ -357,9 +398,10 @@ class APP:
 
     def closeApp(self):
         """called when app is closed"""
-        self.inapp = False #it might give an error since it deleted the QLabel even tho its trying to access it
+        self.inapp = False  # it might give an error since it deleted the QLabel even tho its trying to access it
         self.worker.running = False
         logger.info(f"autodelete for worker is: {self.worker.autoDelete()}")
+
 
 if __name__ == '__main__':
     # Pass in sys.argv to allow command line arguments for your app.
@@ -369,12 +411,12 @@ if __name__ == '__main__':
     qapp.setWindowIcon(QIcon('appdata/app_icon.ico'))
     # FIXME: https://stackoverflow.com/questions/17914960/pyqt-runtimeerror-wrapped-c-c-object-has-been-deleted
     # https://stackoverflow.com/questions/5339062/python-pyside-internal-c-object-already-deleted
-    # I dont think this will happen but if it does, here are some links to fix it 
+    # I dont think this will happen but if it does, here are some links to fix it
 
     app = APP()
     qapp.exec()
 
     app.closeApp()
     logger.info("ended application")
-    
+
     sys.exit()
