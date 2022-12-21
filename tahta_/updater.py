@@ -17,8 +17,9 @@ class InvalidReleaseVer(Exception):
         super().__init__(self.message)
 
 class VersionChecker:
-    def __init__(self,app,app_ver:float) -> None:
+    def __init__(self,app, app_ver:float, logger) -> None:
         self.app = app
+        self.logger = logger
         self.g = gtb.Github( #login_or_token="bruh" #TODO: REMOVE MY TOKEN
         )
         
@@ -28,7 +29,7 @@ class VersionChecker:
         try:
             self.repo = self.g.get_repo("LothRobotics/tubitak-2204a")
         except gtb.RateLimitExceededException:
-            print("EXCEEDED THE MAX API LIMIT GITHUB")
+            self.logger.error("EXCEEDED THE MAX API LIMIT GITHUB")
         self.app_ver = app_ver
         
         #self.importantfiles = ["data.json","log.log","db_credentials.json"]
@@ -45,7 +46,7 @@ class VersionChecker:
         try:
             rmfile = self.repo.get_readme() #get readme.md
         except AttributeError:
-            print("Couldnt get the repo readme")
+            self.logger.error("Couldnt get the repo readme")
             return False
         rmtext = rmfile.decoded_content.decode() #get the str and decode it
         lines = rmtext.splitlines(False) #split the lines
@@ -67,53 +68,50 @@ class VersionChecker:
         try:
             release = self.repo.get_latest_release()
             releasesth = release.get_assets()
-            print(release.upload_url)
-            print(release.html_url)
-            print(release.url)
-            print(release.zipball_url)
+            self.logger.info(f"release upload url: {release.upload_url}\nrelease html url: {release.html_url}\nrelease url :{release.url}\nrelease zipball url: {release.zipball_url}")
             download_url = release.url
             
             # store the URL in url as 
             # username = "N0tn3nl1sh"
             # token = "bruh"
 
-            print("DOWNLOADING JSON")
+            self.logger.info("DOWNLOADING JSON")
             response = requests.get(download_url,       #auth=(username,token) #TODO: Comment this when releasing app
             ).json()
 
-            print("GOT APP ZIP DOWNLOAD URL")
+            self.logger.info("GOT APP ZIP DOWNLOAD URL")
             app_download_url = response["assets"][0]["browser_download_url"]
-            print(app_download_url)
+            self.logger.info(app_download_url)
 
-            print("DOWNLOADING THE ACTUAL FILE")
+            self.logger.info("DOWNLOADING THE ACTUAL FILE")
             response = requests.get(app_download_url,   #auth=(username,token) #TODO: Comment this when releasing app
             )
 
-            print("MAKING ZIP")
+            self.logger.info("MAKING ZIP")
             z = zipfile.ZipFile(BytesIO(response.content))
-            print("MADE ZIP")
+            self.logger.info("MADE ZIP")
 
-            print("STARTED DELETING FILES")
+            self.logger.warning("STARTED DELETING FILES")
             self.delete_files()
 
-            print("REWRITING THE VERSION.JSON FILE")
-            with open("data/data.json","r") as file:
-                data = json.load(file)
-            data["version"] = self.VER_NUM
+            self.logger.info("REWRITING THE VERSION.JSON FILE")
+            with open("data/version.json","r") as file:
+                versiondata = json.load(file)
+            versiondata["version"] = self.VER_NUM
 
-            with open("data/data.json","w") as file:
-                json.dump(data,file,indent=4,ensure_ascii=False)
+            with open("data/version.json","w") as file:
+                json.dump(versiondata,file,indent=4,ensure_ascii=False)
 
-            print("EXTRACTING THE ZIP")
+            self.logger.info("EXTRACTING THE ZIP")
             # Extract all the contents of zip file in current directory
             with z as zipObj:
                 zipObj.extractall()
-            print("EXTRACTED THE ZIP")
+            self.logger.info("EXTRACTED THE ZIP")
 
             self.app.signalmanager.updatedone.emit()
 
         except gtb.RateLimitExceededException:
-            print("RATE LIMIT BRUH")
+            self.logger.error("RATE LIMIT EXCEEDED EXCEPTION")
 
     def delete_files(self):
         tobedeleted = []
@@ -121,21 +119,22 @@ class VersionChecker:
             dirpath = d[0] #current path
             dirname = d[1] #paths that it can go to
             filename = d[2] #files that are currently there
-            print(f"dirpath: {dirpath} , dirname: {dirname} , filename: {filename}" )
+            self.logger.info(f"dirpath: {dirpath} , dirname: {dirname} , filename: {filename}" )
             
             if dirpath == "." : # Files inside root
-                print(f"WONT BE DELETED {dirpath}")
+                self.logger.info(f"WONT BE DELETED {dirpath}")
                 for f in filename:
-                    print(f"REMOVE FILE: {f}")
+                    self.logger.info(f"REMOVE FILE: {f}")
                     os.remove(f)
                     pass
             elif dirpath == ".\\data": #DATA folder
-                print("'data' Folder so it wont be deleted")
+                self.logger.info("DATA folder so it wont be deleted")
                 pass
             else: #Folders in root
+                self.logger.info(f"TOBELETED: {dirpath}")
                 tobedeleted.append(dirpath)
 
-        print(f"WILL BE DELETED: {tobedeleted}")
+        self.logger.info(f"THESE WILL BE DELETED: {tobedeleted}")
         for folder in tobedeleted:
             shutil.rmtree(folder)
             pass

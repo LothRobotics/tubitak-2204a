@@ -320,7 +320,7 @@ class APP:
         logger.info("Create SignalManager Instance")
         self.worker = Worker(self)
         logger.info("Create Worker Instance")
-        self.windowmanager = MainWindow(self)
+        self.windowmanager = MainWindow(self, logger)
         self.windowmanager.setWindowTitle("Akıllı Tahliye Sistemi")
         logger.info("Create WindowManager Instance")
         self.windowmanager.show()
@@ -333,7 +333,7 @@ class APP:
             self.version: float = json.load(file)["version"]
 
         self.tray = AppTray(self.windowmanager.hide, self.windowmanager.show)
-        self.ver_checker = VersionChecker(self, self.version)
+        self.ver_checker = VersionChecker(self, self.version, logger)
 
         self.signalmanager.logged.connect(self.windowmanager.loginsuccesful)
         self.signalmanager.autologged.connect(

@@ -12,9 +12,11 @@ RUN_PATH = "HKEY_CURRENT_USER\\Software\\Microsoft\\Windows\\CurrentVersion\\Run
 
 
 class MainWindow(QMainWindow):
-    def __init__(self, app, *args, **kwargs):
+    def __init__(self, app, logger,  *args, **kwargs):
         super(MainWindow, self).__init__(*args, **kwargs)
         self.app = app
+        self.logger = logger
+
         # self.setObjectName("MainWindow")
         self.setFixedSize(776, 448)
 
@@ -155,14 +157,14 @@ class MainWindow(QMainWindow):
         self.retranslateUi()
 
     def remind_update(self):
-        print("UPDATE UI SHOW")
+        self.logger.info("UPDATE UI SHOW")
         self.updatecontainer.show()
         self.updatetext.show()
         self.updateacceptbut.show()
         self.updaterefusebut.show()
 
     def close_update_reminder(self):
-        print("UPDATE UI CLOSE")
+        self.logger.info("UPDATE UI CLOSE")
         self.updatecontainer.hide()
         self.updatetext.hide()
         self.updateacceptbut.hide()
