@@ -1,10 +1,7 @@
 import pygame as pg
-import sys
-import pymunk
+import sys, pymunk
 from pathfinder import PathFinder
-import json
-import random
-import time
+import json, random, time
 
 from copy import deepcopy
 
